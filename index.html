@@ -2447,6 +2447,22 @@ table.standings tr.qualified-third td:first-child::before {
 .pavatar-stack.rev .pavatar + .pavatar { margin-left: 0; margin-right: -14px; }
 .pavatar-stack.big .pavatar + .pavatar { margin-left: -22px; }
 
+/* Variante con foto real: .pavatar.has-photo contiene un <img> que tapa
+   las iniciales. Si la imagen falla (onerror), removemos .has-photo y
+   queda el avatar de iniciales como fallback. */
+.pavatar.has-photo {
+  background: #1a1410;
+  overflow: hidden;
+  padding: 0;
+}
+.pavatar.has-photo > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 50%;
+}
+
 /* HERO PORTADA */
 .ph-hero {
   margin-top: 20px;
@@ -3493,6 +3509,83 @@ tr.qualified .pstand-pos { background: var(--green); }
   box-shadow: 3px 3px 0 var(--accent);
 }
 
+/* Campo de foto: preview circular + botón "Elegir foto" */
+.enr-photo-field {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+}
+.enr-photo-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px dashed var(--ink-soft);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.enr-photo-preview.has-photo {
+  border: 2px solid var(--ink);
+  background: #1a1410;
+}
+.enr-photo-preview > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.enr-photo-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.enr-photo-btn {
+  display: inline-block;
+  padding: 9px 14px;
+  border: 2px solid var(--ink);
+  background: var(--bg);
+  font-family: 'Archivo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.enr-photo-btn:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+.enr-photo-btn.is-remove {
+  border-color: var(--ink-soft);
+  color: var(--ink-soft);
+  font-size: 11px;
+  padding: 6px 10px;
+}
+.enr-photo-btn.is-remove:hover {
+  background: var(--ink-soft);
+  color: var(--bg);
+}
+.enr-photo-hint {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+.enr-photo-hint.is-error { color: var(--accent); font-weight: 600; }
+.enr-photo-input-hidden { display: none; }
+
 .enr-row-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3973,6 +4066,19 @@ tr.qualified .pstand-pos { background: var(--green); }
           <div class="enr-field">
             <label>Mi WhatsApp</label>
             <input type="tel" id="enr-whatsapp" placeholder="Ej: 59899...">
+          </div>
+        </div>
+
+        <div class="enr-field">
+          <label>Foto <span class="opt">(opcional, para que el admin te reconozca)</span></label>
+          <div class="enr-photo-field">
+            <div class="enr-photo-preview" id="enr-photo-preview">Sin foto</div>
+            <div class="enr-photo-actions">
+              <label class="enr-photo-btn" for="enr-photo-input" id="enr-photo-btn-label">Elegir foto</label>
+              <button type="button" class="enr-photo-btn is-remove" id="enr-photo-remove-btn" style="display:none;">Quitar foto</button>
+              <div class="enr-photo-hint" id="enr-photo-hint">JPG o PNG. Se comprime y sube al enviar la ficha.</div>
+            </div>
+            <input type="file" id="enr-photo-input" class="enr-photo-input-hidden" accept="image/jpeg,image/png,image/webp">
           </div>
         </div>
       </div>
@@ -6855,6 +6961,115 @@ function decodePayload(encoded) {
   }
 }
 
+// ========== photo: compresión local + upload a Supabase Storage ==========
+// Toda función async devuelve null si algo falla (nunca tira) — el enrollment
+// tiene que poder seguir si Storage cae o el user tiene internet flaky.
+const photo = {
+  BUCKET: 'player-photos',
+  MAX_DIM: 512,          // lado máximo del cuadrado final (px)
+  TARGET_KB: 200,        // apuntamos a ~200KB por foto
+  MIN_QUALITY: 0.55,     // no bajar de acá al comprimir
+  MAX_INPUT_MB: 10,      // si el archivo original pesa más, lo rechazamos
+
+  // Valida que sea imagen y no sea absurdamente grande.
+  // Devuelve { ok: true } o { ok: false, reason: '...' }
+  validate(file) {
+    if (!file) return { ok: false, reason: 'No hay archivo' };
+    if (!file.type || !file.type.startsWith('image/')) {
+      return { ok: false, reason: 'El archivo no es una imagen' };
+    }
+    const mb = file.size / (1024 * 1024);
+    if (mb > this.MAX_INPUT_MB) {
+      return { ok: false, reason: `La foto pesa ${mb.toFixed(1)}MB, máximo ${this.MAX_INPUT_MB}MB` };
+    }
+    return { ok: true };
+  },
+
+  // Lee un File/Blob → HTMLImageElement decodificado.
+  _loadImage(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('No se pudo leer la imagen')); };
+      img.src = url;
+    });
+  },
+
+  // Recorta al cuadrado centrado y redimensiona al MAX_DIM, luego comprime a JPEG.
+  // Baja la calidad hasta llegar a TARGET_KB o tocar MIN_QUALITY.
+  async compress(file) {
+    const img = await this._loadImage(file);
+
+    // Recorte cuadrado centrado sobre la foto original
+    const side = Math.min(img.naturalWidth, img.naturalHeight);
+    const sx = (img.naturalWidth - side) / 2;
+    const sy = (img.naturalHeight - side) / 2;
+
+    const out = Math.min(this.MAX_DIM, side); // no upscale
+    const canvas = document.createElement('canvas');
+    canvas.width = out;
+    canvas.height = out;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(img, sx, sy, side, side, 0, 0, out, out);
+
+    // Intentos de compresión con calidad decreciente
+    const targetBytes = this.TARGET_KB * 1024;
+    let quality = 0.85;
+    let blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
+    while (blob && blob.size > targetBytes && quality > this.MIN_QUALITY) {
+      quality -= 0.1;
+      blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
+    }
+    if (!blob) throw new Error('No se pudo comprimir la imagen');
+    return blob;
+  },
+
+  // Sube el blob al bucket y devuelve la URL pública (o null si falla).
+  async upload(blob) {
+    if (!window.sb) {
+      console.warn('[photo.upload] Supabase client no disponible');
+      return null;
+    }
+    try {
+      // Nombre: timestamp + random para evitar colisiones. Sin nombre real del
+      // jugador en el path → no filtramos PII en la URL pública.
+      const rand = Math.random().toString(36).slice(2, 10);
+      const filename = `${Date.now()}-${rand}.jpg`;
+
+      const { error: upErr } = await window.sb.storage
+        .from(this.BUCKET)
+        .upload(filename, blob, {
+          contentType: 'image/jpeg',
+          cacheControl: '31536000', // 1 año; el nombre es único, nunca cambia
+          upsert: false,
+        });
+      if (upErr) {
+        console.warn('[photo.upload] error:', upErr.message || upErr);
+        return null;
+      }
+
+      const { data } = window.sb.storage.from(this.BUCKET).getPublicUrl(filename);
+      return (data && data.publicUrl) || null;
+    } catch (e) {
+      console.warn('[photo.upload] exception:', e);
+      return null;
+    }
+  },
+
+  // Helper end-to-end: File → comprime → sube → URL.
+  // Tira si la compresión falla (error del usuario, archivo inválido).
+  // Devuelve null si solo falla el upload (Supabase caído / sin red).
+  async compressAndUpload(file) {
+    const v = this.validate(file);
+    if (!v.ok) throw new Error(v.reason);
+    const blob = await this.compress(file);
+    return await this.upload(blob);
+  },
+};
+
 // ========== shortLink: capa sobre Supabase ==========
 // put(kind, payload) → string id corto (o null si falla)
 // get(id) → {kind, payload} o null si no existe / error
@@ -7020,9 +7235,61 @@ function enterEnrollmentMode(invitePayload) {
   // Listener del botón enviar
   $('enr-submit-btn').onclick = submitEnrollment;
 
+  // Wiring del input de foto (si no estaba ya conectado)
+  setupEnrollmentPhotoInput();
+
   // Estado inicial de respuestas
   window._quizAnswers = {};
   window._invitePayload = invitePayload;
+  window._enrPhotoFile = null;
+}
+
+// Wiring del input de foto en el formulario de inscripción.
+// Idempotente: se puede llamar varias veces sin duplicar listeners (usa .onX).
+function setupEnrollmentPhotoInput() {
+  const input    = $('enr-photo-input');
+  const preview  = $('enr-photo-preview');
+  const btnLabel = $('enr-photo-btn-label');
+  const btnRemove= $('enr-photo-remove-btn');
+  const hint     = $('enr-photo-hint');
+  if (!input || !preview) return;
+
+  const reset = () => {
+    window._enrPhotoFile = null;
+    input.value = '';
+    preview.classList.remove('has-photo');
+    preview.innerHTML = 'Sin foto';
+    btnLabel.textContent = 'Elegir foto';
+    btnRemove.style.display = 'none';
+    hint.classList.remove('is-error');
+    hint.textContent = 'JPG o PNG. Se comprime y sube al enviar la ficha.';
+  };
+
+  input.onchange = () => {
+    const file = input.files && input.files[0];
+    if (!file) { reset(); return; }
+
+    const v = photo.validate(file);
+    if (!v.ok) {
+      hint.classList.add('is-error');
+      hint.textContent = v.reason;
+      input.value = '';
+      return;
+    }
+
+    window._enrPhotoFile = file;
+
+    // Preview local (sin subir nada todavía)
+    const url = URL.createObjectURL(file);
+    preview.classList.add('has-photo');
+    preview.innerHTML = `<img alt="Vista previa" src="${url}">`;
+    btnLabel.textContent = 'Cambiar foto';
+    btnRemove.style.display = '';
+    hint.classList.remove('is-error');
+    hint.textContent = 'Se comprime y sube al enviar la ficha.';
+  };
+
+  btnRemove.onclick = reset;
 }
 
 function selectQuizOption(qId, optIdx, pts) {
@@ -7074,6 +7341,27 @@ async function submitEnrollment() {
   const totalPts = QUIZ.reduce((sum, q) => sum + (answers[q.id]?.pts || 0), 0);
   const level = computeLevel(totalPts);
 
+  // Subir foto (si el jugador seleccionó una). Lo hacemos ANTES de construir
+  // el submission así el photoUrl queda embebido en el link que recibe el admin.
+  // Si falla el upload, no bloqueamos la inscripción: el admin verá iniciales.
+  const submitBtn = $('enr-submit-btn');
+  const prevBtnLabel = submitBtn ? submitBtn.textContent : null;
+
+  let photoUrl = null;
+  if (window._enrPhotoFile) {
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Subiendo foto...'; }
+    try {
+      photoUrl = await photo.compressAndUpload(window._enrPhotoFile);
+      if (!photoUrl) {
+        // compressAndUpload devuelve null si solo falla el upload (no la compresión).
+        console.warn('[submitEnrollment] foto no se pudo subir, sigo sin foto');
+      }
+    } catch (e) {
+      // Solo tira si la compresión fue imposible (archivo inválido). Avisamos pero seguimos.
+      console.warn('[submitEnrollment] foto inválida:', e.message || e);
+    }
+  }
+
   const payload = window._invitePayload || {};
   const submission = {
     id: uid(),
@@ -7089,11 +7377,10 @@ async function submitEnrollment() {
     level: level.key,
     levelLabel: level.label,
     levelSuggest: level.suggest,
+    photoUrl,                        // null si no subió foto o si falló el upload
   };
 
   // Feedback mientras hablamos con Supabase
-  const submitBtn = $('enr-submit-btn');
-  const prevBtnLabel = submitBtn ? submitBtn.textContent : null;
   if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Generando link...'; }
 
   const subLink = await buildSubmissionLink(submission);
@@ -7411,6 +7698,11 @@ function addPairToTournament(aId, bId) {
     p2: `${b.firstName} ${b.lastName}${b.nickname ? ' (' + b.nickname + ')' : ''}`,
     p1Data: a,
     p2Data: b,
+    // Fotos: venir pueden ser null (el jugador no subió foto, o falló el upload).
+    // Se propagan para que renderAvatar muestre <img>. Si la URL se rompe
+    // después, el onerror del <img> cae a iniciales automáticamente.
+    p1Photo: a.photoUrl || null,
+    p2Photo: b.photoUrl || null,
   };
   if (!targetT.teams) targetT.teams = [];
   targetT.teams.push(team);
@@ -7699,14 +7991,29 @@ function playerNameClean(fullName) {
   return fullName.replace(/\([^)]*\)/g, '').trim();
 }
 
-function renderAvatar(fullName, size = 'md') {
+// renderAvatar: dibuja el avatar de un jugador.
+//   - fullName : nombre (para iniciales y color).
+//   - size     : 'xs' | 'sm' | 'md' | 'lg' | 'xl'.
+//   - photoUrl : opcional. Si viene, renderiza <img> arriba de las iniciales.
+//                Si la imagen falla al cargar, el onerror remueve .has-photo
+//                y quita el <img>, quedando las iniciales como fallback visible.
+// Firma retro-compatible: los callers viejos que llaman renderAvatar(name, 'md')
+// siguen funcionando sin cambios.
+function renderAvatar(fullName, size = 'md', photoUrl = null) {
   const i = playerInitials(fullName);
   const c = playerColor(fullName);
-  return `<div class="pavatar sz-${size} c-${c}" title="${escapeHtml(playerNameClean(fullName))}">${escapeHtml(i)}</div>`;
+  const cleanName = playerNameClean(fullName);
+  const photoClass = photoUrl ? ' has-photo' : '';
+  const imgHtml = photoUrl
+    ? `<img alt="" src="${escapeHtml(photoUrl)}" onerror="this.parentElement.classList.remove('has-photo'); this.remove();">`
+    : '';
+  return `<div class="pavatar sz-${size} c-${c}${photoClass}" title="${escapeHtml(cleanName)}">${escapeHtml(i)}${imgHtml}</div>`;
 }
 
-function renderPairAvatars(p1, p2, size = 'md') {
-  return `<div class="pavatar-stack ${size === 'xl' ? 'big' : ''}">${renderAvatar(p1, size)}${renderAvatar(p2, size)}</div>`;
+// renderPairAvatars: acepta fotos opcionales de cada jugador.
+// Firma retro-compatible: llamadas viejas con (p1, p2, 'md') siguen funcionando.
+function renderPairAvatars(p1, p2, size = 'md', photoUrl1 = null, photoUrl2 = null) {
+  return `<div class="pavatar-stack ${size === 'xl' ? 'big' : ''}">${renderAvatar(p1, size, photoUrl1)}${renderAvatar(p2, size, photoUrl2)}</div>`;
 }
 
 function getDivClass(division) {
@@ -7920,7 +8227,7 @@ function renderPubLive() {
       </div>
       <div class="plive-scoreboard">
         <div class="plive-team home">
-          ${renderPairAvatars(home.p1, home.p2, 'lg')}
+          ${renderPairAvatars(home.p1, home.p2, 'lg', home.p1Photo, home.p2Photo)}
           <div class="plive-team-info">
             <div class="plive-team-players">${escapeHtml(playerNameClean(home.p1).split(' ').pop() || home.p1)} / ${escapeHtml(playerNameClean(home.p2).split(' ').pop() || home.p2)}</div>
             <div class="plive-team-meta">DIV. ${escapeHtml(tournament.division)}</div>
@@ -7931,7 +8238,7 @@ function renderPubLive() {
           ${sets ? `<div class="plive-score-sub">${escapeHtml(sets)}</div>` : ''}
         </div>
         <div class="plive-team away">
-          ${renderPairAvatars(away.p1, away.p2, 'lg')}
+          ${renderPairAvatars(away.p1, away.p2, 'lg', away.p1Photo, away.p2Photo)}
           <div class="plive-team-info">
             <div class="plive-team-players">${escapeHtml(playerNameClean(away.p1).split(' ').pop() || away.p1)} / ${escapeHtml(playerNameClean(away.p2).split(' ').pop() || away.p2)}</div>
             <div class="plive-team-meta">DIV. ${escapeHtml(tournament.division)}</div>
@@ -8276,8 +8583,8 @@ function renderPubTeams() {
       <div class="pteam ${divClass}">
         <span class="pteam-badge">DIV. ${escapeHtml(tournament.division)} · ${escapeHtml(groupLabel)}</span>
         <div class="pteam-avatars">
-          ${renderAvatar(team.p1, 'xl')}
-          ${renderAvatar(team.p2, 'xl')}
+          ${renderAvatar(team.p1, 'xl', team.p1Photo)}
+          ${renderAvatar(team.p2, 'xl', team.p2Photo)}
         </div>
         <div class="pteam-names">
           <div class="pteam-p">${escapeHtml(n1)}${nick1 ? `<span class="nick">"${escapeHtml(nick1)}"</span>` : ''}</div>
@@ -8332,11 +8639,11 @@ function renderPubResults() {
         <div class="presult-date">${escapeHtml(dateStr)}</div>
         <div class="presult-team home ${homeCls}">
           ${escapeHtml(playerNameClean(home.p1).split(' ').pop())} / ${escapeHtml(playerNameClean(home.p2).split(' ').pop())}
-          ${renderAvatar(home.p1, 'sm')}
+          ${renderAvatar(home.p1, 'sm', home.p1Photo)}
         </div>
         <div class="presult-score">${totals.home} – ${totals.away}</div>
         <div class="presult-team ${awayCls}">
-          ${renderAvatar(away.p1, 'sm')}
+          ${renderAvatar(away.p1, 'sm', away.p1Photo)}
           ${escapeHtml(playerNameClean(away.p1).split(' ').pop())} / ${escapeHtml(playerNameClean(away.p2).split(' ').pop())}
         </div>
         <span class="pdiv-chip ${divClass}">${escapeHtml(tournament.division)}</span>

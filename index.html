@@ -5640,71 +5640,93 @@ function addTeam() {
   saveState();
 }
 
+// Intenta recuperar la submission asociada a un lado (p1/p2) de un team.
+// Útil para teams que se armaron antes de que existiera p1Data/p2Data o que
+// quedaron sin ese campo al serializar a localStorage en una versión vieja.
+// Estrategia:
+//   1. Si el team ya tiene p1Data/p2Data con id válido → buscamos esa en workspace
+//   2. Si no, intentamos matchear por nombre (firstName+lastName) dentro de las
+//      submissions aprobadas del mismo torneo.
+function findSubmissionForTeamSide(team, side) {
+  const snapshot = side === 'p1' ? team.p1Data : team.p2Data;
+  if (snapshot && snapshot.id) {
+    const found = (workspace.submissions || []).find(s => s.id === snapshot.id);
+    if (found) return found;
+  }
+  // Fallback: buscar por nombre dentro del mismo torneo
+  const rawName = side === 'p1' ? team.p1 : team.p2;
+  if (!rawName || rawName === '(pendiente)') return null;
+  const cleanName = rawName.replace(/\s*\([^)]*\)\s*/g, '').trim().toLowerCase();
+  const tId = findTournamentIdForTeam(team);
+  const candidates = (workspace.submissions || []).filter(s =>
+    s.status === 'approved' && (!tId || s.addedToTournamentId === tId)
+  );
+  return candidates.find(s => {
+    const fullName = `${s.firstName} ${s.lastName}`.trim().toLowerCase();
+    return fullName === cleanName;
+  }) || null;
+}
+
+// Encuentra el id del torneo que contiene un team. Necesario cuando state no
+// apunta al torneo correcto (por ej. si el admin está viendo otro torneo).
+function findTournamentIdForTeam(team) {
+  if (!team) return null;
+  for (const t of (workspace.tournaments || [])) {
+    if ((t.teams || []).some(x => x.id === team.id)) return t.id;
+  }
+  return null;
+}
+
 function removeTeam(id) {
   const t = teamById(id);
   if (!t) return;
 
-  // En fase setup: borrado simple, sin historial. Devolvemos las submissions
-  // al pool de pendientes.
-  if (state.phase === 'setup') {
-    // Preguntamos a dónde vuelve cada jugador
-    const placements = [];
-    if (t.p1Data) {
-      openReturnPlayerModal(`${t.p1Data.firstName} ${t.p1Data.lastName}`, (dest) => {
-        if (dest === 'cancel') return;
-        placements.push({ sub: t.p1Data, dest });
-        if (t.p2Data) {
-          openReturnPlayerModal(`${t.p2Data.firstName} ${t.p2Data.lastName}`, (dest2) => {
-            if (dest2 === 'cancel') return;
-            placements.push({ sub: t.p2Data, dest: dest2 });
-            applyRemoveTeam(t, placements);
-          });
-        } else {
-          applyRemoveTeam(t, placements);
-        }
-      });
-      return;
-    }
-    // Sin p1Data (equipo legacy sin submissions): borrado directo
-    if (!confirm(`¿Eliminar el equipo "${t.p1} / ${t.p2}"?`)) return;
-    state.teams = state.teams.filter(x => x.id !== id);
-    renderTeams();
-    saveState();
+  // Buscar las submissions reales asociadas a cada lado (robusto contra
+  // teams viejos sin p1Data/p2Data).
+  const sub1 = findSubmissionForTeamSide(t, 'p1');
+  const sub2 = findSubmissionForTeamSide(t, 'p2');
+
+  // En fase setup: borrado físico. En fase activa: marcar disbanded.
+  const isSetup = (state.phase === 'setup');
+
+  // Si no tenemos NINGÚN submission asociado (equipo totalmente legacy):
+  // confirmación simple y chau. No hay nada que devolver al pool.
+  if (!sub1 && !sub2) {
+    const confirmMsg = isSetup
+      ? `¿Eliminar el equipo "${t.p1} / ${t.p2}"?`
+      : `¿Eliminar el equipo "${t.p1} / ${t.p2}"?\n\n`
+      + `El torneo ya empezó. Los partidos ya jugados por este equipo se preservan. `
+      + `Los pendientes no se jugarán.`;
+    if (!confirm(confirmMsg)) return;
+    if (isSetup) applyRemoveTeam(t, []);
+    else         applyDissolveTeam(t, []);
     return;
   }
 
-  // Fase activa: confirmar + disolver (sin borrar para preservar partidos jugados).
-  const msg = `¿Eliminar el equipo "${t.p1} / ${t.p2}"?\n\n`
-            + `El torneo ya empezó. Los partidos ya jugados por este equipo se preservan `
-            + `(el equipo figura como "ex-equipo" en esos resultados). `
-            + `Los partidos pendientes no se jugarán.\n\n`
-            + `Esta acción queda registrada como modificación.`;
-  if (!confirm(msg)) return;
-
-  // Preguntamos a dónde vuelve cada jugador (si tienen submission asociada)
-  const doDissolve = (placements) => applyDissolveTeam(t, placements);
-  if (t.p1Data || t.p2Data) {
-    const placements = [];
-    const askP1 = (next) => {
-      if (!t.p1Data) return next();
-      openReturnPlayerModal(`${t.p1Data.firstName} ${t.p1Data.lastName}`, (dest) => {
-        if (dest === 'cancel') return;
-        placements.push({ sub: t.p1Data, dest });
-        next();
-      });
-    };
-    const askP2 = (next) => {
-      if (!t.p2Data) return next();
-      openReturnPlayerModal(`${t.p2Data.firstName} ${t.p2Data.lastName}`, (dest) => {
-        if (dest === 'cancel') return;
-        placements.push({ sub: t.p2Data, dest });
-        next();
-      });
-    };
-    askP1(() => askP2(() => doDissolve(placements)));
-  } else {
-    doDissolve([]);
+  // En fase activa, pedimos confirmación general primero
+  if (!isSetup) {
+    const msg = `¿Eliminar el equipo "${t.p1} / ${t.p2}"?\n\n`
+              + `El torneo ya empezó. Los partidos ya jugados por este equipo se preservan `
+              + `(el equipo figura como "ex-equipo" en esos resultados). `
+              + `Los partidos pendientes no se jugarán.\n\n`
+              + `Esta acción queda registrada como modificación.`;
+    if (!confirm(msg)) return;
   }
+
+  // Preguntamos a dónde vuelve cada jugador con submission
+  const placements = [];
+  const askForSub = (sub, next) => {
+    if (!sub) return next();
+    openReturnPlayerModal(`${sub.firstName} ${sub.lastName}`, (dest) => {
+      if (dest === 'cancel') return; // abort total, no seguimos
+      placements.push({ sub, dest });
+      next();
+    });
+  };
+  askForSub(sub1, () => askForSub(sub2, () => {
+    if (isSetup) applyRemoveTeam(t, placements);
+    else         applyDissolveTeam(t, placements);
+  }));
 }
 
 // Aplicar la eliminación en fase setup (borrado físico)
@@ -5853,10 +5875,10 @@ function ensureTeamEditorModal() {
 function removePlayerFromTeam(teamId, side) {
   const t = teamById(teamId);
   if (!t || t.disbanded) return;
-  const sub = side === 'p1' ? t.p1Data : t.p2Data;
+  const sub = findSubmissionForTeamSide(t, side);
   const name = side === 'p1' ? t.p1 : t.p2;
   if (!sub) {
-    // Equipo legacy sin submission: pedimos confirmación simple
+    // Sin submission asociada: confirmación simple
     if (!confirm(`¿Sacar a "${name}" del equipo?\n\nEl equipo queda con un solo jugador.`)) return;
     applyRemovePlayerFromTeam(t, side, null, null);
     return;
@@ -5979,7 +6001,7 @@ function doReplacePlayer(teamId, side, submissionId) {
   if (!t || !sub) { toast('No se pudo completar el reemplazo'); return; }
 
   // Preguntamos a dónde va el jugador REEMPLAZADO (el que sale)
-  const outSub = side === 'p1' ? t.p1Data : t.p2Data;
+  const outSub = findSubmissionForTeamSide(t, side);
   const outName = side === 'p1' ? t.p1 : t.p2;
 
   const doReplacement = (outDest) => {
@@ -6084,22 +6106,33 @@ function ensureReturnPlayerModal() {
   return m;
 }
 
-// Restaurar una submission al pool según el destino elegido
+// Restaurar una submission al pool según el destino elegido.
+// IMPORTANTE: el `sub` que recibimos puede ser el p1Data/p2Data del team, que
+// tras ciclos de save/load de localStorage deja de ser la misma referencia que
+// el submission en workspace.submissions[]. Siempre buscamos por ID para
+// modificar la submission REAL (y, si la encontramos, también sincronizamos
+// el snapshot del team como bonus).
 function returnSubmissionToPool(sub, dest) {
-  if (!sub) return;
+  if (!sub || !sub.id) return;
+  const real = (workspace.submissions || []).find(s => s.id === sub.id);
+  if (!real) {
+    console.warn('[returnSubmissionToPool] submission real no encontrada para id', sub.id);
+    return;
+  }
+
   if (dest === 'out') {
     // No vuelve a ningún pool; marcamos como withdrawn para historial
-    sub.status = 'withdrawn';
-    sub.withdrawnAt = Date.now();
-    delete sub.addedToTournamentId;
+    real.status = 'withdrawn';
+    real.withdrawnAt = Date.now();
+    delete real.addedToTournamentId;
     return;
   }
   // solo / waiting-partner → vuelve al pool de pendientes
-  sub.status = 'pending';
-  delete sub.addedToTournamentId;
+  real.status = 'pending';
+  delete real.addedToTournamentId;
   // 'solo' = quiere jugar pero sin compañero asignado → lookingForPartner=true
   // 'waiting-partner' = tiene compañero declarado (o lo tendrá) → lookingForPartner=false
-  sub.lookingForPartner = (dest === 'solo');
+  real.lookingForPartner = (dest === 'solo');
 }
 
 // ========== PAGOS (por jugador, estado binario DEBE/PAGÓ) ==========

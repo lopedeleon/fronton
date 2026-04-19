@@ -2767,6 +2767,137 @@ table.standings tr.qualified-third td:first-child::before {
   text-transform: uppercase;
 }
 
+/* ==== Sponsor con IMAGEN + efecto cartel luminoso ====
+   Cuando la tarjeta tiene clase .has-image, ocultamos el contenido textual y
+   la imagen ocupa todo el espacio. Aplicamos un flicker irregular tipo led
+   viejo: la mayoría del tiempo está "prendido" brillando, con apagones muy
+   breves e irregulares.
+   El glow se logra combinando filter:brightness/saturate con drop-shadow. */
+.psponsor.has-image {
+  padding: 0;
+  background: #0a0806;
+  border-color: transparent;
+  overflow: hidden;
+  width: 320px;
+  height: 200px;
+}
+.psponsor.has-image .psponsor-tag,
+.psponsor.has-image .psponsor-title,
+.psponsor.has-image .psponsor-body,
+.psponsor.has-image .psponsor-click { display: none; }
+.psponsor.has-image .psponsor-img-wrap {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0806;
+}
+.psponsor.has-image img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  /* animación de parpadeo con glow */
+  animation: sponsorNeonFlicker 5.2s infinite;
+  will-change: filter, opacity;
+}
+/* Un overlay sutil agrega un "halo" de color cuando prende */
+.psponsor.has-image .psponsor-img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(255,200,120,0.18), transparent 65%);
+  mix-blend-mode: screen;
+  animation: sponsorNeonGlow 5.2s infinite;
+}
+
+/* Keyframes con apagones cortos irregulares — como un led gastado.
+   "0% → 100%" cubre todo el ciclo de 5.2s. Los % con valores bajos son los
+   flashes de apagón, muy rápidos, y siempre volvemos al estado brillante. */
+@keyframes sponsorNeonFlicker {
+  0%, 100%   { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
+  7%         { filter: brightness(0.25) saturate(0.4)  drop-shadow(0 0 2px  rgba(255,180,100,0.15)); opacity: 0.75; }
+  7.6%       { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
+  42%        { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
+  43%        { filter: brightness(0.35) saturate(0.5)  drop-shadow(0 0 3px  rgba(255,180,100,0.2));  opacity: 0.8; }
+  43.4%      { filter: brightness(1.3)  saturate(1.25) drop-shadow(0 0 16px rgba(255,200,120,0.7));  opacity: 1; }
+  43.8%      { filter: brightness(0.3)  saturate(0.45) drop-shadow(0 0 2px  rgba(255,180,100,0.15)); opacity: 0.75; }
+  44.4%      { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
+  75%        { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
+  75.3%      { filter: brightness(0.2)  saturate(0.3)  drop-shadow(0 0 1px  rgba(255,180,100,0.1));  opacity: 0.7; }
+  75.8%      { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
+}
+@keyframes sponsorNeonGlow {
+  0%, 100% { opacity: 1; }
+  7%, 43%, 43.8%, 75.3% { opacity: 0.1; }
+  7.6%, 43.4%, 44.4%, 75.8% { opacity: 1; }
+}
+
+/* Respeto preferencia del usuario por menos movimiento: sin animación */
+@media (prefers-reduced-motion: reduce) {
+  .psponsor.has-image img,
+  .psponsor.has-image .psponsor-img-wrap::after {
+    animation: none;
+    filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 8px rgba(255,180,100,0.4));
+  }
+}
+
+/* ==== Input de imagen en el form de sponsor (admin) ==== */
+.ad-image-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border: 1px dashed var(--ink-soft);
+  background: rgba(0,0,0,0.02);
+}
+.ad-image-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 4px;
+  border: 1px solid var(--ink-soft);
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-soft);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.ad-image-preview.has-image {
+  border-color: var(--ink);
+  background: #1a1410;
+  color: var(--bg);
+}
+.ad-image-preview > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.ad-image-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.ad-image-hint {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.35;
+}
+.ad-image-hint.is-error { color: var(--accent); font-weight: 600; }
+
 /* TICKER */
 .pticker {
   margin-top: 22px;
@@ -3869,47 +4000,43 @@ tr.qualified .pstand-pos { background: var(--green); }
   flex-shrink: 0;
 }
 .submission-avatar .pavatar { width: 52px; height: 52px; font-size: 18px; }
+
+/* Botón SIEMPRE visible como badge en la esquina inferior derecha del avatar.
+   Es clickable tanto en desktop como en mobile — más descubrible que un hover. */
 .submission-avatar .photo-upload-btn {
   position: absolute;
-  inset: 0;
+  right: -4px;
+  bottom: -4px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 2px solid var(--ink);
-  background: rgba(26,20,16,0.78);
+  border: 2px solid var(--bg-paper);
+  background: var(--accent);
   color: var(--bg);
   font-family: 'Archivo', sans-serif;
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  line-height: 1;
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2px;
-  line-height: 1.1;
-  text-align: center;
+  transition: transform 0.12s ease-out, background 0.12s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
 }
-.submission-avatar:hover .photo-upload-btn,
-.submission-avatar .photo-upload-btn:focus { opacity: 1; }
-/* En mobile no hay hover: el botón siempre visible abajo a la derecha como badge */
-@media (hover: none) {
-  .submission-avatar .photo-upload-btn {
-    opacity: 1;
-    inset: auto -4px -4px auto;
-    width: 22px;
-    height: 22px;
-    font-size: 11px;
-    border-radius: 50%;
-    background: var(--accent);
-    padding: 0;
-  }
+.submission-avatar .photo-upload-btn:hover {
+  transform: scale(1.15);
+  background: var(--ink);
 }
 .submission-avatar.is-uploading .photo-upload-btn {
-  opacity: 1;
-  background: var(--accent);
+  background: var(--ink);
   pointer-events: none;
+  animation: subPhotoPulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes subPhotoPulse {
+  from { opacity: 0.5; }
+  to   { opacity: 1; }
 }
 
 .submission-level-badge {
@@ -4683,7 +4810,7 @@ tr.qualified .pstand-pos { background: var(--green); }
         <input type="text" id="ad-tag" placeholder="Etiqueta (ej: Sponsor Oficial)" maxlength="20">
       </div>
       <input type="text" id="ad-body" placeholder="Descripción breve" maxlength="100" style="width:100%;margin-bottom:8px;">
-      <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px;">
+      <div style="display:grid;grid-template-columns:2fr 1fr auto;gap:8px;margin-bottom:10px;">
         <input type="url" id="ad-url" placeholder="URL opcional (ej: https://sponsor.com)">
         <select id="ad-color">
           <option value="1">Rojo/Oscuro</option>
@@ -4692,6 +4819,17 @@ tr.qualified .pstand-pos { background: var(--green); }
           <option value="4">Negro</option>
         </select>
         <button class="btn btn-accent btn-sm" id="add-ad-btn">＋ Agregar</button>
+      </div>
+      <!-- Upload de imagen/PDF opcional: si se carga, reemplaza la tarjeta por
+           la imagen con efecto neón parpadeante. -->
+      <div class="ad-image-field">
+        <div class="ad-image-preview" id="ad-image-preview">Sin imagen</div>
+        <div class="ad-image-actions">
+          <label class="btn btn-ghost btn-sm" for="ad-image-input">📎 Imagen o PDF (opcional)</label>
+          <button type="button" class="btn btn-ghost btn-sm" id="ad-image-remove-btn" style="display:none;">Quitar</button>
+          <div class="ad-image-hint" id="ad-image-hint">JPG, PNG, WebP o PDF. El PDF se convierte a imagen automáticamente.</div>
+        </div>
+        <input type="file" id="ad-image-input" accept="image/jpeg,image/png,image/webp,application/pdf" style="display:none;">
       </div>
       <div id="ads-list" style="margin-top:12px;"></div>
     </div>
@@ -6570,11 +6708,15 @@ function renderAdsList() {
   }
   list.innerHTML = workspace.ads.map(ad => `
     <div class="ad-list-item">
-      <div>
-        <strong>${escapeHtml(ad.title)}</strong>
-        ${ad.tag ? `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;background:var(--gold);color:var(--ink);padding:1px 6px;margin-left:6px;">${escapeHtml(ad.tag)}</span>` : ''}
-        ${ad.body ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${escapeHtml(ad.body)}</div>` : ''}
-        ${ad.url ? `<div style="font-size:10px;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-top:2px;">↗ ${escapeHtml(ad.url)}</div>` : ''}
+      <div style="display:flex;gap:10px;align-items:center;min-width:0;">
+        ${ad.imageUrl ? `<img src="${escapeHtml(ad.imageUrl)}" alt="" style="width:42px;height:42px;object-fit:cover;border:1px solid var(--ink-soft);border-radius:3px;flex-shrink:0;">` : ''}
+        <div style="min-width:0;">
+          <strong>${escapeHtml(ad.title || '(Sin título)')}</strong>
+          ${ad.tag ? `<span style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;background:var(--gold);color:var(--ink);padding:1px 6px;margin-left:6px;">${escapeHtml(ad.tag)}</span>` : ''}
+          ${ad.imageUrl ? `<span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;background:var(--accent);color:var(--bg);padding:1px 6px;margin-left:6px;">◆ CON IMAGEN</span>` : ''}
+          ${ad.body ? `<div style="font-size:11px;color:var(--muted);margin-top:2px;">${escapeHtml(ad.body)}</div>` : ''}
+          ${ad.url ? `<div style="font-size:10px;color:var(--accent);font-family:'JetBrains Mono',monospace;margin-top:2px;">↗ ${escapeHtml(ad.url)}</div>` : ''}
+        </div>
       </div>
       <button class="btn btn-danger btn-sm" onclick="removeAd('${ad.id}')">Eliminar</button>
     </div>
@@ -6859,23 +7001,117 @@ function initTournamentControls() {
     toast(`Torneo "${name}" creado`);
   });
 
-  $('add-ad-btn').addEventListener('click', () => {
+  $('add-ad-btn').addEventListener('click', async () => {
     const title = $('ad-title').value.trim();
     const body = $('ad-body').value.trim();
     const tag = $('ad-tag').value.trim() || 'Sponsor';
     const url = $('ad-url').value.trim();
     const colorIdx = parseInt($('ad-color').value) || 1;
-    if (!title) { toast('Falta el título'); return; }
+    const imageFile = window._adImageFile || null;
+
+    // Si hay imagen, el title es opcional (la imagen manda). Si no, pedimos title.
+    if (!title && !imageFile) { toast('Falta el título o una imagen'); return; }
+
+    // Subir imagen primero si la hay (PDF se convierte a JPG adentro)
+    const addBtn = $('add-ad-btn');
+    const prevLabel = addBtn.textContent;
+    let imageUrl = null;
+    if (imageFile) {
+      addBtn.disabled = true;
+      addBtn.textContent = 'Subiendo...';
+      try {
+        imageUrl = await photo.uploadSponsorImage(imageFile);
+        if (!imageUrl) {
+          toast('No se pudo subir la imagen');
+          addBtn.disabled = false;
+          addBtn.textContent = prevLabel;
+          return;
+        }
+      } catch (e) {
+        toast('Imagen inválida: ' + (e.message || e));
+        addBtn.disabled = false;
+        addBtn.textContent = prevLabel;
+        return;
+      }
+    }
+
     if (!workspace.ads) workspace.ads = [];
-    workspace.ads.push({ id: uid(), title, body, tag, url, colorIdx });
+    workspace.ads.push({ id: uid(), title, body, tag, url, colorIdx, imageUrl });
     $('ad-title').value = '';
     $('ad-body').value = '';
     $('ad-tag').value = '';
     $('ad-url').value = '';
+    resetAdImageInput();
+    addBtn.disabled = false;
+    addBtn.textContent = prevLabel;
     saveState();
     renderAll();
     toast('Publicidad agregada');
   });
+
+  // Wiring del input de imagen del sponsor (preview + validación local)
+  setupAdImageInput();
+}
+
+// Reset del input y preview del sponsor (compartido entre "agregar nuevo" y
+// cuando se termina de subir uno).
+function resetAdImageInput() {
+  const input = $('ad-image-input');
+  const preview = $('ad-image-preview');
+  const removeBtn = $('ad-image-remove-btn');
+  const hint = $('ad-image-hint');
+  if (!input || !preview) return;
+  window._adImageFile = null;
+  input.value = '';
+  preview.classList.remove('has-image');
+  preview.innerHTML = 'Sin imagen';
+  if (removeBtn) removeBtn.style.display = 'none';
+  if (hint) {
+    hint.classList.remove('is-error');
+    hint.textContent = 'JPG, PNG, WebP o PDF. El PDF se convierte a imagen automáticamente.';
+  }
+}
+
+function setupAdImageInput() {
+  const input = $('ad-image-input');
+  const preview = $('ad-image-preview');
+  const removeBtn = $('ad-image-remove-btn');
+  const hint = $('ad-image-hint');
+  if (!input || !preview) return;
+
+  input.onchange = () => {
+    const file = input.files && input.files[0];
+    if (!file) { resetAdImageInput(); return; }
+
+    const v = photo.validateSponsor(file);
+    if (!v.ok) {
+      hint.classList.add('is-error');
+      hint.textContent = v.reason;
+      input.value = '';
+      return;
+    }
+
+    window._adImageFile = file;
+
+    // Preview: para imagen mostramos el blob directo; para PDF mostramos un
+    // placeholder con el nombre del archivo (convertir el PDF en preview
+    // requeriría cargar pdf.js igual que al subir — lo hacemos cuando sube)
+    if (v.isPdf) {
+      preview.classList.add('has-image');
+      preview.innerHTML = `<div style="text-align:center;padding:8px;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.3;">PDF<br>${escapeHtml(file.name.slice(0, 24))}</div>`;
+    } else {
+      const url = URL.createObjectURL(file);
+      preview.classList.add('has-image');
+      preview.innerHTML = `<img alt="Preview" src="${url}">`;
+    }
+    removeBtn.style.display = '';
+    hint.classList.remove('is-error');
+    hint.textContent = v.isPdf
+      ? 'Se convierte la primera página a imagen al subir.'
+      : 'Se sube al agregar la publicidad.';
+  };
+
+  removeBtn.onclick = resetAdImageInput;
 }
 
 // ============================================================
@@ -7080,22 +7316,22 @@ const photo = {
   },
 
   // Sube el blob al bucket y devuelve la URL pública (o null si falla).
-  async upload(blob) {
+  // bucket: opcional; default = this.BUCKET (player-photos)
+  async upload(blob, bucket = null) {
     if (!window.sb) {
       console.warn('[photo.upload] Supabase client no disponible');
       return null;
     }
+    const bucketName = bucket || this.BUCKET;
     try {
-      // Nombre: timestamp + random para evitar colisiones. Sin nombre real del
-      // jugador en el path → no filtramos PII en la URL pública.
       const rand = Math.random().toString(36).slice(2, 10);
       const filename = `${Date.now()}-${rand}.jpg`;
 
       const { error: upErr } = await window.sb.storage
-        .from(this.BUCKET)
+        .from(bucketName)
         .upload(filename, blob, {
           contentType: 'image/jpeg',
-          cacheControl: '31536000', // 1 año; el nombre es único, nunca cambia
+          cacheControl: '31536000',
           upsert: false,
         });
       if (upErr) {
@@ -7103,7 +7339,7 @@ const photo = {
         return null;
       }
 
-      const { data } = window.sb.storage.from(this.BUCKET).getPublicUrl(filename);
+      const { data } = window.sb.storage.from(bucketName).getPublicUrl(filename);
       return (data && data.publicUrl) || null;
     } catch (e) {
       console.warn('[photo.upload] exception:', e);
@@ -7119,6 +7355,129 @@ const photo = {
     if (!v.ok) throw new Error(v.reason);
     const blob = await this.compress(file);
     return await this.upload(blob);
+  },
+
+  // --------- SPONSOR IMAGES ---------
+  // Parámetros distintos para sponsors: más grande (hasta 1024px), más calidad.
+  SPONSOR_BUCKET: 'sponsor-images',
+  SPONSOR_MAX_DIM: 1024,
+  SPONSOR_TARGET_KB: 500,
+  SPONSOR_MAX_INPUT_MB: 20,    // PDFs pueden venir pesados
+  _pdfJsPromise: null,          // cache del loader de pdf.js
+
+  // Carga pdf.js on-demand (lazy). Se importa una sola vez.
+  async _loadPdfJs() {
+    if (this._pdfJsPromise) return this._pdfJsPromise;
+    this._pdfJsPromise = (async () => {
+      // Importamos pdf.js como módulo ESM desde CDN jsDelivr
+      const mod = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs');
+      // pdf.js necesita un worker; apuntamos al CDN también
+      mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+      return mod;
+    })();
+    return this._pdfJsPromise;
+  },
+
+  // Convierte la primera página de un PDF en un Blob JPEG.
+  // Escalado a SPONSOR_MAX_DIM en el lado mayor.
+  async pdfFirstPageToBlob(file) {
+    const pdfjs = await this._loadPdfJs();
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: buf }).promise;
+    const page = await pdf.getPage(1);
+
+    // Calcular escala para que el lado mayor ~= SPONSOR_MAX_DIM
+    const baseViewport = page.getViewport({ scale: 1 });
+    const maxSide = Math.max(baseViewport.width, baseViewport.height);
+    const scale = Math.min(this.SPONSOR_MAX_DIM / maxSide, 3); // tope por si el PDF es muy chico
+    const viewport = page.getViewport({ scale });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.floor(viewport.width);
+    canvas.height = Math.floor(viewport.height);
+    const ctx = canvas.getContext('2d');
+
+    // Fondo blanco (los PDFs tienen transparencia por defecto; cuando
+    // encodeamos a JPEG queremos blanco sólido, no negro)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    // Comprimir a JPEG con calidad razonable para carteles
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        b => b ? resolve(b) : reject(new Error('No se pudo generar imagen del PDF')),
+        'image/jpeg',
+        0.9
+      );
+    });
+  },
+
+  // Recibe un File de imagen (cualquiera de los formatos soportados) y devuelve
+  // un Blob JPEG redimensionado a SPONSOR_MAX_DIM y con compresión progresiva.
+  // Similar a compress() pero sin el recorte cuadrado: los sponsors pueden ser
+  // rectangulares (carteles, logos horizontales).
+  async compressSponsorImage(file) {
+    const img = await this._loadImage(file);
+    const w = img.naturalWidth, h = img.naturalHeight;
+    const maxSide = Math.max(w, h);
+    const scale = maxSide > this.SPONSOR_MAX_DIM ? (this.SPONSOR_MAX_DIM / maxSide) : 1;
+    const outW = Math.round(w * scale);
+    const outH = Math.round(h * scale);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = outW;
+    canvas.height = outH;
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    // Fondo blanco para PNG/WebP con transparencia (evita fondo negro en JPEG)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, outW, outH);
+    ctx.drawImage(img, 0, 0, outW, outH);
+
+    const targetBytes = this.SPONSOR_TARGET_KB * 1024;
+    let quality = 0.9;
+    let blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
+    while (blob && blob.size > targetBytes && quality > 0.6) {
+      quality -= 0.1;
+      blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', quality));
+    }
+    if (!blob) throw new Error('No se pudo comprimir la imagen');
+    return blob;
+  },
+
+  // Valida entrada de sponsor (acepta image/* y application/pdf).
+  validateSponsor(file) {
+    if (!file) return { ok: false, reason: 'No hay archivo' };
+    const isImage = file.type && file.type.startsWith('image/');
+    const isPdf = file.type === 'application/pdf';
+    if (!isImage && !isPdf) {
+      return { ok: false, reason: 'Solo imagen (JPG/PNG/WebP) o PDF' };
+    }
+    const mb = file.size / (1024 * 1024);
+    if (mb > this.SPONSOR_MAX_INPUT_MB) {
+      return { ok: false, reason: `El archivo pesa ${mb.toFixed(1)}MB, máximo ${this.SPONSOR_MAX_INPUT_MB}MB` };
+    }
+    return { ok: true, isPdf };
+  },
+
+  // Helper end-to-end para sponsor: File → (PDF? → página 1) → comprime → sube.
+  // Tira si la validación/conversión falla; devuelve null si solo falla el upload.
+  async uploadSponsorImage(file) {
+    const v = this.validateSponsor(file);
+    if (!v.ok) throw new Error(v.reason);
+
+    let blob;
+    if (v.isPdf) {
+      // PDF → convertir primera página a JPEG ya en el tamaño correcto
+      blob = await this.pdfFirstPageToBlob(file);
+    } else {
+      // Imagen → solo redimensionar + comprimir
+      blob = await this.compressSponsorImage(file);
+    }
+    return await this.upload(blob, this.SPONSOR_BUCKET);
   },
 };
 
@@ -8145,13 +8504,16 @@ function renderPairAvatars(p1, p2, size = 'md', photoUrl1 = null, photoUrl2 = nu
 function renderSubmissionAvatar(submission) {
   const fullName = `${submission.firstName || ''} ${submission.lastName || ''}`.trim();
   const hasPhoto = !!submission.photoUrl;
-  const label = hasPhoto ? 'Cambiar' : '+ Foto';
+  // Badge chico en la esquina: "+" si no hay foto, lápiz si ya tiene.
+  const icon  = hasPhoto ? '✎' : '+';
+  const title = hasPhoto ? 'Cambiar foto' : 'Subir foto';
   return `
     <div class="submission-avatar" data-sub-avatar="${submission.id}">
       ${renderAvatar(fullName, 'lg', submission.photoUrl || null)}
       <button type="button" class="photo-upload-btn"
-              title="${hasPhoto ? 'Cambiar foto' : 'Subir foto'}"
-              onclick="triggerAdminPhotoUpload('${submission.id}')">${label}</button>
+              title="${title}"
+              aria-label="${title}"
+              onclick="triggerAdminPhotoUpload('${submission.id}')">${icon}</button>
     </div>
   `;
 }
@@ -8396,11 +8758,22 @@ function renderPubSponsorsMarquee() {
     el.innerHTML = '';
     return;
   }
-  // duplicamos el contenido para que el scroll sea sin cortes
   const cardHtml = ad => {
     const color = `c-${(ad.colorIdx || 1)}`;
     const urlAttr = ad.url ? `href="${escapeHtml(ad.url)}" target="_blank" rel="noopener"` : 'href="#" onclick="return false"';
     const clickHint = ad.url ? `<div class="psponsor-click">VISITAR →</div>` : '';
+    // Si el sponsor tiene imagen, la mostramos como cartel luminoso y
+    // ocultamos los textos (via CSS .psponsor.has-image).
+    if (ad.imageUrl) {
+      return `
+        <a class="psponsor ${color} has-image" ${urlAttr}>
+          <div class="psponsor-img-wrap">
+            <img alt="${escapeHtml(ad.title || ad.tag || 'Sponsor')}" src="${escapeHtml(ad.imageUrl)}"
+                 onerror="this.closest('.psponsor').classList.remove('has-image'); this.parentElement.remove();">
+          </div>
+        </a>
+      `;
+    }
     return `
       <a class="psponsor ${color}" ${urlAttr}>
         <div class="psponsor-tag">${escapeHtml(ad.tag || 'Sponsor')}</div>
@@ -8599,6 +8972,16 @@ function renderPubTournaments() {
       ${ads.slice(0, 3).map(ad => {
         const color = `c-${(ad.colorIdx || 1)}`;
         const urlAttr = ad.url ? `href="${escapeHtml(ad.url)}" target="_blank" rel="noopener"` : 'href="#" onclick="return false"';
+        if (ad.imageUrl) {
+          return `
+            <a class="psponsor ${color} has-image" ${urlAttr}>
+              <div class="psponsor-img-wrap">
+                <img alt="${escapeHtml(ad.title || ad.tag || 'Sponsor')}" src="${escapeHtml(ad.imageUrl)}"
+                     onerror="this.closest('.psponsor').classList.remove('has-image'); this.parentElement.remove();">
+              </div>
+            </a>
+          `;
+        }
         return `
           <a class="psponsor ${color}" ${urlAttr}>
             <div class="psponsor-tag">${escapeHtml(ad.tag || 'Sponsor')}</div>

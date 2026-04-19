@@ -2767,24 +2767,30 @@ table.standings tr.qualified-third td:first-child::before {
   text-transform: uppercase;
 }
 
-/* ==== Sponsor con IMAGEN + efecto cartel luminoso ====
-   Cuando la tarjeta tiene clase .has-image, ocultamos el contenido textual y
-   la imagen ocupa todo el espacio. Aplicamos un flicker irregular tipo led
-   viejo: la mayoría del tiempo está "prendido" brillando, con apagones muy
-   breves e irregulares.
-   El glow se logra combinando filter:brightness/saturate con drop-shadow. */
+/* ==== Sponsor con IMAGEN — cartel luminoso estilo Times Square ====
+   Brillo constante intenso + pulso sutil de glow + barrido de reflejo + marco
+   con "focos". No hay apagones: la luz está siempre encendida. */
 .psponsor.has-image {
   padding: 0;
   background: #0a0806;
-  border-color: transparent;
-  overflow: hidden;
-  width: 320px;
-  height: 200px;
+  border: 3px solid #1a1410;
+  overflow: visible;                 /* dejamos que el glow salga del marco */
+  width: 380px;
+  height: 240px;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px rgba(255,200,120,0.25),
+    0 0 24px 4px rgba(255,180,100,0.35),
+    0 0 48px 8px rgba(255,150,80,0.18),
+    inset 0 0 20px rgba(0,0,0,0.6);
+  animation: sponsorBoxGlowPulse 3.2s ease-in-out infinite;
+  will-change: box-shadow;
 }
 .psponsor.has-image .psponsor-tag,
 .psponsor.has-image .psponsor-title,
 .psponsor.has-image .psponsor-body,
 .psponsor.has-image .psponsor-click { display: none; }
+
 .psponsor.has-image .psponsor-img-wrap {
   width: 100%;
   height: 100%;
@@ -2792,59 +2798,116 @@ table.standings tr.qualified-third td:first-child::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0a0806;
+  background: radial-gradient(ellipse at center, #1a1410 0%, #0a0806 85%);
+  overflow: hidden;                  /* el barrido de luz sí se recorta acá */
+  border-radius: 3px;
 }
+
 .psponsor.has-image img {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 92%;
+  max-height: 88%;
   width: auto;
   height: auto;
   object-fit: contain;
   display: block;
-  /* animación de parpadeo con glow */
-  animation: sponsorNeonFlicker 5.2s infinite;
-  will-change: filter, opacity;
+  /* Brillo fijo intenso tipo cartel encendido 24/7. No hay apagones. */
+  filter: brightness(1.12) saturate(1.18) contrast(1.05);
+  /* Un pulso de glow DETRÁS de la imagen via drop-shadow, muy sutil */
+  animation: sponsorImgGlowPulse 3.2s ease-in-out infinite;
+  will-change: filter;
+  position: relative;
+  z-index: 2;
 }
-/* Un overlay sutil agrega un "halo" de color cuando prende */
+
+/* Barrido diagonal de luz — simula reflejo sobre vidrio/acrílico */
+.psponsor.has-image .psponsor-img-wrap::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    transparent 40%,
+    rgba(255,240,200,0.06) 48%,
+    rgba(255,240,200,0.14) 50%,
+    rgba(255,240,200,0.06) 52%,
+    transparent 60%,
+    transparent 100%
+  );
+  transform: rotate(15deg);
+  pointer-events: none;
+  z-index: 3;
+  animation: sponsorLightSweep 8s ease-in-out infinite;
+}
+
+/* Glow interno que "respira" — simula el back-light del cartel */
 .psponsor.has-image .psponsor-img-wrap::after {
   content: '';
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at center, rgba(255,200,120,0.18), transparent 65%);
+  z-index: 1;
+  background: radial-gradient(ellipse at center, rgba(255,200,120,0.22), transparent 70%);
   mix-blend-mode: screen;
-  animation: sponsorNeonGlow 5.2s infinite;
+  animation: sponsorInnerGlowPulse 3.2s ease-in-out infinite;
 }
 
-/* Keyframes con apagones cortos irregulares — como un led gastado.
-   "0% → 100%" cubre todo el ciclo de 5.2s. Los % con valores bajos son los
-   flashes de apagón, muy rápidos, y siempre volvemos al estado brillante. */
-@keyframes sponsorNeonFlicker {
-  0%, 100%   { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
-  7%         { filter: brightness(0.25) saturate(0.4)  drop-shadow(0 0 2px  rgba(255,180,100,0.15)); opacity: 0.75; }
-  7.6%       { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
-  42%        { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
-  43%        { filter: brightness(0.35) saturate(0.5)  drop-shadow(0 0 3px  rgba(255,180,100,0.2));  opacity: 0.8; }
-  43.4%      { filter: brightness(1.3)  saturate(1.25) drop-shadow(0 0 16px rgba(255,200,120,0.7));  opacity: 1; }
-  43.8%      { filter: brightness(0.3)  saturate(0.45) drop-shadow(0 0 2px  rgba(255,180,100,0.15)); opacity: 0.75; }
-  44.4%      { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
-  75%        { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
-  75.3%      { filter: brightness(0.2)  saturate(0.3)  drop-shadow(0 0 1px  rgba(255,180,100,0.1));  opacity: 0.7; }
-  75.8%      { filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 12px rgba(255,180,100,0.55)); opacity: 1; }
+/* Keyframes: siempre "prendido", solo respira. */
+@keyframes sponsorBoxGlowPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(255,200,120,0.25),
+      0 0 24px 4px rgba(255,180,100,0.35),
+      0 0 48px 8px rgba(255,150,80,0.18),
+      inset 0 0 20px rgba(0,0,0,0.6);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255,220,150,0.40),
+      0 0 32px 6px rgba(255,200,120,0.55),
+      0 0 64px 12px rgba(255,170,100,0.28),
+      inset 0 0 20px rgba(0,0,0,0.6);
+  }
 }
-@keyframes sponsorNeonGlow {
-  0%, 100% { opacity: 1; }
-  7%, 43%, 43.8%, 75.3% { opacity: 0.1; }
-  7.6%, 43.4%, 44.4%, 75.8% { opacity: 1; }
+@keyframes sponsorImgGlowPulse {
+  0%, 100% { filter: brightness(1.10) saturate(1.15) contrast(1.05) drop-shadow(0 0 6px rgba(255,200,120,0.35)); }
+  50%      { filter: brightness(1.18) saturate(1.22) contrast(1.06) drop-shadow(0 0 12px rgba(255,210,140,0.55)); }
+}
+@keyframes sponsorInnerGlowPulse {
+  0%, 100% { opacity: 0.7; }
+  50%      { opacity: 1;   }
+}
+@keyframes sponsorLightSweep {
+  0%, 100%  { transform: translateX(0)      rotate(15deg); opacity: 0; }
+  30%       { opacity: 0; }
+  50%       { transform: translateX(420px)  rotate(15deg); opacity: 1; }
+  70%       { opacity: 0; }
 }
 
-/* Respeto preferencia del usuario por menos movimiento: sin animación */
+/* Respeto preferencia del usuario por menos movimiento */
 @media (prefers-reduced-motion: reduce) {
+  .psponsor.has-image,
   .psponsor.has-image img,
+  .psponsor.has-image .psponsor-img-wrap::before,
   .psponsor.has-image .psponsor-img-wrap::after {
     animation: none;
-    filter: brightness(1.15) saturate(1.15) drop-shadow(0 0 8px rgba(255,180,100,0.4));
   }
+  .psponsor.has-image img {
+    filter: brightness(1.12) saturate(1.18) contrast(1.05) drop-shadow(0 0 8px rgba(255,200,120,0.4));
+  }
+}
+
+/* Hover: levantamos el cartel un toque y le metemos glow extra */
+.psponsor.has-image:hover {
+  transform: translate(-3px, -3px);
+  box-shadow:
+    0 0 0 1px rgba(255,230,170,0.55),
+    0 0 40px 8px rgba(255,210,140,0.7),
+    0 0 80px 16px rgba(255,180,110,0.35),
+    inset 0 0 20px rgba(0,0,0,0.6);
 }
 
 /* ==== Input de imagen en el form de sponsor (admin) ==== */

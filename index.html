@@ -3744,6 +3744,11 @@ tr.qualified .pstand-pos { background: var(--green); }
   flex: 1;
   min-width: 0;
 }
+.enr-photo-btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
 .enr-photo-btn {
   display: inline-block;
   padding: 9px 14px;
@@ -4102,6 +4107,38 @@ tr.qualified .pstand-pos { background: var(--green); }
   to   { opacity: 1; }
 }
 
+/* Mini-menú flotante que aparece cuando el admin clickea el + del avatar */
+.admin-photo-menu {
+  position: absolute;
+  z-index: 1000;
+  background: var(--bg-paper);
+  border: 2px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  overflow: hidden;
+}
+.admin-photo-menu button {
+  appearance: none;
+  background: var(--bg-paper);
+  border: none;
+  border-bottom: 1px solid var(--ink-soft);
+  padding: 11px 14px;
+  font-family: 'Archivo', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  color: var(--ink);
+  transition: background 0.12s, color 0.12s;
+}
+.admin-photo-menu button:last-child { border-bottom: none; }
+.admin-photo-menu button:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
 .submission-level-badge {
   background: var(--ink);
   color: var(--bg);
@@ -4316,10 +4353,16 @@ tr.qualified .pstand-pos { background: var(--green); }
           <div class="enr-photo-field">
             <div class="enr-photo-preview" id="enr-photo-preview">Sin foto</div>
             <div class="enr-photo-actions">
-              <label class="enr-photo-btn" for="enr-photo-input" id="enr-photo-btn-label">Elegir foto</label>
+              <div class="enr-photo-btn-row">
+                <label class="enr-photo-btn" for="enr-photo-camera-input" id="enr-photo-btn-camera">📷 Sacar foto</label>
+                <label class="enr-photo-btn" for="enr-photo-input" id="enr-photo-btn-label">🖼 De galería</label>
+              </div>
               <button type="button" class="enr-photo-btn is-remove" id="enr-photo-remove-btn" style="display:none;">Quitar foto</button>
               <div class="enr-photo-hint" id="enr-photo-hint">JPG o PNG. Se comprime y sube al enviar la ficha.</div>
             </div>
+            <!-- Dos inputs: uno abre cámara directa (capture="user" en mobile),
+                 otro abre la galería. En desktop ambos abren el selector de archivos. -->
+            <input type="file" id="enr-photo-camera-input" class="enr-photo-input-hidden" accept="image/*" capture="user">
             <input type="file" id="enr-photo-input" class="enr-photo-input-hidden" accept="image/jpeg,image/png,image/webp">
           </div>
         </div>
@@ -7545,29 +7588,91 @@ const photo = {
 };
 
 // ========== ADMIN: subir foto de una submission ya recibida ==========
-// Flujo: el admin hace click en el avatar de una submission → abrimos un file
-// picker oculto → comprime → sube → actualiza el submission.photoUrl, y si la
-// pareja YA está armada en un torneo, también actualiza team.p1Photo/p2Photo.
-// Todo idempotente: si algo falla a mitad, el admin puede reintentar.
-function triggerAdminPhotoUpload(submissionId) {
-  // Input compartido, se crea on-demand y queda reutilizable.
-  let input = document.getElementById('_admin-photo-input');
-  if (!input) {
-    input = document.createElement('input');
-    input.type = 'file';
-    input.id = '_admin-photo-input';
-    input.accept = 'image/jpeg,image/png,image/webp';
-    input.style.display = 'none';
-    document.body.appendChild(input);
+// Flujo: el admin hace click en el avatar de una submission → aparece un
+// mini-menú con "Sacar foto" y "De galería" → seleccionar → comprime + sube
+// → actualiza submission.photoUrl (y team.p1Photo/p2Photo si ya armada).
+function triggerAdminPhotoUpload(submissionId, anchorEl = null) {
+  // Cerramos cualquier menú previo abierto
+  closeAdminPhotoMenu();
+
+  // Input compartido de "galería" (no usa capture)
+  let inputGallery = document.getElementById('_admin-photo-input-gallery');
+  if (!inputGallery) {
+    inputGallery = document.createElement('input');
+    inputGallery.type = 'file';
+    inputGallery.id = '_admin-photo-input-gallery';
+    inputGallery.accept = 'image/jpeg,image/png,image/webp';
+    inputGallery.style.display = 'none';
+    document.body.appendChild(inputGallery);
   }
-  // Siempre sobrescribimos el handler: apunta a la submission de este click.
-  input.onchange = async () => {
-    const file = input.files && input.files[0];
-    input.value = ''; // permite elegir el mismo archivo de nuevo si falla
+
+  // Input compartido de "cámara" (capture="environment" sugiere cámara trasera
+  // en mobile; desktop lo ignora y abre file picker)
+  let inputCamera = document.getElementById('_admin-photo-input-camera');
+  if (!inputCamera) {
+    inputCamera = document.createElement('input');
+    inputCamera.type = 'file';
+    inputCamera.id = '_admin-photo-input-camera';
+    inputCamera.accept = 'image/*';
+    inputCamera.setAttribute('capture', 'environment');
+    inputCamera.style.display = 'none';
+    document.body.appendChild(inputCamera);
+  }
+
+  const runUpload = async (inputEl) => {
+    const file = inputEl.files && inputEl.files[0];
+    inputEl.value = '';
     if (!file) return;
     await uploadPhotoForSubmission(submissionId, file);
   };
-  input.click();
+  inputGallery.onchange = () => runUpload(inputGallery);
+  inputCamera.onchange  = () => runUpload(inputCamera);
+
+  // Mini-menú: dos botones absolutos cerca del avatar que disparó el click.
+  // Lo anclamos al body y lo posicionamos con getBoundingClientRect.
+  const avatar = anchorEl || document.querySelector(`[data-sub-avatar="${submissionId}"]`);
+  if (!avatar) {
+    // Fallback: sin anchor, abrimos galería directo
+    inputGallery.click();
+    return;
+  }
+  const rect = avatar.getBoundingClientRect();
+
+  const menu = document.createElement('div');
+  menu.id = '_admin-photo-menu';
+  menu.className = 'admin-photo-menu';
+  menu.innerHTML = `
+    <button type="button" data-action="camera">📷 Sacar foto</button>
+    <button type="button" data-action="gallery">🖼 De galería</button>
+  `;
+  menu.style.left = `${rect.left + window.scrollX}px`;
+  menu.style.top  = `${rect.bottom + window.scrollY + 6}px`;
+  document.body.appendChild(menu);
+
+  // Click en el menú → disparar input correspondiente y cerrar
+  menu.onclick = (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    closeAdminPhotoMenu();
+    if (action === 'camera') inputCamera.click();
+    else inputGallery.click();
+  };
+
+  // Cerrar al clickear fuera
+  setTimeout(() => {
+    document.addEventListener('click', closeAdminPhotoMenuOnOutside, { once: true });
+  }, 0);
+}
+
+function closeAdminPhotoMenu() {
+  const m = document.getElementById('_admin-photo-menu');
+  if (m) m.remove();
+}
+function closeAdminPhotoMenuOnOutside(e) {
+  const m = document.getElementById('_admin-photo-menu');
+  if (!m) return;
+  if (!m.contains(e.target)) closeAdminPhotoMenu();
 }
 
 async function uploadPhotoForSubmission(submissionId, file) {
@@ -7791,33 +7896,39 @@ function enterEnrollmentMode(invitePayload) {
 // Wiring del input de foto en el formulario de inscripción.
 // Idempotente: se puede llamar varias veces sin duplicar listeners (usa .onX).
 function setupEnrollmentPhotoInput() {
-  const input    = $('enr-photo-input');
+  const inputGallery = $('enr-photo-input');
+  const inputCamera  = $('enr-photo-camera-input');
   const preview  = $('enr-photo-preview');
   const btnLabel = $('enr-photo-btn-label');
+  const btnCam   = $('enr-photo-btn-camera');
   const btnRemove= $('enr-photo-remove-btn');
   const hint     = $('enr-photo-hint');
-  if (!input || !preview) return;
+  if (!inputGallery || !preview) return;
 
   const reset = () => {
     window._enrPhotoFile = null;
-    input.value = '';
+    inputGallery.value = '';
+    if (inputCamera) inputCamera.value = '';
     preview.classList.remove('has-photo');
     preview.innerHTML = 'Sin foto';
-    btnLabel.textContent = 'Elegir foto';
+    if (btnLabel) btnLabel.textContent = '🖼 De galería';
+    if (btnCam)   btnCam.textContent   = '📷 Sacar foto';
     btnRemove.style.display = 'none';
     hint.classList.remove('is-error');
     hint.textContent = 'JPG o PNG. Se comprime y sube al enviar la ficha.';
   };
 
-  input.onchange = () => {
-    const file = input.files && input.files[0];
-    if (!file) { reset(); return; }
+  // Handler común para cualquiera de los dos inputs: valida, previsualiza,
+  // guarda en _enrPhotoFile. Se llama con el input que disparó el cambio.
+  const onFileChosen = (inputEl) => {
+    const file = inputEl.files && inputEl.files[0];
+    if (!file) return;
 
     const v = photo.validate(file);
     if (!v.ok) {
       hint.classList.add('is-error');
       hint.textContent = v.reason;
-      input.value = '';
+      inputEl.value = '';
       return;
     }
 
@@ -7827,12 +7938,15 @@ function setupEnrollmentPhotoInput() {
     const url = URL.createObjectURL(file);
     preview.classList.add('has-photo');
     preview.innerHTML = `<img alt="Vista previa" src="${url}">`;
-    btnLabel.textContent = 'Cambiar foto';
+    if (btnLabel) btnLabel.textContent = '🖼 Cambiar';
+    if (btnCam)   btnCam.textContent   = '📷 Otra';
     btnRemove.style.display = '';
     hint.classList.remove('is-error');
     hint.textContent = 'Se comprime y sube al enviar la ficha.';
   };
 
+  inputGallery.onchange = () => onFileChosen(inputGallery);
+  if (inputCamera) inputCamera.onchange = () => onFileChosen(inputCamera);
   btnRemove.onclick = reset;
 }
 
@@ -8576,7 +8690,7 @@ function renderSubmissionAvatar(submission) {
       <button type="button" class="photo-upload-btn"
               title="${title}"
               aria-label="${title}"
-              onclick="triggerAdminPhotoUpload('${submission.id}')">${icon}</button>
+              onclick="event.stopPropagation(); triggerAdminPhotoUpload('${submission.id}', this.parentElement)">${icon}</button>
     </div>
   `;
 }

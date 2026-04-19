@@ -1029,6 +1029,20 @@ table.standings tr.qualified-third td:first-child::before {
   background: var(--bg);
   color: var(--green);
 }
+/* Pago marcado como PAGÓ pero sin método/receptor registrado. Amarillo para
+   llamar la atención: faltan datos para el arqueo. */
+.payment-chip.is-incomplete {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold);
+}
+.payment-chip.is-incomplete:hover {
+  background: var(--ink);
+  color: var(--gold);
+  border-color: var(--ink);
+}
+/* Fila con el mismo color en el borde izquierdo para que se vea en el listado */
+.payments-row.is-incomplete { border-left: 4px solid var(--gold); }
 
 /* Chip mini para la card de equipo (pestaña "Equipos" del admin) */
 .team-card .team-payment-line {
@@ -6472,14 +6486,34 @@ function submissionPaid(sub) {
   return !!(sub && sub.paymentStatus === 'paid');
 }
 
-// Toggle del estado de pago. Si el jugador DEBE → abre modal para registrar
-// detalles (método, receptor si cash, notas). Si ya PAGÓ → pide confirmación
-// para deshacer el pago.
+// ¿Es un pago "incompleto" (marcado como pagado pero sin método ni receptor)?
+// Típicamente pagos registrados antes de que existieran los campos de detalle,
+// o importados desde un backup viejo. Los chips de estos pagos se ven amarillos
+// con warning y al tocarlos abren el modal para completar datos.
+function submissionPaymentIncomplete(sub) {
+  if (!submissionPaid(sub)) return false;
+  // Sin método registrado
+  if (!sub.paymentMethod) return true;
+  // Efectivo sin receptor registrado
+  if (sub.paymentMethod === 'cash' && !sub.paymentReceiver) return true;
+  return false;
+}
+
+// Toggle del estado de pago.
+//   DEBE → abre modal para registrar detalles
+//   PAGÓ incompleto → abre modal para completar datos (sin deshacer)
+//   PAGÓ completo → pide confirmación para deshacer
 function togglePaymentStatus(submissionId) {
   const sub = (workspace.submissions || []).find(s => s.id === submissionId);
   if (!sub) return;
+
   if (sub.paymentStatus === 'paid') {
-    // Deshacer: pedimos confirmación y limpiamos todos los campos de pago.
+    // Caso especial: pago incompleto → abrimos modal pre-cargado con lo que sepamos
+    if (submissionPaymentIncomplete(sub)) {
+      openPaymentRegisterModal(sub, { completing: true });
+      return;
+    }
+    // Pago completo: confirmación de deshacer
     if (!confirm(`¿Marcar como DEBE a ${sub.firstName} ${sub.lastName}?\n\nSe borran los detalles del pago registrado.`)) return;
     sub.paymentStatus = 'pending';
     sub.paymentAt = null;
@@ -6491,61 +6525,94 @@ function togglePaymentStatus(submissionId) {
     toast(`Marcado como DEBE: ${sub.firstName} ${sub.lastName}`);
     return;
   }
-  // Abrir modal para registrar el pago con todos los detalles
+  // DEBE → abrir modal para registrar desde cero
   openPaymentRegisterModal(sub);
 }
 
 // Modal de registro de pago: método, receptor (si efectivo), notas.
-function openPaymentRegisterModal(sub) {
+// Opciones:
+//   - completing: true si estamos completando datos de un pago ya existente
+//     (marca el título, y preserva el paymentAt original al guardar)
+function openPaymentRegisterModal(sub, opts = {}) {
   const modal = ensurePaymentRegisterModal();
+  const completing = !!opts.completing;
   $('pay-reg-player').textContent = `${sub.firstName} ${sub.lastName}`;
   const amount = getPaymentAmount();
   $('pay-reg-amount').textContent = amount > 0 ? `$${amount.toLocaleString('es-UY')}` : '—';
 
-  // Reset del form
-  $('pay-reg-method-cash').checked = true;
-  $('pay-reg-notes').value = '';
+  // Título y botón de guardar cambian según modo
+  const titleEl = modal.querySelector('.modal-head h3');
+  const saveBtn = $('pay-reg-save-btn');
+  if (titleEl) titleEl.textContent = completing ? 'Completar datos del pago' : 'Registrar pago';
+  if (saveBtn) saveBtn.textContent = completing ? '✓ Completar datos' : '✓ Registrar pago';
+
+  // Reset del form — si estamos completando, pre-cargamos lo que ya existe
+  const existingMethod = completing ? sub.paymentMethod : null;
+  if (existingMethod === 'transfer') {
+    $('pay-reg-method-transfer').checked = true;
+  } else {
+    // default: efectivo (tanto para DEBE nuevo como para completar sin método)
+    $('pay-reg-method-cash').checked = true;
+  }
+  $('pay-reg-notes').value = completing ? (sub.paymentNotes || '') : '';
   $('pay-reg-receiver-other').value = '';
   updatePaymentMethodUI();
 
   // Receptores disponibles (chips de selección rápida + opción "otro")
-  renderCashReceiverOptions();
+  // Si estamos completando y ya tenía un receptor, lo preseleccionamos
+  renderCashReceiverOptions(completing ? sub.paymentReceiver : null);
 
-  $('pay-reg-save-btn').onclick = () => savePaymentRegistration(sub.id);
+  // Guardar: en modo "completing" preservamos paymentAt original
+  $('pay-reg-save-btn').onclick = () => savePaymentRegistration(sub.id, { preserveDate: completing });
   $('pay-reg-cancel-btn').onclick = () => modal.classList.remove('show');
   modal.classList.add('show');
 }
 
 // Renderiza los receptores configurados como botones de radio visuales.
 // Siempre agrega una opción "Otro..." que habilita el input de texto libre.
-function renderCashReceiverOptions() {
+function renderCashReceiverOptions(preselectedName = null) {
   const list = (workspace.paymentConfig && workspace.paymentConfig.cashReceivers) || [];
   const el = $('pay-reg-receiver-list');
   if (!el) return;
-  // Si no hay receptores configurados, mostramos solo el campo libre.
+  // Si no hay receptores configurados, mostramos solo el campo libre
   if (list.length === 0) {
     el.innerHTML = `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Sin receptores configurados. Escribí uno abajo, o agregá receptores frecuentes en Ajustes.</div>`;
     $('pay-reg-receiver-other-wrap').style.display = '';
+    if (preselectedName) $('pay-reg-receiver-other').value = preselectedName;
     return;
   }
-  el.innerHTML = list.map((name, i) => `
+
+  // ¿El preselected está en la lista configurada?
+  const matchesConfigured = preselectedName && list.some(n => n.toLowerCase() === preselectedName.toLowerCase());
+
+  el.innerHTML = list.map((name, i) => {
+    const isChecked = matchesConfigured
+      ? name.toLowerCase() === preselectedName.toLowerCase()
+      : (!preselectedName && i === 0);  // default: primero si no hay preseleccionado
+    return `
+      <label class="pay-reg-receiver-opt">
+        <input type="radio" name="pay-reg-receiver" value="${escapeHtml(name)}" ${isChecked ? 'checked' : ''}>
+        <span>${escapeHtml(name)}</span>
+      </label>
+    `;
+  }).join('') + `
     <label class="pay-reg-receiver-opt">
-      <input type="radio" name="pay-reg-receiver" value="${escapeHtml(name)}" ${i === 0 ? 'checked' : ''}>
-      <span>${escapeHtml(name)}</span>
-    </label>
-  `).join('') + `
-    <label class="pay-reg-receiver-opt">
-      <input type="radio" name="pay-reg-receiver" value="__other__">
+      <input type="radio" name="pay-reg-receiver" value="__other__" ${preselectedName && !matchesConfigured ? 'checked' : ''}>
       <span>Otro...</span>
     </label>
   `;
-  // Wire: mostrar el input "otro" solo si se elige esa opción
   el.querySelectorAll('input[name="pay-reg-receiver"]').forEach(r => {
     r.onchange = () => {
       $('pay-reg-receiver-other-wrap').style.display = r.value === '__other__' && r.checked ? '' : 'none';
     };
   });
-  $('pay-reg-receiver-other-wrap').style.display = 'none';
+  // Si el preselected no matchea la lista configurada, mostramos el input de "otro" con el valor
+  if (preselectedName && !matchesConfigured) {
+    $('pay-reg-receiver-other-wrap').style.display = '';
+    $('pay-reg-receiver-other').value = preselectedName;
+  } else {
+    $('pay-reg-receiver-other-wrap').style.display = 'none';
+  }
 }
 
 // Habilita/oculta la sección de receptor según el método elegido
@@ -6555,8 +6622,10 @@ function updatePaymentMethodUI() {
   if (recvSec) recvSec.style.display = isCash ? '' : 'none';
 }
 
-// Confirmar registro del pago con los datos del modal
-function savePaymentRegistration(submissionId) {
+// Confirmar registro del pago con los datos del modal.
+// opts.preserveDate: si true, mantiene el paymentAt original (caso "completar
+// datos faltantes" — no queremos que la fecha cambie a hoy).
+function savePaymentRegistration(submissionId, opts = {}) {
   const sub = (workspace.submissions || []).find(s => s.id === submissionId);
   if (!sub) return;
   const isCash = $('pay-reg-method-cash').checked;
@@ -6570,7 +6639,6 @@ function savePaymentRegistration(submissionId) {
     } else if (selected) {
       receiver = selected.value;
     } else {
-      // Si no hay receptores configurados, tomar directo del input libre
       receiver = $('pay-reg-receiver-other').value.trim();
     }
     if (!receiver) {
@@ -6582,7 +6650,8 @@ function savePaymentRegistration(submissionId) {
   const notes = $('pay-reg-notes').value.trim() || null;
 
   sub.paymentStatus = 'paid';
-  sub.paymentAt = Date.now();
+  // Preservar la fecha original si estamos completando datos, si no usar ahora
+  if (!opts.preserveDate || !sub.paymentAt) sub.paymentAt = Date.now();
   sub.paymentMethod = method;
   sub.paymentReceiver = receiver;
   sub.paymentNotes = notes;
@@ -6590,7 +6659,8 @@ function savePaymentRegistration(submissionId) {
   saveState();
   $('payment-register-modal').classList.remove('show');
   renderAll();
-  toast(`✓ Pagó: ${sub.firstName} ${sub.lastName}${isCash ? ' (efectivo a ' + receiver + ')' : ' (transferencia)'}`);
+  const action = opts.preserveDate ? 'Datos completados' : '✓ Pagó';
+  toast(`${action}: ${sub.firstName} ${sub.lastName}${isCash ? ' (efectivo a ' + receiver + ')' : ' (transferencia)'}`);
 }
 
 // Modal DOM (creado on-demand, reusable)
@@ -6720,20 +6790,32 @@ function renderPayments() {
     <div class="payments-list-head">Jugadores en equipos</div>
     ${sorted.map(s => {
       const paid = submissionPaid(s);
+      const incomplete = submissionPaymentIncomplete(s);
       const name = `${s.firstName} ${s.lastName}${s.nickname ? ' (' + s.nickname + ')' : ''}`;
       const paidAtStr = paid && s.paymentAt
         ? new Date(s.paymentAt).toLocaleDateString('es-UY', { day: '2-digit', month: '2-digit' })
         : '';
+      // Estado del chip: 3 variantes (debe / pagado completo / pagado incompleto)
+      let chipCls, chipTxt, chipTitle;
+      if (!paid) {
+        chipCls = 'is-pending'; chipTxt = '✕ DEBE'; chipTitle = 'Click para registrar pago';
+      } else if (incomplete) {
+        chipCls = 'is-incomplete'; chipTxt = `⚠ PAGÓ · FALTAN DATOS${paidAtStr ? ' · ' + paidAtStr : ''}`;
+        chipTitle = 'Este pago no tiene método/receptor registrado. Click para completar.';
+      } else {
+        chipCls = 'is-paid'; chipTxt = `✓ PAGÓ${paidAtStr ? ' · ' + paidAtStr : ''}`;
+        chipTitle = 'Click para marcar como pendiente';
+      }
       return `
-        <div class="payments-row ${paid ? 'is-paid' : 'is-pending'}">
+        <div class="payments-row ${paid ? (incomplete ? 'is-incomplete' : 'is-paid') : 'is-pending'}">
           <div class="payments-row-info">
             <div class="payments-row-name">${escapeHtml(name)}</div>
             <div class="payments-row-meta">${escapeHtml(tourName(s.addedToTournamentId))}</div>
           </div>
-          <button class="payment-chip ${paid ? 'is-paid' : 'is-pending'}"
+          <button class="payment-chip ${chipCls}"
                   onclick="togglePaymentStatus('${s.id}')"
-                  title="Click para ${paid ? 'marcar como pendiente' : 'marcar como pagado'}">
-            ${paid ? `✓ PAGÓ${paidAtStr ? ' · ' + paidAtStr : ''}` : '✕ DEBE'}
+                  title="${chipTitle}">
+            ${chipTxt}
           </button>
         </div>
       `;
@@ -6993,19 +7075,30 @@ function renderTeams() {
 
     // Chips de pago por jugador (solo si tienen submission asociada — si no, no
     // hay dónde guardar el estado). Un chip por jugador, independientes.
-    const paymentChip = (sub) => {
+    // IMPORTANTE: buscamos la submission REAL en workspace, no el snapshot
+    // t.p1Data (que puede estar desincronizado tras save/load).
+    const paymentChip = (side) => {
+      const sub = findSubmissionForTeamSide(t, side);
       if (!sub) return '';
       const paid = submissionPaid(sub);
-      return `<button class="payment-chip ${paid ? 'is-paid' : 'is-pending'}"
+      const incomplete = submissionPaymentIncomplete(sub);
+      let cls, txt, title;
+      if (!paid) {
+        cls = 'is-pending'; txt = '✕ DEBE'; title = 'Click para registrar pago';
+      } else if (incomplete) {
+        cls = 'is-incomplete'; txt = '⚠ PAGÓ'; title = 'Faltan datos del pago. Click para completar.';
+      } else {
+        cls = 'is-paid'; txt = '✓ PAGÓ'; title = 'Click para desmarcar';
+      }
+      return `<button class="payment-chip ${cls}"
                 onclick="event.stopPropagation(); togglePaymentStatus('${sub.id}')"
-                title="${paid ? 'Pagó — click para desmarcar' : 'Debe — click para marcar como pagado'}">
-                ${paid ? '✓ PAGÓ' : '✕ DEBE'}
-              </button>`;
+                title="${title}">${txt}</button>`;
     };
-    const paymentsLine = (t.p1Data || t.p2Data)
+    const hasAnySub = !!(findSubmissionForTeamSide(t, 'p1') || findSubmissionForTeamSide(t, 'p2'));
+    const paymentsLine = hasAnySub
       ? `<div class="team-payment-line">
-           ${t.p1Data ? `<span class="pname">${escapeHtml(t.p1Data.firstName)}:</span>${paymentChip(t.p1Data)}` : ''}
-           ${t.p2Data ? `<span class="pname">${escapeHtml(t.p2Data.firstName)}:</span>${paymentChip(t.p2Data)}` : ''}
+           ${t.p1Data ? `<span class="pname">${escapeHtml(t.p1Data.firstName)}:</span>${paymentChip('p1')}` : ''}
+           ${t.p2Data ? `<span class="pname">${escapeHtml(t.p2Data.firstName)}:</span>${paymentChip('p2')}` : ''}
          </div>`
       : '';
 

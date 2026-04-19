@@ -4603,6 +4603,44 @@ tr.qualified .pstand-pos { background: var(--green); }
 
 const STORAGE_KEY = 'fronton-workspace-v2';
 
+// ============================================================
+//  Capa de persistencia: localStorage con API compatible
+// ============================================================
+// Originalmente este código usaba `window.storage` (la API de artifacts de Claude),
+// que no existe en un sitio público. Acá definimos un shim que replica la misma
+// interfaz async {get/set} pero sobre localStorage, que funciona en cualquier browser.
+if (!window.storage) {
+  window.storage = {
+    get: async (key) => {
+      try {
+        const value = localStorage.getItem(key);
+        return value === null ? null : { key, value, shared: false };
+      } catch (e) {
+        console.error('[storage.get] error:', e);
+        return null;
+      }
+    },
+    set: async (key, value) => {
+      try {
+        localStorage.setItem(key, value);
+        return { key, value, shared: false };
+      } catch (e) {
+        console.error('[storage.set] error:', e);
+        // Típicamente QuotaExceededError si el workspace supera ~5MB
+        return null;
+      }
+    },
+    delete: async (key) => {
+      try {
+        localStorage.removeItem(key);
+        return { key, deleted: true, shared: false };
+      } catch (e) {
+        return null;
+      }
+    },
+  };
+}
+
 // Helpers declarados primero porque se usan en la inicialización
 const uid = () => Math.random().toString(36).substring(2, 10);
 function generateCode() {

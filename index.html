@@ -828,6 +828,92 @@ table.standings tr.qualified-third td:first-child::before {
   vertical-align: super;
 }
 
+/* ==== Modal de cámara (getUserMedia) ====
+   Aparece cuando el usuario pide "Sacar foto". Muestra la vista previa de la
+   cámara con un botón grande de disparo, y opciones para cerrar o cambiar
+   entre cámara frontal/trasera. Es full-screen en mobile, centrado en desktop. */
+.camera-modal {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 10000;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.camera-modal.show { display: flex; }
+.camera-modal video {
+  width: 100%;
+  max-width: 100%;
+  max-height: calc(100vh - 140px);
+  object-fit: contain;
+  background: #000;
+}
+.camera-modal-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0));
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.camera-modal-shutter {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 5px solid #fff;
+  background: var(--accent);
+  cursor: pointer;
+  padding: 0;
+  justify-self: center;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.4);
+  transition: transform 0.1s;
+}
+.camera-modal-shutter:active { transform: scale(0.92); }
+.camera-modal-shutter:disabled { opacity: 0.4; cursor: wait; }
+.camera-modal-btn {
+  appearance: none;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.5);
+  color: #fff;
+  padding: 10px 14px;
+  font-family: 'Archivo', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.camera-modal-btn:hover { background: rgba(255,255,255,0.3); }
+.camera-modal-btn.is-cancel { justify-self: start; }
+.camera-modal-btn.is-flip   { justify-self: end; }
+.camera-modal-error {
+  position: absolute;
+  inset: 20px;
+  background: var(--bg);
+  border: 3px solid var(--accent);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--ink);
+}
+.camera-modal-error h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  margin: 0;
+}
+
 /* ==== PAGOS (admin-only) ==== */
 /* Resumen arriba del listado: tres cajas grandes con métricas */
 .payments-summary {
@@ -4635,15 +4721,17 @@ tr.qualified .pstand-pos { background: var(--green); }
             <div class="enr-photo-preview" id="enr-photo-preview">Sin foto</div>
             <div class="enr-photo-actions">
               <div class="enr-photo-btn-row">
-                <label class="enr-photo-btn" for="enr-photo-camera-input" id="enr-photo-btn-camera">📷 Sacar foto</label>
+                <!-- "Sacar foto" usa getUserMedia (modal con vista previa + disparo).
+                     Si el navegador no soporta getUserMedia, cae al input capture como fallback. -->
+                <button type="button" class="enr-photo-btn" id="enr-photo-btn-camera">📷 Sacar foto</button>
                 <label class="enr-photo-btn" for="enr-photo-input" id="enr-photo-btn-label">🖼 De galería</label>
               </div>
               <button type="button" class="enr-photo-btn is-remove" id="enr-photo-remove-btn" style="display:none;">Quitar foto</button>
               <div class="enr-photo-hint" id="enr-photo-hint">JPG o PNG. Se comprime y sube al enviar la ficha.</div>
             </div>
-            <!-- Dos inputs: uno abre cámara directa (capture="user" en mobile),
-                 otro abre la galería. En desktop ambos abren el selector de archivos. -->
+            <!-- Input hidden para el fallback de cámara (navegadores sin getUserMedia) -->
             <input type="file" id="enr-photo-camera-input" class="enr-photo-input-hidden" accept="image/*" capture="user">
+            <!-- Input hidden para la galería -->
             <input type="file" id="enr-photo-input" class="enr-photo-input-hidden" accept="image/jpeg,image/png,image/webp">
           </div>
         </div>
@@ -8563,6 +8651,180 @@ const photo = {
   },
 };
 
+// ========== cameraCapture: disparar la cámara con getUserMedia ==========
+// Abre un modal con <video> en vivo y botón de disparo. Al capturar, devuelve
+// un File (image/jpeg) listo para pasar a photo.compressAndUpload().
+//
+// Uso:
+//   const file = await cameraCapture.open({ facingMode: 'user' });
+//   if (file) { /* procesar */ }
+//
+// Si getUserMedia no está soportado o el user niega permisos, devuelve null
+// y muestra error visible. El caller debe tener un fallback (input file).
+const cameraCapture = {
+  _stream: null,
+  _modal: null,
+  _currentFacing: 'user',
+
+  // ¿Hay soporte en este navegador?
+  isSupported() {
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  },
+
+  // Crea el modal si no existe y lo devuelve
+  _ensureModal() {
+    if (this._modal) return this._modal;
+    const m = document.createElement('div');
+    m.className = 'camera-modal';
+    m.id = '_camera-modal';
+    m.innerHTML = `
+      <video id="_camera-video" autoplay playsinline muted></video>
+      <div class="camera-modal-controls">
+        <button type="button" class="camera-modal-btn is-cancel" id="_camera-cancel">Cancelar</button>
+        <button type="button" class="camera-modal-shutter" id="_camera-shutter" title="Tomar foto" aria-label="Tomar foto"></button>
+        <button type="button" class="camera-modal-btn is-flip" id="_camera-flip" title="Cambiar cámara">↻</button>
+      </div>
+    `;
+    document.body.appendChild(m);
+    this._modal = m;
+    return m;
+  },
+
+  // Intenta iniciar la cámara con la orientación pedida. Si falla, intenta con
+  // la opuesta (algunos dispositivos solo tienen una cámara y rechazan la
+  // constraint específica).
+  async _startStream(facingMode) {
+    if (this._stream) {
+      this._stream.getTracks().forEach(t => t.stop());
+      this._stream = null;
+    }
+    const tryOpen = async (mode) => navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: mode } },
+      audio: false,
+    });
+    try {
+      return await tryOpen(facingMode);
+    } catch (e) {
+      // Si la constraint ideal falla, intentar con la otra cámara como fallback
+      const other = facingMode === 'user' ? 'environment' : 'user';
+      try {
+        return await tryOpen(other);
+      } catch (e2) {
+        // Último intento: sin constraint de facingMode (laptops con webcam suelen necesitar esto)
+        return await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      }
+    }
+  },
+
+  // Muestra el modal con un mensaje de error (permisos denegados, sin cámara, etc.)
+  _showError(modal, message, onClose) {
+    const existing = modal.querySelector('.camera-modal-error');
+    if (existing) existing.remove();
+    const err = document.createElement('div');
+    err.className = 'camera-modal-error';
+    err.innerHTML = `
+      <h3>No pudimos abrir la cámara</h3>
+      <div>${message}</div>
+      <button type="button" class="btn btn-accent">Entendido</button>
+    `;
+    err.querySelector('button').onclick = onClose;
+    modal.appendChild(err);
+  },
+
+  // API principal. Devuelve Promise<File|null>.
+  // opts.facingMode: 'user' (frontal, default) o 'environment' (trasera)
+  async open(opts = {}) {
+    if (!this.isSupported()) return null;
+
+    const modal = this._ensureModal();
+    const video = modal.querySelector('#_camera-video');
+    const shutter = modal.querySelector('#_camera-shutter');
+    const cancelBtn = modal.querySelector('#_camera-cancel');
+    const flipBtn = modal.querySelector('#_camera-flip');
+    this._currentFacing = opts.facingMode || 'user';
+
+    modal.classList.add('show');
+
+    // Promise que resolvemos al capturar, cancelar, o con error
+    return new Promise(async (resolve) => {
+      const cleanup = () => {
+        if (this._stream) {
+          this._stream.getTracks().forEach(t => t.stop());
+          this._stream = null;
+        }
+        modal.classList.remove('show');
+        const err = modal.querySelector('.camera-modal-error');
+        if (err) err.remove();
+        shutter.onclick = null;
+        cancelBtn.onclick = null;
+        flipBtn.onclick = null;
+      };
+
+      cancelBtn.onclick = () => { cleanup(); resolve(null); };
+
+      flipBtn.onclick = async () => {
+        this._currentFacing = this._currentFacing === 'user' ? 'environment' : 'user';
+        try {
+          this._stream = await this._startStream(this._currentFacing);
+          video.srcObject = this._stream;
+        } catch (e) {
+          // Si falla el flip, dejamos la cámara actual
+          console.warn('[cameraCapture] flip failed', e);
+        }
+      };
+
+      shutter.onclick = async () => {
+        if (!this._stream) return;
+        shutter.disabled = true;
+        try {
+          // Capturar el frame actual del video a un canvas, y convertir a blob JPEG
+          const vw = video.videoWidth;
+          const vh = video.videoHeight;
+          if (!vw || !vh) throw new Error('El video no está listo');
+          const canvas = document.createElement('canvas');
+          canvas.width = vw;
+          canvas.height = vh;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, vw, vh);
+          const blob = await new Promise((res, rej) =>
+            canvas.toBlob(b => b ? res(b) : rej(new Error('toBlob failed')), 'image/jpeg', 0.92));
+          // Envolvemos el Blob en un File para que el resto del código lo trate
+          // igual que un archivo subido desde input type=file
+          const file = new File([blob], `camera-${Date.now()}.jpg`, { type: 'image/jpeg' });
+          cleanup();
+          resolve(file);
+        } catch (e) {
+          console.warn('[cameraCapture] shutter failed', e);
+          shutter.disabled = false;
+          this._showError(modal, 'No se pudo capturar la imagen. Probá de nuevo.', () => {
+            cleanup();
+            resolve(null);
+          });
+        }
+      };
+
+      try {
+        this._stream = await this._startStream(this._currentFacing);
+        video.srcObject = this._stream;
+      } catch (e) {
+        console.warn('[cameraCapture] startStream failed', e);
+        let message = 'Tu dispositivo no dejó acceder a la cámara.';
+        if (e && e.name === 'NotAllowedError') {
+          message = 'Negaste el permiso de cámara. Habilitalo en los ajustes del navegador y reintentá.';
+        } else if (e && e.name === 'NotFoundError') {
+          message = 'No encontramos una cámara en tu dispositivo.';
+        } else if (e && e.name === 'NotReadableError') {
+          message = 'La cámara está siendo usada por otra aplicación.';
+        }
+        this._showError(modal, message, () => {
+          cleanup();
+          resolve(null);
+        });
+      }
+    });
+  },
+};
+
 // ========== ADMIN: subir foto de una submission ya recibida ==========
 // Flujo: el admin hace click en el avatar de una submission → aparece un
 // mini-menú con "Sacar foto" y "De galería" → seleccionar → comprime + sube
@@ -8626,13 +8888,23 @@ function triggerAdminPhotoUpload(submissionId, anchorEl = null) {
   document.body.appendChild(menu);
 
   // Click en el menú → disparar input correspondiente y cerrar
-  menu.onclick = (e) => {
+  menu.onclick = async (e) => {
     const btn = e.target.closest('button');
     if (!btn) return;
     const action = btn.dataset.action;
     closeAdminPhotoMenu();
-    if (action === 'camera') inputCamera.click();
-    else inputGallery.click();
+    if (action === 'camera') {
+      // Intentar getUserMedia (modal con preview en vivo). Fallback: input capture.
+      if (cameraCapture.isSupported()) {
+        // Admin le saca foto al jugador → cámara trasera es más útil
+        const file = await cameraCapture.open({ facingMode: 'environment' });
+        if (file) await uploadPhotoForSubmission(submissionId, file);
+      } else {
+        inputCamera.click();
+      }
+    } else {
+      inputGallery.click();
+    }
   };
 
   // Cerrar al clickear fuera
@@ -8924,6 +9196,38 @@ function setupEnrollmentPhotoInput() {
   inputGallery.onchange = () => onFileChosen(inputGallery);
   if (inputCamera) inputCamera.onchange = () => onFileChosen(inputCamera);
   btnRemove.onclick = reset;
+
+  // Botón "Sacar foto": intenta getUserMedia (modal con vista previa en vivo).
+  // Si el navegador no lo soporta, cae al input hidden con capture="user".
+  if (btnCam) {
+    btnCam.onclick = async () => {
+      if (cameraCapture.isSupported()) {
+        const file = await cameraCapture.open({ facingMode: 'user' });
+        if (file) {
+          // Simular un "input change" con este file para reusar el flujo común
+          window._enrPhotoFile = file;
+          const v = photo.validate(file);
+          if (!v.ok) {
+            hint.classList.add('is-error');
+            hint.textContent = v.reason;
+            window._enrPhotoFile = null;
+            return;
+          }
+          const url = URL.createObjectURL(file);
+          preview.classList.add('has-photo');
+          preview.innerHTML = `<img alt="Vista previa" src="${url}">`;
+          if (btnLabel) btnLabel.textContent = '🖼 Cambiar';
+          if (btnCam)   btnCam.textContent   = '📷 Otra';
+          btnRemove.style.display = '';
+          hint.classList.remove('is-error');
+          hint.textContent = 'Se comprime y sube al enviar la ficha.';
+        }
+      } else if (inputCamera) {
+        // Fallback: disparar el input con capture
+        inputCamera.click();
+      }
+    };
+  }
 }
 
 function selectQuizOption(qId, optIdx, pts) {

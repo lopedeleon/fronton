@@ -3855,9 +3855,61 @@ tr.qualified .pstand-pos { background: var(--green); }
   padding: 14px 16px;
   margin-bottom: 10px;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto;
   gap: 12px;
   align-items: center;
+}
+
+/* Avatar del jugador dentro de la card de submission.
+   El botón "Subir foto" se superpone en hover/tap para invitar a cambiarla. */
+.submission-avatar {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+.submission-avatar .pavatar { width: 52px; height: 52px; font-size: 18px; }
+.submission-avatar .photo-upload-btn {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: rgba(26,20,16,0.78);
+  color: var(--bg);
+  font-family: 'Archivo', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  line-height: 1.1;
+  text-align: center;
+}
+.submission-avatar:hover .photo-upload-btn,
+.submission-avatar .photo-upload-btn:focus { opacity: 1; }
+/* En mobile no hay hover: el botón siempre visible abajo a la derecha como badge */
+@media (hover: none) {
+  .submission-avatar .photo-upload-btn {
+    opacity: 1;
+    inset: auto -4px -4px auto;
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+    border-radius: 50%;
+    background: var(--accent);
+    padding: 0;
+  }
+}
+.submission-avatar.is-uploading .photo-upload-btn {
+  opacity: 1;
+  background: var(--accent);
+  pointer-events: none;
 }
 
 .submission-level-badge {
@@ -7070,6 +7122,76 @@ const photo = {
   },
 };
 
+// ========== ADMIN: subir foto de una submission ya recibida ==========
+// Flujo: el admin hace click en el avatar de una submission → abrimos un file
+// picker oculto → comprime → sube → actualiza el submission.photoUrl, y si la
+// pareja YA está armada en un torneo, también actualiza team.p1Photo/p2Photo.
+// Todo idempotente: si algo falla a mitad, el admin puede reintentar.
+function triggerAdminPhotoUpload(submissionId) {
+  // Input compartido, se crea on-demand y queda reutilizable.
+  let input = document.getElementById('_admin-photo-input');
+  if (!input) {
+    input = document.createElement('input');
+    input.type = 'file';
+    input.id = '_admin-photo-input';
+    input.accept = 'image/jpeg,image/png,image/webp';
+    input.style.display = 'none';
+    document.body.appendChild(input);
+  }
+  // Siempre sobrescribimos el handler: apunta a la submission de este click.
+  input.onchange = async () => {
+    const file = input.files && input.files[0];
+    input.value = ''; // permite elegir el mismo archivo de nuevo si falla
+    if (!file) return;
+    await uploadPhotoForSubmission(submissionId, file);
+  };
+  input.click();
+}
+
+async function uploadPhotoForSubmission(submissionId, file) {
+  const sub = (workspace.submissions || []).find(s => s.id === submissionId);
+  if (!sub) { toast('Ficha no encontrada'); return; }
+
+  // Marcar la card como "uploading" para feedback visual.
+  const avatarEl = document.querySelector(`[data-sub-avatar="${submissionId}"]`);
+  if (avatarEl) avatarEl.classList.add('is-uploading');
+
+  let url = null;
+  try {
+    url = await photo.compressAndUpload(file);
+  } catch (e) {
+    // Falla en compresión/validación (archivo inválido)
+    toast('Foto inválida: ' + (e.message || e));
+    if (avatarEl) avatarEl.classList.remove('is-uploading');
+    return;
+  }
+
+  if (!url) {
+    toast('No se pudo subir la foto (revisá conexión)');
+    if (avatarEl) avatarEl.classList.remove('is-uploading');
+    return;
+  }
+
+  // Actualizar la submission
+  sub.photoUrl = url;
+
+  // Si ya fue agregada a un torneo, propagar también a team.p1Photo/p2Photo
+  // buscando el team que la contiene (match por id del submission en p1Data/p2Data).
+  if (sub.addedToTournamentId && workspace.tournaments) {
+    const t = workspace.tournaments.find(t => t.id === sub.addedToTournamentId);
+    if (t && t.teams) {
+      for (const team of t.teams) {
+        if (team.p1Data && team.p1Data.id === submissionId) team.p1Photo = url;
+        if (team.p2Data && team.p2Data.id === submissionId) team.p2Photo = url;
+      }
+    }
+  }
+
+  saveState();
+  renderAll();
+  toast('Foto actualizada');
+}
+
 // ========== shortLink: capa sobre Supabase ==========
 // put(kind, payload) → string id corto (o null si falla)
 // get(id) → {kind, payload} o null si no existe / error
@@ -7505,6 +7627,7 @@ function renderInscriptions() {
       const level = computeLevel(s.totalPts);
       return `
         <div class="submission-card">
+          ${renderSubmissionAvatar(s)}
           <div class="submission-level-badge lvl-${level.key}">
             <span class="lvl">${level.label.split(' ')[0].slice(0,4).toUpperCase()}</span>
             <span class="pts">${s.totalPts} PTS</span>
@@ -7589,6 +7712,7 @@ function renderInscriptions() {
         const suggestion = candidates[0];
         return `
           <div class="submission-card" style="border-left:4px solid var(--gold);">
+            ${renderSubmissionAvatar(s)}
             <div class="submission-level-badge lvl-${lv.key}">
               <span class="lvl">${lv.label.split(' ')[0].slice(0,4).toUpperCase()}</span>
               <span class="pts">${s.totalPts} PTS</span>
@@ -8014,6 +8138,22 @@ function renderAvatar(fullName, size = 'md', photoUrl = null) {
 // Firma retro-compatible: llamadas viejas con (p1, p2, 'md') siguen funcionando.
 function renderPairAvatars(p1, p2, size = 'md', photoUrl1 = null, photoUrl2 = null) {
   return `<div class="pavatar-stack ${size === 'xl' ? 'big' : ''}">${renderAvatar(p1, size, photoUrl1)}${renderAvatar(p2, size, photoUrl2)}</div>`;
+}
+
+// Avatar de submission con overlay para subir/cambiar foto (admin-only).
+// El overlay aparece en hover (desktop) o como badge "+" permanente (mobile).
+function renderSubmissionAvatar(submission) {
+  const fullName = `${submission.firstName || ''} ${submission.lastName || ''}`.trim();
+  const hasPhoto = !!submission.photoUrl;
+  const label = hasPhoto ? 'Cambiar' : '+ Foto';
+  return `
+    <div class="submission-avatar" data-sub-avatar="${submission.id}">
+      ${renderAvatar(fullName, 'lg', submission.photoUrl || null)}
+      <button type="button" class="photo-upload-btn"
+              title="${hasPhoto ? 'Cambiar foto' : 'Subir foto'}"
+              onclick="triggerAdminPhotoUpload('${submission.id}')">${label}</button>
+    </div>
+  `;
 }
 
 function getDivClass(division) {
@@ -8683,6 +8823,7 @@ window.deleteSubmission = deleteSubmission;
 window.viewSubmissionDetail = viewSubmissionDetail;
 window.reshareInvitation = reshareInvitation;
 window.pairSoloPlayers = pairSoloPlayers;
+window.triggerAdminPhotoUpload = triggerAdminPhotoUpload;
 
 // cerrar modal al click en el backdrop (pero no al click dentro de la caja)
 $('match-modal').addEventListener('click', (e) => {

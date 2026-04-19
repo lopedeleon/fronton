@@ -1049,6 +1049,223 @@ table.standings tr.qualified-third td:first-child::before {
   letter-spacing: 0.08em;
 }
 
+/* ==== Chips de receptores de efectivo (en Ajustes) ==== */
+.cash-receivers-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 20px;
+}
+.cash-receiver-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 4px 4px 10px;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+.cash-receiver-chip button {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: var(--bg);
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 0 6px;
+  font-size: 14px;
+  line-height: 1;
+  transition: opacity 0.12s;
+}
+.cash-receiver-chip button:hover { opacity: 1; color: var(--accent); }
+
+/* ==== Modal de registro de pago ==== */
+.pay-reg-player-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--bg-paper);
+  border: 2px solid var(--ink);
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.pay-reg-player-line strong {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+}
+.pay-reg-amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+.pay-reg-amount strong { color: var(--ink); font-size: 14px; font-family: inherit; }
+.pay-reg-section { margin-bottom: 14px; }
+.pay-reg-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.pay-reg-method-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.pay-reg-method-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.12s;
+}
+.pay-reg-method-opt input { accent-color: var(--accent); }
+.pay-reg-method-opt:has(input:checked) {
+  background: var(--ink);
+  color: var(--bg);
+}
+.pay-reg-receiver-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.pay-reg-receiver-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--ink-soft);
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.12s;
+}
+.pay-reg-receiver-opt:hover { background: var(--bg-paper); }
+.pay-reg-receiver-opt input { accent-color: var(--accent); }
+.pay-reg-receiver-opt:has(input:checked) {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+/* ==== Arqueo (panel colapsable) ==== */
+.arqueo-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.arqueo-total-box {
+  padding: 12px;
+  border: 2px solid;
+  text-align: center;
+}
+.arqueo-total-box.cash { background: rgba(45,106,79,0.08); border-color: var(--green); color: var(--green); }
+.arqueo-total-box.transfer { background: rgba(200,48,28,0.06); border-color: var(--accent); color: var(--accent); }
+.arqueo-total-box.unspecified { background: rgba(128,128,128,0.1); border-color: var(--muted); color: var(--muted); grid-column: span 2; }
+.arqueo-total-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.arqueo-total-big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.arqueo-total-sub {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+.arqueo-section { margin-bottom: 14px; }
+.arqueo-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.arqueo-receivers {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.arqueo-receiver-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--bg-paper);
+  border-left: 3px solid var(--green);
+  align-items: baseline;
+}
+.arqueo-receiver-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+.arqueo-receiver-amount {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  color: var(--green);
+  letter-spacing: 0.02em;
+}
+.arqueo-receiver-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.arqueo-table {
+  border: 1px solid var(--ink-soft);
+  font-size: 12px;
+  overflow-x: auto;
+}
+.arqueo-table-head {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.arqueo-table-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ink-soft);
+  align-items: start;
+}
+.arqueo-table-row:last-child { border-bottom: none; }
+.arqueo-table-row:nth-child(odd) { background: var(--bg-paper); }
+.arqueo-row-notes {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 2px;
+}
+
 /* barra de estado en el modal */
 .modal-status-bar {
   display: flex;
@@ -5074,8 +5291,25 @@ tr.qualified .pstand-pos { background: var(--green); }
         </div>
         <button class="btn btn-ghost btn-sm" id="payment-amount-save-btn">Guardar</button>
       </div>
+
+      <!-- Receptores de efectivo configurables -->
+      <div style="margin-top:14px;">
+        <label style="font-size:9px;margin-bottom:6px;">Personas que pueden recibir efectivo</label>
+        <div id="cash-receivers-chips" class="cash-receivers-chips"></div>
+        <div class="form-row" style="grid-template-columns:1fr auto;gap:6px;margin-top:6px;">
+          <input type="text" id="cash-receiver-new" placeholder="Ej: Lopé" maxlength="30">
+          <button class="btn btn-ghost btn-sm" id="cash-receiver-add-btn">+ Agregar</button>
+        </div>
+      </div>
+
       <div id="payments-summary" style="margin-top:14px;"></div>
       <div id="payments-list" style="margin-top:10px;"></div>
+
+      <!-- Arqueo colapsable: totales por método + receptor + tabla detallada -->
+      <div style="margin-top:14px;">
+        <button type="button" class="btn btn-ghost btn-sm" id="arqueo-toggle-btn" style="width:100%;">▼ Ver arqueo detallado</button>
+        <div id="arqueo-panel" style="display:none;margin-top:10px;"></div>
+      </div>
     </div>
 
     <div class="form-card">
@@ -5483,6 +5717,7 @@ let workspace = {
   payments: [],         // [{id, tournamentId, submissionId, firstName, lastName, amount, concept, status:'pending'|'paid'|'waived', createdAt, paidAt, notes}]
   paymentConfig: {
     amount: 0,          // monto fijo de inscripción por jugador (en pesos)
+    cashReceivers: [],  // lista de personas que pueden recibir efectivo (ej: ['Lopé', 'Juan'])
     accountNumber: '',  // cuenta BROU
     accountHolder: '',  // titular
     accountBank: 'BROU',
@@ -6237,21 +6472,183 @@ function submissionPaid(sub) {
   return !!(sub && sub.paymentStatus === 'paid');
 }
 
-// Toggle del estado de pago. Usado por los chips clickables.
+// Toggle del estado de pago. Si el jugador DEBE → abre modal para registrar
+// detalles (método, receptor si cash, notas). Si ya PAGÓ → pide confirmación
+// para deshacer el pago.
 function togglePaymentStatus(submissionId) {
   const sub = (workspace.submissions || []).find(s => s.id === submissionId);
   if (!sub) return;
   if (sub.paymentStatus === 'paid') {
+    // Deshacer: pedimos confirmación y limpiamos todos los campos de pago.
+    if (!confirm(`¿Marcar como DEBE a ${sub.firstName} ${sub.lastName}?\n\nSe borran los detalles del pago registrado.`)) return;
     sub.paymentStatus = 'pending';
     sub.paymentAt = null;
+    sub.paymentMethod = null;
+    sub.paymentReceiver = null;
+    sub.paymentNotes = null;
+    saveState();
+    renderAll();
     toast(`Marcado como DEBE: ${sub.firstName} ${sub.lastName}`);
-  } else {
-    sub.paymentStatus = 'paid';
-    sub.paymentAt = Date.now();
-    toast(`✓ Pagó: ${sub.firstName} ${sub.lastName}`);
+    return;
   }
+  // Abrir modal para registrar el pago con todos los detalles
+  openPaymentRegisterModal(sub);
+}
+
+// Modal de registro de pago: método, receptor (si efectivo), notas.
+function openPaymentRegisterModal(sub) {
+  const modal = ensurePaymentRegisterModal();
+  $('pay-reg-player').textContent = `${sub.firstName} ${sub.lastName}`;
+  const amount = getPaymentAmount();
+  $('pay-reg-amount').textContent = amount > 0 ? `$${amount.toLocaleString('es-UY')}` : '—';
+
+  // Reset del form
+  $('pay-reg-method-cash').checked = true;
+  $('pay-reg-notes').value = '';
+  $('pay-reg-receiver-other').value = '';
+  updatePaymentMethodUI();
+
+  // Receptores disponibles (chips de selección rápida + opción "otro")
+  renderCashReceiverOptions();
+
+  $('pay-reg-save-btn').onclick = () => savePaymentRegistration(sub.id);
+  $('pay-reg-cancel-btn').onclick = () => modal.classList.remove('show');
+  modal.classList.add('show');
+}
+
+// Renderiza los receptores configurados como botones de radio visuales.
+// Siempre agrega una opción "Otro..." que habilita el input de texto libre.
+function renderCashReceiverOptions() {
+  const list = (workspace.paymentConfig && workspace.paymentConfig.cashReceivers) || [];
+  const el = $('pay-reg-receiver-list');
+  if (!el) return;
+  // Si no hay receptores configurados, mostramos solo el campo libre.
+  if (list.length === 0) {
+    el.innerHTML = `<div style="font-size:12px;color:var(--muted);margin-bottom:6px;">Sin receptores configurados. Escribí uno abajo, o agregá receptores frecuentes en Ajustes.</div>`;
+    $('pay-reg-receiver-other-wrap').style.display = '';
+    return;
+  }
+  el.innerHTML = list.map((name, i) => `
+    <label class="pay-reg-receiver-opt">
+      <input type="radio" name="pay-reg-receiver" value="${escapeHtml(name)}" ${i === 0 ? 'checked' : ''}>
+      <span>${escapeHtml(name)}</span>
+    </label>
+  `).join('') + `
+    <label class="pay-reg-receiver-opt">
+      <input type="radio" name="pay-reg-receiver" value="__other__">
+      <span>Otro...</span>
+    </label>
+  `;
+  // Wire: mostrar el input "otro" solo si se elige esa opción
+  el.querySelectorAll('input[name="pay-reg-receiver"]').forEach(r => {
+    r.onchange = () => {
+      $('pay-reg-receiver-other-wrap').style.display = r.value === '__other__' && r.checked ? '' : 'none';
+    };
+  });
+  $('pay-reg-receiver-other-wrap').style.display = 'none';
+}
+
+// Habilita/oculta la sección de receptor según el método elegido
+function updatePaymentMethodUI() {
+  const isCash = $('pay-reg-method-cash') && $('pay-reg-method-cash').checked;
+  const recvSec = $('pay-reg-receiver-section');
+  if (recvSec) recvSec.style.display = isCash ? '' : 'none';
+}
+
+// Confirmar registro del pago con los datos del modal
+function savePaymentRegistration(submissionId) {
+  const sub = (workspace.submissions || []).find(s => s.id === submissionId);
+  if (!sub) return;
+  const isCash = $('pay-reg-method-cash').checked;
+  const method = isCash ? 'cash' : 'transfer';
+
+  let receiver = null;
+  if (isCash) {
+    const selected = document.querySelector('input[name="pay-reg-receiver"]:checked');
+    if (selected && selected.value === '__other__') {
+      receiver = $('pay-reg-receiver-other').value.trim();
+    } else if (selected) {
+      receiver = selected.value;
+    } else {
+      // Si no hay receptores configurados, tomar directo del input libre
+      receiver = $('pay-reg-receiver-other').value.trim();
+    }
+    if (!receiver) {
+      toast('Ingresá quién recibió el dinero');
+      return;
+    }
+  }
+
+  const notes = $('pay-reg-notes').value.trim() || null;
+
+  sub.paymentStatus = 'paid';
+  sub.paymentAt = Date.now();
+  sub.paymentMethod = method;
+  sub.paymentReceiver = receiver;
+  sub.paymentNotes = notes;
+
   saveState();
+  $('payment-register-modal').classList.remove('show');
   renderAll();
+  toast(`✓ Pagó: ${sub.firstName} ${sub.lastName}${isCash ? ' (efectivo a ' + receiver + ')' : ' (transferencia)'}`);
+}
+
+// Modal DOM (creado on-demand, reusable)
+function ensurePaymentRegisterModal() {
+  let m = $('payment-register-modal');
+  if (m) return m;
+  m = document.createElement('div');
+  m.id = 'payment-register-modal';
+  m.className = 'modal-backdrop';
+  m.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Registrar pago</h3>
+        <button type="button" class="modal-close" id="pay-reg-cancel-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="pay-reg-player-line">
+          <strong id="pay-reg-player">—</strong>
+          <span class="pay-reg-amount">Monto: <strong id="pay-reg-amount">—</strong></span>
+        </div>
+
+        <div class="pay-reg-section">
+          <div class="pay-reg-label">Método de pago</div>
+          <div class="pay-reg-method-options">
+            <label class="pay-reg-method-opt">
+              <input type="radio" name="pay-reg-method" id="pay-reg-method-cash" value="cash" checked onchange="updatePaymentMethodUI()">
+              <span>💵 Efectivo</span>
+            </label>
+            <label class="pay-reg-method-opt">
+              <input type="radio" name="pay-reg-method" id="pay-reg-method-transfer" value="transfer" onchange="updatePaymentMethodUI()">
+              <span>🏦 Transferencia</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="pay-reg-section" id="pay-reg-receiver-section">
+          <div class="pay-reg-label">¿Quién recibió el efectivo?</div>
+          <div id="pay-reg-receiver-list" class="pay-reg-receiver-list"></div>
+          <div id="pay-reg-receiver-other-wrap" style="display:none;margin-top:6px;">
+            <input type="text" id="pay-reg-receiver-other" placeholder="Nombre de quien recibió" maxlength="40">
+          </div>
+        </div>
+
+        <div class="pay-reg-section">
+          <div class="pay-reg-label">Notas <span style="color:var(--muted);font-weight:400;text-transform:none;">(opcional)</span></div>
+          <input type="text" id="pay-reg-notes" placeholder="Ej: pagó parte del equipo, adelantó 500..." maxlength="120">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="pay-reg-cancel-btn-2" onclick="document.getElementById('payment-register-modal').classList.remove('show')">Cancelar</button>
+          <button type="button" class="btn btn-accent" id="pay-reg-save-btn">✓ Registrar pago</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(m);
+  m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); });
+  return m;
 }
 
 // Devuelve las submissions que están en algún equipo armado (approved) de
@@ -6342,6 +6739,12 @@ function renderPayments() {
       `;
     }).join('')}
   `;
+
+  // Si el panel de arqueo está abierto, re-renderizarlo para reflejar el cambio
+  const arqueoPanel = $('arqueo-panel');
+  if (arqueoPanel && arqueoPanel.style.display !== 'none') {
+    renderArqueo();
+  }
 }
 
 // Wire up del input de monto (se llama una sola vez al iniciar)
@@ -6359,6 +6762,189 @@ function setupPaymentAmountInput() {
   };
   btn.onclick = save;
   input.addEventListener('keypress', (e) => { if (e.key === 'Enter') save(); });
+
+  // Wire-up de receptores de efectivo
+  setupCashReceiversInput();
+  // Wire-up del toggle de arqueo
+  setupArqueoToggle();
+}
+
+// Gestión de la lista de receptores configurables
+function setupCashReceiversInput() {
+  const input = $('cash-receiver-new');
+  const btn = $('cash-receiver-add-btn');
+  if (!input || !btn) return;
+  const add = () => {
+    const name = input.value.trim();
+    if (!name) return;
+    if (!workspace.paymentConfig) workspace.paymentConfig = {};
+    if (!Array.isArray(workspace.paymentConfig.cashReceivers)) workspace.paymentConfig.cashReceivers = [];
+    // Evitar duplicados (case-insensitive)
+    const existing = workspace.paymentConfig.cashReceivers.map(r => r.toLowerCase());
+    if (existing.includes(name.toLowerCase())) {
+      toast('Ese receptor ya está en la lista');
+      return;
+    }
+    workspace.paymentConfig.cashReceivers.push(name);
+    input.value = '';
+    saveState();
+    renderCashReceiversChips();
+    toast(`Receptor agregado: ${name}`);
+  };
+  btn.onclick = add;
+  input.addEventListener('keypress', (e) => { if (e.key === 'Enter') add(); });
+  renderCashReceiversChips();
+}
+
+function renderCashReceiversChips() {
+  const el = $('cash-receivers-chips');
+  if (!el) return;
+  const list = (workspace.paymentConfig && workspace.paymentConfig.cashReceivers) || [];
+  if (list.length === 0) {
+    el.innerHTML = `<div style="font-size:11px;color:var(--muted);font-style:italic;padding:4px 0;">Sin receptores configurados. Agregá nombres para elegir rápido al registrar pagos en efectivo.</div>`;
+    return;
+  }
+  el.innerHTML = list.map((name, i) => `
+    <span class="cash-receiver-chip">
+      ${escapeHtml(name)}
+      <button type="button" onclick="removeCashReceiver(${i})" title="Quitar" aria-label="Quitar ${escapeHtml(name)}">✕</button>
+    </span>
+  `).join('');
+}
+
+function removeCashReceiver(index) {
+  if (!workspace.paymentConfig || !Array.isArray(workspace.paymentConfig.cashReceivers)) return;
+  const name = workspace.paymentConfig.cashReceivers[index];
+  if (!name) return;
+  // No borrar si hay pagos registrados a nombre de este receptor — avisar al admin.
+  const usedInPayments = (workspace.submissions || []).some(s =>
+    s.paymentReceiver && s.paymentReceiver.toLowerCase() === name.toLowerCase()
+  );
+  if (usedInPayments) {
+    if (!confirm(`"${name}" ya recibió pagos registrados. Si lo quitás, los pagos se mantienen con su nombre en el historial pero no estará disponible para nuevos pagos.\n\n¿Quitar igual?`)) return;
+  }
+  workspace.paymentConfig.cashReceivers.splice(index, 1);
+  saveState();
+  renderCashReceiversChips();
+}
+
+// Toggle del panel de arqueo (colapsable)
+function setupArqueoToggle() {
+  const btn = $('arqueo-toggle-btn');
+  const panel = $('arqueo-panel');
+  if (!btn || !panel) return;
+  btn.onclick = () => {
+    const open = panel.style.display !== 'none';
+    if (open) {
+      panel.style.display = 'none';
+      btn.textContent = '▼ Ver arqueo detallado';
+    } else {
+      renderArqueo();
+      panel.style.display = '';
+      btn.textContent = '▲ Ocultar arqueo';
+    }
+  };
+}
+
+// Render del arqueo: totales por método + receptor + tabla detallada
+function renderArqueo() {
+  const panel = $('arqueo-panel');
+  if (!panel) return;
+  const amount = getPaymentAmount();
+  const paidSubs = (workspace.submissions || []).filter(submissionPaid);
+
+  if (paidSubs.length === 0) {
+    panel.innerHTML = `<div style="font-size:12px;color:var(--muted);font-style:italic;padding:10px;text-align:center;">Todavía no se registraron pagos.</div>`;
+    return;
+  }
+
+  // Agrupar totales por método
+  const byMethod = { cash: 0, transfer: 0, unspecified: 0 };
+  // Agrupar totales por receptor (solo efectivo)
+  const byReceiver = {}; // { 'Lopé': 1, 'Juan': 3 } → cantidad de pagos recibidos
+
+  for (const s of paidSubs) {
+    if (s.paymentMethod === 'cash') {
+      byMethod.cash++;
+      const r = s.paymentReceiver || '(sin nombre)';
+      byReceiver[r] = (byReceiver[r] || 0) + 1;
+    } else if (s.paymentMethod === 'transfer') {
+      byMethod.transfer++;
+    } else {
+      byMethod.unspecified++;
+    }
+  }
+
+  const money = n => amount > 0 ? `$${(n * amount).toLocaleString('es-UY')}` : `${n} pagos`;
+  const fmtDate = (ts) => {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    return `${d.toLocaleDateString('es-UY', { day: '2-digit', month: '2-digit' })} ${d.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  // Tabla detallada: todos los pagos ordenados por fecha (más reciente primero)
+  const sorted = [...paidSubs].sort((a, b) => (b.paymentAt || 0) - (a.paymentAt || 0));
+
+  panel.innerHTML = `
+    <div class="arqueo-totals">
+      <div class="arqueo-total-box cash">
+        <div class="arqueo-total-lbl">💵 Efectivo</div>
+        <div class="arqueo-total-big">${money(byMethod.cash)}</div>
+        <div class="arqueo-total-sub">${byMethod.cash} pago${byMethod.cash === 1 ? '' : 's'}</div>
+      </div>
+      <div class="arqueo-total-box transfer">
+        <div class="arqueo-total-lbl">🏦 Transferencia</div>
+        <div class="arqueo-total-big">${money(byMethod.transfer)}</div>
+        <div class="arqueo-total-sub">${byMethod.transfer} pago${byMethod.transfer === 1 ? '' : 's'}</div>
+      </div>
+      ${byMethod.unspecified > 0 ? `
+        <div class="arqueo-total-box unspecified">
+          <div class="arqueo-total-lbl">? Sin método</div>
+          <div class="arqueo-total-big">${money(byMethod.unspecified)}</div>
+          <div class="arqueo-total-sub">${byMethod.unspecified} pago${byMethod.unspecified === 1 ? '' : 's'}</div>
+        </div>` : ''}
+    </div>
+
+    ${Object.keys(byReceiver).length > 0 ? `
+      <div class="arqueo-section">
+        <div class="arqueo-section-title">Efectivo por receptor</div>
+        <div class="arqueo-receivers">
+          ${Object.entries(byReceiver)
+            .sort((a,b) => b[1] - a[1])
+            .map(([name, count]) => `
+              <div class="arqueo-receiver-row">
+                <span class="arqueo-receiver-name">${escapeHtml(name)}</span>
+                <span class="arqueo-receiver-amount">${money(count)}</span>
+                <span class="arqueo-receiver-count">${count} pago${count === 1 ? '' : 's'}</span>
+              </div>
+            `).join('')}
+        </div>
+      </div>` : ''}
+
+    <div class="arqueo-section">
+      <div class="arqueo-section-title">Detalle de pagos (${paidSubs.length})</div>
+      <div class="arqueo-table">
+        <div class="arqueo-table-head">
+          <span>Jugador</span><span>Método</span><span>Receptor</span><span>Fecha</span>
+        </div>
+        ${sorted.map(s => {
+          const method = s.paymentMethod === 'cash' ? '💵 Efectivo'
+                       : s.paymentMethod === 'transfer' ? '🏦 Transferencia'
+                       : '— sin método';
+          const recv = s.paymentMethod === 'cash' ? (s.paymentReceiver || '—') : '—';
+          const notes = s.paymentNotes ? `<div class="arqueo-row-notes">📝 ${escapeHtml(s.paymentNotes)}</div>` : '';
+          return `
+            <div class="arqueo-table-row">
+              <span><strong>${escapeHtml(s.firstName)} ${escapeHtml(s.lastName)}</strong>${notes}</span>
+              <span>${method}</span>
+              <span>${escapeHtml(recv)}</span>
+              <span>${fmtDate(s.paymentAt)}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
 }
 
 function renderTeams() {
@@ -9070,11 +9656,61 @@ async function buildSubmissionLink(submission) {
   return `${base}#submit=${encodePayload(payload)}`;
 }
 
+// ========== Re-evaluación (actualizar nivel de un jugador ya inscripto) ==========
+// Flujo:
+//   1. Admin → buildReevalLink(submission) → link `#reeval=<id>`
+//   2. Jugador abre → enterEnrollmentMode con isReevaluation=true → edita + quiz
+//   3. Jugador envía → buildReevalResultLink → link `#reeval-result=<id>`
+//   4. Admin clickea → handleIncomingReevalResult → actualiza submission en el pool,
+//      guardando snapshot del estado previo en submission.history[]
+
+// Link que el admin envía al jugador para re-evaluar.
+// Incluye el submissionId y los datos actuales del jugador para pre-rellenar el form.
+async function buildReevalLink(submission) {
+  const base = window.location.href.split('#')[0];
+  const payload = {
+    t: 'reeval',
+    sid: submission.id,
+    // Datos actuales para pre-rellenar (los editables)
+    fn: submission.firstName,
+    ln: submission.lastName,
+    nn: submission.nickname || '',
+    ag: submission.age,
+    wa: submission.whatsapp,
+    // Contexto del torneo (solo para mostrar en la UI, no se usa al guardar)
+    tn: submission.tournamentName,
+    td: submission.tournamentDivision,
+    // WhatsApp del admin para el link de vuelta
+    adm: workspace.adminWhatsApp || '',
+  };
+  const id = await shortLink.put('reeval', payload);
+  if (id) return `${base}#reeval=${id}`;
+  return `${base}#reeval=${encodePayload(payload)}`;
+}
+
+// Link que el jugador envía al admin tras terminar la re-evaluación.
+// Lleva solo los cambios (no toda la submission completa).
+async function buildReevalResultLink(result) {
+  const base = window.location.href.split('#')[0];
+  const payload = {
+    t: 'reeval-result',
+    r: result, // { sid, firstName, lastName, nickname, age, whatsapp, quizAnswers, totalPts, level, levelLabel, levelSuggest }
+  };
+  const id = await shortLink.put('reeval-result', payload);
+  if (id) return `${base}#reeval-result=${id}`;
+  return `${base}#reeval-result=${encodePayload(payload)}`;
+}
+
 // ========== Detectar modo de la URL ==========
 // ASYNC ahora porque puede tener que resolver un ID corto vía Supabase.
-// Acepta dos formatos:
-//   - #invite=<shortId>    → lee de Supabase
-//   - #invite=<base64url>  → decodifica localmente (legacy, retrocompat)
+// Acepta los siguientes formatos:
+//   - #invite=<token>         → invitación inicial (admin → jugador)
+//   - #submit=<token>          → submission inicial (jugador → admin)
+//   - #reeval=<token>          → re-evaluación (admin → jugador, para actualizar nivel)
+//   - #reeval-result=<token>   → resultado de re-evaluación (jugador → admin)
+// Donde <token> puede ser:
+//   · ID corto (10 chars alfanuméricos) → se busca en Supabase
+//   · base64url legacy → se decodifica localmente
 async function detectMode() {
   const hash = window.location.hash;
   if (hash.startsWith('#invite=')) {
@@ -9084,6 +9720,14 @@ async function detectMode() {
   if (hash.startsWith('#submit=')) {
     const token = hash.slice(8);
     return { kind: 'submit', payload: await resolveToken(token, 'submit') };
+  }
+  if (hash.startsWith('#reeval-result=')) {
+    const token = hash.slice('#reeval-result='.length);
+    return { kind: 'reeval-result', payload: await resolveToken(token, 'reeval-result') };
+  }
+  if (hash.startsWith('#reeval=')) {
+    const token = hash.slice(8);
+    return { kind: 'reeval', payload: await resolveToken(token, 'reeval') };
   }
   return { kind: 'normal' };
 }
@@ -9099,14 +9743,39 @@ async function resolveToken(token, expectedKind) {
   return decodePayload(token);
 }
 
-// ========== MODO PLANILLA (jugador invitado) ==========
-function enterEnrollmentMode(invitePayload) {
+// ========== MODO PLANILLA (jugador invitado o re-evaluación) ==========
+// payload: datos de la invitación (normal) o de la re-evaluación (isReevaluation=true)
+// isReevaluation: cuando es true, pre-rellena datos y oculta la sección de compañero
+function enterEnrollmentMode(invitePayload, isReevaluation = false) {
   $('main-app').style.display = 'none';
   $('enrollment-mode').style.display = 'block';
 
-  // info del torneo
-  if (invitePayload && invitePayload.tn) {
-    $('enr-sub').textContent = `Estás siendo invitado/a al torneo "${invitePayload.tn}" (Divisional ${invitePayload.td || 'A'}). Completá la ficha para inscribirte.`;
+  // Ajustes según modo
+  const sub = $('enr-sub');
+  const submitBtn = $('enr-submit-btn');
+  const partnerCard = document.querySelector('.enr-card:nth-of-type(2)'); // la 2da card es "¿Con quién jugás?"
+
+  if (isReevaluation) {
+    // Re-evaluación: el jugador ya está inscripto, solo actualiza sus datos
+    if (sub) sub.textContent = `Actualizá tus datos o re-hacé la autoevaluación. Si tu nivel cambió, el admin lo verá reflejado.`;
+    if (submitBtn) submitBtn.textContent = 'Enviar actualización →';
+    if (partnerCard) partnerCard.style.display = 'none';
+
+    // Prerellenar datos personales con los valores actuales
+    if (invitePayload) {
+      if ($('enr-first-name') && invitePayload.fn) $('enr-first-name').value = invitePayload.fn;
+      if ($('enr-last-name')  && invitePayload.ln) $('enr-last-name').value  = invitePayload.ln;
+      if ($('enr-nickname')   && invitePayload.nn) $('enr-nickname').value   = invitePayload.nn;
+      if ($('enr-age')        && invitePayload.ag) $('enr-age').value        = invitePayload.ag;
+      if ($('enr-whatsapp')   && invitePayload.wa) $('enr-whatsapp').value   = invitePayload.wa;
+    }
+  } else {
+    // Modo invitación normal (default). Mostrar sección de compañero y texto inicial.
+    if (partnerCard) partnerCard.style.display = '';
+    if (submitBtn) submitBtn.textContent = 'Enviar mi ficha →';
+    if (invitePayload && invitePayload.tn) {
+      if (sub) sub.textContent = `Estás siendo invitado/a al torneo "${invitePayload.tn}" (Divisional ${invitePayload.td || 'A'}). Completá la ficha para inscribirte.`;
+    }
   }
 
   // Renderizar quiz
@@ -9139,6 +9808,8 @@ function enterEnrollmentMode(invitePayload) {
   window._quizAnswers = {};
   window._invitePayload = invitePayload;
   window._enrPhotoFile = null;
+  // Flag para que submitEnrollment sepa qué flujo seguir
+  window._isReevaluation = isReevaluation;
 }
 
 // Wiring del input de foto en el formulario de inscripción.
@@ -9257,16 +9928,9 @@ async function submitEnrollment() {
   const age = parseInt($('enr-age').value);
   const whatsapp = $('enr-whatsapp').value.trim();
 
-  // Modo de compañero
-  const modeEl = document.querySelector('input[name="partner-mode"]:checked');
-  const noPartner = modeEl && modeEl.value === 'none';
-  const partnerName = noPartner ? '' : $('enr-partner-name').value.trim();
-  const partnerWhatsapp = noPartner ? '' : $('enr-partner-whatsapp').value.trim();
-
   if (!firstName || !lastName) { alert('Falta tu nombre o apellido'); return; }
   if (!age || age < 10) { alert('Completá tu edad'); return; }
   if (!whatsapp) { alert('Completá tu WhatsApp'); return; }
-  if (!noPartner && !partnerName) { alert('Ingresá el nombre de tu compañero/a, o marcá "no tengo compañero aún"'); return; }
 
   // Validar quiz completo
   const answers = window._quizAnswers || {};
@@ -9278,6 +9942,56 @@ async function submitEnrollment() {
 
   const totalPts = QUIZ.reduce((sum, q) => sum + (answers[q.id]?.pts || 0), 0);
   const level = computeLevel(totalPts);
+
+  // ========== Rama: RE-EVALUACIÓN ==========
+  // En re-eval no hay compañero/foto/invitación. Solo generamos link de vuelta
+  // con los datos actualizados y el sid de la submission original.
+  if (window._isReevaluation) {
+    const reevalPayload = window._invitePayload || {};
+    const result = {
+      sid: reevalPayload.sid,     // id de la submission a actualizar
+      firstName, lastName, nickname, age, whatsapp,
+      quizAnswers: answers,
+      totalPts,
+      level: level.key,
+      levelLabel: level.label,
+      levelSuggest: level.suggest,
+      updatedAt: Date.now(),
+    };
+
+    const submitBtn = $('enr-submit-btn');
+    const prevBtnLabel = submitBtn ? submitBtn.textContent : null;
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Generando link...'; }
+
+    const resultLink = await buildReevalResultLink(result);
+    const adminWa = reevalPayload.adm || '';
+
+    // Pantalla de éxito (reusamos la misma, ocultando el bloque de compañero)
+    $('enr-form-step').style.display = 'none';
+    $('enr-success-step').style.display = 'block';
+    const adminMsg = `Hola! Actualicé mi ficha del torneo ${reevalPayload.tn || ''}. Acá están los datos nuevos:\n\n${resultLink}`;
+    const adminBtn = $('enr-send-admin-btn');
+    adminBtn.href = adminWa
+      ? `https://wa.me/${adminWa}?text=${encodeURIComponent(adminMsg)}`
+      : `https://wa.me/?text=${encodeURIComponent(adminMsg)}`;
+    $('enr-admin-link-text').value = resultLink;
+    // En re-eval no hay bloque de compañero
+    $('enr-partner-block').style.display = 'none';
+    $('enr-manual-partner-box').style.display = 'none';
+
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = prevBtnLabel; }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+
+  // ========== Rama: INSCRIPCIÓN NORMAL ==========
+  // Modo de compañero (solo aplica en inscripción nueva)
+  const modeEl = document.querySelector('input[name="partner-mode"]:checked');
+  const noPartner = modeEl && modeEl.value === 'none';
+  const partnerName = noPartner ? '' : $('enr-partner-name').value.trim();
+  const partnerWhatsapp = noPartner ? '' : $('enr-partner-whatsapp').value.trim();
+
+  if (!noPartner && !partnerName) { alert('Ingresá el nombre de tu compañero/a, o marcá "no tengo compañero aún"'); return; }
 
   // Subir foto (si el jugador seleccionó una). Lo hacemos ANTES de construir
   // el submission así el photoUrl queda embebido en el link que recibe el admin.
@@ -9408,6 +10122,92 @@ function handleIncomingSubmission(payload) {
   toast(`Ficha de ${sub.firstName} ${sub.lastName} importada`);
 }
 
+// Handler para cuando el admin clickea un link #reeval-result=... enviado
+// por un jugador tras actualizar sus datos / nivel.
+// Actualiza la submission existente in-place y guarda el estado previo en
+// submission.history[] con timestamp.
+function handleIncomingReevalResult(payload) {
+  if (!payload || !payload.r || !payload.r.sid) { toast('Link de actualización inválido'); return; }
+  const result = payload.r;
+  const sub = (workspace.submissions || []).find(s => s.id === result.sid);
+  if (!sub) {
+    toast('No encontramos la ficha original para actualizar');
+    return;
+  }
+  // Si el jugador ya está aprobado en un equipo, rechazamos el update porque
+  // la configuración fue "solo antes de armar pareja".
+  if (sub.status === 'approved') {
+    toast(`${sub.firstName} ya está en un equipo armado — no se puede actualizar nivel ahora`);
+    return;
+  }
+
+  // Detección de re-import: si en este mismo submission ya procesamos un update
+  // con el mismo updatedAt, no hacemos nada (evita duplicar historial).
+  if (Array.isArray(sub.history) && sub.history.some(h => h.appliedAt === result.updatedAt)) {
+    toast('Esta actualización ya estaba aplicada');
+    return;
+  }
+
+  // Guardar snapshot del estado ACTUAL antes de sobrescribir
+  if (!Array.isArray(sub.history)) sub.history = [];
+  sub.history.push({
+    appliedAt: result.updatedAt || Date.now(),
+    // Snapshot de los campos editables antes del update
+    prev: {
+      firstName: sub.firstName,
+      lastName: sub.lastName,
+      nickname: sub.nickname,
+      age: sub.age,
+      whatsapp: sub.whatsapp,
+      quizAnswers: sub.quizAnswers,
+      totalPts: sub.totalPts,
+      level: sub.level,
+      levelLabel: sub.levelLabel,
+      levelSuggest: sub.levelSuggest,
+    },
+  });
+
+  // Aplicar los cambios nuevos
+  sub.firstName = result.firstName;
+  sub.lastName = result.lastName;
+  sub.nickname = result.nickname || '';
+  sub.age = result.age;
+  sub.whatsapp = result.whatsapp;
+  sub.quizAnswers = result.quizAnswers;
+  sub.totalPts = result.totalPts;
+  sub.level = result.level;
+  sub.levelLabel = result.levelLabel;
+  sub.levelSuggest = result.levelSuggest;
+  sub.updatedAt = result.updatedAt || Date.now();
+
+  saveState();
+  renderAll();
+
+  history.replaceState(null, '', window.location.href.split('#')[0]);
+  document.querySelector('[data-tab="inscriptions"]').click();
+  toast(`✓ Actualizado: ${sub.firstName} ${sub.lastName} — ${sub.levelLabel} · ${sub.totalPts} PTS`);
+}
+
+// Generar el link de re-evaluación y abrir WhatsApp al jugador.
+// Llamado desde el botón "Actualizar nivel" de cada card de submission.
+async function requestReevaluation(submissionId) {
+  const sub = (workspace.submissions || []).find(s => s.id === submissionId);
+  if (!sub) { toast('Ficha no encontrada'); return; }
+  if (sub.status === 'approved') {
+    toast('Este jugador ya está en un equipo armado — no se puede actualizar nivel');
+    return;
+  }
+  if (!sub.whatsapp) {
+    toast('Este jugador no tiene WhatsApp registrado');
+    return;
+  }
+  const link = await buildReevalLink(sub);
+  const msg = `Hola ${sub.firstName}! Actualizá tus datos o re-hacé la autoevaluación del torneo ${sub.tournamentName || ''}:\n\n${link}`;
+  const wa = sub.whatsapp.replace(/[^\d]/g, '');
+  window.open(`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`, '_blank');
+  toast('Abrí WhatsApp con el link de actualización');
+}
+
 // ========== ADMIN: render de inscripciones ==========
 function renderInscriptions() {
   if (!$('inscriptions-meta')) return;
@@ -9460,12 +10260,14 @@ function renderInscriptions() {
               ${s.age} AÑOS · ${escapeHtml(level.label.toUpperCase())} · SUG. ${escapeHtml(level.suggest)} · WA ${escapeHtml(s.whatsapp || '—')}
             </div>
             ${s.tournamentName ? `<div style="font-size:11px;color:var(--accent);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;margin-top:3px;">→ ${escapeHtml(s.tournamentName)} · DIV. ${escapeHtml(s.tournamentDivision)}</div>` : ''}
+            ${(Array.isArray(s.history) && s.history.length > 0) ? `<div style="font-size:10px;color:var(--gold);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;margin-top:3px;" title="El jugador actualizó su ficha ${s.history.length} ${s.history.length === 1 ? 'vez' : 'veces'}">↻ ACTUALIZADO (${s.history.length})</div>` : ''}
             <div class="submission-partner">
               <span class="label">Compañero:</span> ${escapeHtml(s.partnerName || '—')}
             </div>
           </div>
           <div class="submission-actions">
             <button class="btn btn-sm btn-ghost" onclick="viewSubmissionDetail('${s.id}')">Ver</button>
+            <button class="btn btn-sm btn-ghost" onclick="requestReevaluation('${s.id}')" title="Pedirle al jugador que actualice su nivel">↻ Nivel</button>
             <button class="btn btn-danger btn-sm" onclick="deleteSubmission('${s.id}')">✕</button>
           </div>
         </div>
@@ -9507,6 +10309,8 @@ function renderInscriptions() {
             <button class="btn btn-accent btn-sm" onclick="addPairToTournament('${p.a.id}','${p.b.id}')">+ Agregar al torneo</button>
             <button class="btn btn-ghost btn-sm" onclick="viewSubmissionDetail('${p.a.id}')">Ver ${escapeHtml(p.a.firstName)}</button>
             <button class="btn btn-ghost btn-sm" onclick="viewSubmissionDetail('${p.b.id}')">Ver ${escapeHtml(p.b.firstName)}</button>
+            <button class="btn btn-ghost btn-sm" onclick="requestReevaluation('${p.a.id}')" title="Pedirle a ${escapeHtml(p.a.firstName)} que actualice su nivel">↻ ${escapeHtml(p.a.firstName)}</button>
+            <button class="btn btn-ghost btn-sm" onclick="requestReevaluation('${p.b.id}')" title="Pedirle a ${escapeHtml(p.b.firstName)} que actualice su nivel">↻ ${escapeHtml(p.b.firstName)}</button>
           </div>
         </div>
       `;
@@ -9555,6 +10359,7 @@ function renderInscriptions() {
             <div class="submission-actions">
               ${suggestion ? `<button class="btn btn-accent btn-sm" onclick="pairSoloPlayers('${s.id}','${suggestion.id}')">⇄ Emparejar</button>` : ''}
               <button class="btn btn-ghost btn-sm" onclick="viewSubmissionDetail('${s.id}')">Ver</button>
+              <button class="btn btn-ghost btn-sm" onclick="requestReevaluation('${s.id}')" title="Pedirle al jugador que actualice su nivel">↻ Nivel</button>
               <button class="btn btn-danger btn-sm" onclick="deleteSubmission('${s.id}')">✕</button>
             </div>
           </div>
@@ -9827,10 +10632,19 @@ async function initRouteMode() {
     enterEnrollmentMode(mode.payload);
     return 'enrollment';
   }
+  if (mode.kind === 'reeval' && mode.payload) {
+    // El jugador abrió un link de re-evaluación → mostrar form prellenado
+    enterEnrollmentMode(mode.payload, true);
+    return 'enrollment';
+  }
   if (mode.kind === 'submit' && mode.payload) {
     // Procesar submission entrante y seguir a la app normal
     // (esperamos a que loadState haya terminado antes de handleIncomingSubmission)
     return 'submit';
+  }
+  if (mode.kind === 'reeval-result' && mode.payload) {
+    // Admin recibió resultado de re-evaluación → esperamos loadState y procesamos
+    return 'reeval-result';
   }
   return 'normal';
 }
@@ -9886,7 +10700,14 @@ function submitAdminLogin() {
     closeAdminLogin();
     showAdminMode();
     toast('Modo admin activado');
-    // Si había una ficha esperando, importarla
+    // Si había algo entrante esperando (submission o reeval-result), procesarlo
+    if (window._pendingIncoming) {
+      const p = window._pendingIncoming;
+      if (p.kind === 'submit') handleIncomingSubmission(p.payload);
+      else if (p.kind === 'reeval-result') handleIncomingReevalResult(p.payload);
+      window._pendingIncoming = null;
+    }
+    // Retrocompat: por si quedó algún _pendingSubmission de sesiones viejas
     if (window._pendingSubmission) {
       handleIncomingSubmission(window._pendingSubmission);
       window._pendingSubmission = null;
@@ -10651,6 +11472,9 @@ window.closeTeamEditor = closeTeamEditor;
 window.closeReplacePicker = closeReplacePicker;
 window.doReplacePlayer = doReplacePlayer;
 window.togglePaymentStatus = togglePaymentStatus;
+window.removeCashReceiver = removeCashReceiver;
+window.updatePaymentMethodUI = updatePaymentMethodUI;
+window.requestReevaluation = requestReevaluation;
 window.editKOMatch = editKOMatch;
 window.closeMatchEditor = closeMatchEditor;
 window.clearMatchResult = clearMatchResult;
@@ -10716,12 +11540,19 @@ function waitForSupabase(timeoutMs = 3000) {
     return;
   }
 
-  // 2b. Si el hash es un link de invite/submit pero no pudimos resolver el payload,
-  //     avisar y caer al modo normal. Causas típicas: ID inexistente o Supabase caído.
-  if ((hashMode.kind === 'invite' || hashMode.kind === 'submit') && !hashMode.payload) {
+  // 2a. Si es modo RE-EVALUACIÓN (jugador reabriendo su ficha para actualizarla)
+  if (hashMode.kind === 'reeval' && hashMode.payload) {
+    $('loading-state') && ($('loading-state').style.display = 'none');
+    enterEnrollmentMode(hashMode.payload, true);
+    return;
+  }
+
+  // 2b. Si el hash es un link que no pudimos resolver, avisar y caer al modo normal.
+  if ((hashMode.kind === 'invite' || hashMode.kind === 'submit' ||
+       hashMode.kind === 'reeval' || hashMode.kind === 'reeval-result') && !hashMode.payload) {
     $('loading-state') && ($('loading-state').style.display = 'none');
     setTimeout(() => {
-      alert('El link de inscripción no es válido o expiró. Pedile al organizador uno nuevo.');
+      alert('El link no es válido o expiró. Pedile al organizador uno nuevo.');
     }, 200);
   }
 
@@ -10740,20 +11571,24 @@ function waitForSupabase(timeoutMs = 3000) {
     });
   }
 
-  // 4. Si venimos de un link de submission (admin recibiendo ficha) forzar modo admin,
-  //    SI hay clave guardada en la sesión; si no, mostrar modo público y avisar
-  if (hashMode.kind === 'submit' && hashMode.payload) {
-    // Si el admin estaba logueado en la sesión, importar directamente
+  // 4. Si venimos de un link de submission o reeval-result (admin recibiendo datos)
+  //    forzar modo admin si hay clave guardada; si no, mostrar modo público y avisar.
+  const incomingAdminHash = (hashMode.kind === 'submit' || hashMode.kind === 'reeval-result') && hashMode.payload;
+  if (incomingAdminHash) {
+    const applyIncoming = () => {
+      if (hashMode.kind === 'submit') handleIncomingSubmission(hashMode.payload);
+      else                            handleIncomingReevalResult(hashMode.payload);
+    };
     if (getCurrentMode() === 'admin') {
       showAdminMode();
-      handleIncomingSubmission(hashMode.payload);
+      applyIncoming();
     } else {
       // Guardamos el payload para procesarlo cuando entre con clave
-      window._pendingSubmission = hashMode.payload;
+      window._pendingIncoming = { kind: hashMode.kind, payload: hashMode.payload };
       showPublicMode();
-      // avisamos que hay una ficha esperando
       setTimeout(() => {
-        if (confirm('Recibiste una ficha de inscripción. Para importarla, necesitás entrar como administrador. ¿Ingresar ahora?')) {
+        const tipo = hashMode.kind === 'submit' ? 'ficha de inscripción' : 'actualización de ficha';
+        if (confirm(`Recibiste una ${tipo}. Para procesarla, necesitás entrar como administrador. ¿Ingresar ahora?`)) {
           requestAdminAccess();
         }
       }, 500);

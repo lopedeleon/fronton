@@ -6846,6 +6846,28 @@ function setupArqueoToggle() {
   };
 }
 
+// Atajo desde la card del torneo: cambia a pestaña Inscripciones, despliega
+// el panel de arqueo si no estaba abierto, y scrollea hasta él.
+function goToArqueo() {
+  const tab = document.querySelector('[data-tab="inscriptions"]');
+  if (tab) tab.click();
+  // Damos un tick para que el DOM de la pestaña ya esté visible
+  setTimeout(() => {
+    const panel = $('arqueo-panel');
+    const btn = $('arqueo-toggle-btn');
+    if (panel && btn && panel.style.display === 'none') {
+      // Abrimos el panel (simulando el click del toggle para mantener el texto sincronizado)
+      btn.click();
+    } else if (panel) {
+      // Ya estaba abierto: re-renderizamos por si cambió algo
+      renderArqueo();
+    }
+    // Scroll hasta el panel con un pequeño offset arriba para no taparlo
+    const target = $('arqueo-panel');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
 // Render del arqueo: totales por método + receptor + tabla detallada
 function renderArqueo() {
   const panel = $('arqueo-panel');
@@ -8433,6 +8455,7 @@ function renderTournamentCard(t, isArchived) {
         ${isArchived
           ? `<button class="btn btn-ghost btn-sm" onclick="viewArchivedTournament('${t.id}')">📊 Resumen</button>`
           : `<button class="btn btn-ghost btn-sm" onclick="renameTournament('${t.id}')">Renombrar</button>`}
+        <button class="btn btn-ghost btn-sm" onclick="goToArqueo()" title="Ver arqueo de pagos">💰 Arqueo</button>
         <button class="btn btn-danger btn-sm" onclick="deleteTournament('${t.id}')">Eliminar</button>
       </div>
     </div>
@@ -11474,6 +11497,7 @@ window.doReplacePlayer = doReplacePlayer;
 window.togglePaymentStatus = togglePaymentStatus;
 window.removeCashReceiver = removeCashReceiver;
 window.updatePaymentMethodUI = updatePaymentMethodUI;
+window.goToArqueo = goToArqueo;
 window.requestReevaluation = requestReevaluation;
 window.editKOMatch = editKOMatch;
 window.closeMatchEditor = closeMatchEditor;

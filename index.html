@@ -682,6 +682,287 @@ table.standings tr.qualified-third td:first-child::before {
   border-color: var(--accent);
 }
 
+/* ==== Extensiones de modal: head con título + close, variante chica ==== */
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.modal-head h3 {
+  margin: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: 0.03em;
+}
+.modal-head .modal-close {
+  position: static;
+  flex-shrink: 0;
+}
+.modal-box-sm { max-width: 400px; }
+
+/* ==== Editor de equipo (fase activa) ==== */
+.team-editor-section {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink-soft);
+}
+.team-editor-section:last-child { border-bottom: none; padding-bottom: 0; }
+.team-editor-section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.team-editor-player-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.team-editor-player-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+  flex: 1;
+  min-width: 0;
+}
+.team-editor-player-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.team-editor-danger {
+  background: rgba(200,48,28,0.05);
+  padding: 12px;
+  margin-left: -12px;
+  margin-right: -12px;
+  text-align: center;
+}
+.team-editor-history {
+  font-size: 12px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+.team-editor-log-item {
+  padding: 3px 0;
+  color: var(--ink-soft);
+}
+
+/* ==== Picker de reemplazo de jugador ==== */
+.replace-picker-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--ink-soft);
+  margin-bottom: 6px;
+  background: var(--bg-paper);
+}
+.replace-picker-item.is-different-tour {
+  border-style: dashed;
+  opacity: 0.8;
+}
+.replace-picker-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+.replace-picker-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ==== Modal "¿a dónde vuelve el jugador?" ==== */
+.return-player-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.return-player-options .btn {
+  text-align: left;
+  padding: 12px 14px;
+  line-height: 1.3;
+}
+.return-player-options .btn .btn-sub {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* ==== Badge de equipo modificado ==== */
+.team-mod-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  background: var(--gold);
+  color: var(--ink);
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+/* Asterisco público discreto (para vista pública de equipos modificados) */
+.team-mod-asterisk {
+  color: var(--gold);
+  font-size: 0.8em;
+  font-weight: 700;
+  margin-left: 2px;
+  vertical-align: super;
+}
+
+/* ==== PAGOS (admin-only) ==== */
+/* Resumen arriba del listado: tres cajas grandes con métricas */
+.payments-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.payments-summary-box {
+  background: var(--bg-paper);
+  border: 2px solid var(--ink);
+  padding: 10px 12px;
+  text-align: center;
+}
+.payments-summary-box.all-paid { background: var(--green); color: var(--bg); border-color: var(--green); }
+.payments-summary-box.pending  { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.payments-summary-box.money    { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.payments-summary-big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.payments-summary-big .sep {
+  font-size: 0.7em;
+  opacity: 0.5;
+  margin: 0 2px;
+}
+.payments-summary-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  opacity: 0.85;
+}
+@media (max-width: 520px) {
+  .payments-summary { grid-template-columns: 1fr; }
+  .payments-summary-big { font-size: 22px; }
+}
+
+/* Cabecera del listado de jugadores */
+.payments-list-head {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin: 14px 0 6px;
+}
+
+/* Fila de un jugador: nombre + chip de estado. Para que el chip sea obvio,
+   la fila cambia de fondo según estado (suavemente). */
+.payments-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--ink-soft);
+  margin-bottom: 4px;
+  background: var(--bg-paper);
+  transition: background 0.15s, border-color 0.15s;
+}
+.payments-row.is-pending { border-left: 4px solid var(--accent); }
+.payments-row.is-paid    { border-left: 4px solid var(--green); opacity: 0.85; }
+.payments-row-info { min-width: 0; flex: 1; }
+.payments-row-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+.payments-row-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Chip clickable DEBE/PAGÓ. Es el mismo componente que se usa también en las
+   cards de equipo (en pestaña "Equipos" del admin). */
+.payment-chip {
+  appearance: none;
+  border: 2px solid;
+  padding: 6px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.12s;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.payment-chip.is-pending {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.payment-chip.is-pending:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.payment-chip.is-paid {
+  background: var(--green);
+  color: var(--bg);
+  border-color: var(--green);
+}
+.payment-chip.is-paid:hover {
+  background: var(--bg);
+  color: var(--green);
+}
+
+/* Chip mini para la card de equipo (pestaña "Equipos" del admin) */
+.team-card .team-payment-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+.team-card .team-payment-line .pname {
+  font-weight: 700;
+  color: var(--ink);
+}
+.team-card .team-payment-line .payment-chip {
+  padding: 3px 7px;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
 /* barra de estado en el modal */
 .modal-status-bar {
   display: flex;
@@ -4694,6 +4975,22 @@ tr.qualified .pstand-pos { background: var(--green); }
     </div>
 
     <div class="form-card">
+      <label>💰 Pagos de inscripción</label>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;">
+        MONTO FIJO POR JUGADOR · SE APLICA A TODOS LOS TORNEOS
+      </div>
+      <div class="form-row" style="grid-template-columns:1fr auto;gap:8px;align-items:end;">
+        <div>
+          <label style="font-size:9px;margin-bottom:4px;">Monto por jugador ($)</label>
+          <input type="number" id="payment-amount" placeholder="0" min="0" step="50">
+        </div>
+        <button class="btn btn-ghost btn-sm" id="payment-amount-save-btn">Guardar</button>
+      </div>
+      <div id="payments-summary" style="margin-top:14px;"></div>
+      <div id="payments-list" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="form-card">
       <label>Invitar jugador</label>
       <div style="display:grid;grid-template-columns:1fr;gap:10px;">
         <div>
@@ -5097,6 +5394,7 @@ let workspace = {
   // PAGOS
   payments: [],         // [{id, tournamentId, submissionId, firstName, lastName, amount, concept, status:'pending'|'paid'|'waived', createdAt, paidAt, notes}]
   paymentConfig: {
+    amount: 0,          // monto fijo de inscripción por jugador (en pesos)
     accountNumber: '',  // cuenta BROU
     accountHolder: '',  // titular
     accountBank: 'BROU',
@@ -5200,6 +5498,24 @@ function teamById(id) {
   return state.teams.find(t => t.id === id);
 }
 
+// Devuelve solo los equipos NO disueltos. Usar para: formularios, grupos,
+// llaves eliminatorias, clasificaciones. NO usar para renderizar nombres en
+// partidos ya jugados (esos siguen teniendo que mostrar los equipos disueltos).
+function getActiveTeams() {
+  return (state.teams || []).filter(t => !t.disbanded);
+}
+
+// Helper: ¿el equipo está disuelto? Usado para asteriscos en vista pública.
+function teamIsDisbanded(id) {
+  const t = teamById(id);
+  return !!(t && t.disbanded);
+}
+// Helper: ¿el equipo tuvo cambios (jugador reemplazado o removido)? Para badge modificado.
+function teamWasModified(id) {
+  const t = teamById(id);
+  return !!(t && Array.isArray(t.changeLog) && t.changeLog.length > 0);
+}
+
 // ---------- HELPERS DE PARTIDO (según modo) ----------
 function matchIsPlayed(m) {
   if (!m) return false;
@@ -5281,7 +5597,12 @@ function teamName(id) {
     return `${pos}º ${g}`;
   }
   const t = teamById(id);
-  return t ? `${t.p1} / ${t.p2}` : '—';
+  if (!t) return '—';
+  let base = `${t.p1} / ${t.p2}`;
+  if (t.disbanded) base = `(ex) ${base}`;
+  // Asterisco discreto para equipos modificados (visible en toda vista pública)
+  if (Array.isArray(t.changeLog) && t.changeLog.length > 0) base = `${base}*`;
+  return base;
 }
 
 function toast(msg) {
@@ -5320,40 +5641,662 @@ function addTeam() {
 }
 
 function removeTeam(id) {
-  if (state.phase !== 'setup') {
-    toast('El torneo ya empezó');
+  const t = teamById(id);
+  if (!t) return;
+
+  // En fase setup: borrado simple, sin historial. Devolvemos las submissions
+  // al pool de pendientes.
+  if (state.phase === 'setup') {
+    // Preguntamos a dónde vuelve cada jugador
+    const placements = [];
+    if (t.p1Data) {
+      openReturnPlayerModal(`${t.p1Data.firstName} ${t.p1Data.lastName}`, (dest) => {
+        if (dest === 'cancel') return;
+        placements.push({ sub: t.p1Data, dest });
+        if (t.p2Data) {
+          openReturnPlayerModal(`${t.p2Data.firstName} ${t.p2Data.lastName}`, (dest2) => {
+            if (dest2 === 'cancel') return;
+            placements.push({ sub: t.p2Data, dest: dest2 });
+            applyRemoveTeam(t, placements);
+          });
+        } else {
+          applyRemoveTeam(t, placements);
+        }
+      });
+      return;
+    }
+    // Sin p1Data (equipo legacy sin submissions): borrado directo
+    if (!confirm(`¿Eliminar el equipo "${t.p1} / ${t.p2}"?`)) return;
+    state.teams = state.teams.filter(x => x.id !== id);
+    renderTeams();
+    saveState();
     return;
   }
-  state.teams = state.teams.filter(t => t.id !== id);
-  renderTeams();
+
+  // Fase activa: confirmar + disolver (sin borrar para preservar partidos jugados).
+  const msg = `¿Eliminar el equipo "${t.p1} / ${t.p2}"?\n\n`
+            + `El torneo ya empezó. Los partidos ya jugados por este equipo se preservan `
+            + `(el equipo figura como "ex-equipo" en esos resultados). `
+            + `Los partidos pendientes no se jugarán.\n\n`
+            + `Esta acción queda registrada como modificación.`;
+  if (!confirm(msg)) return;
+
+  // Preguntamos a dónde vuelve cada jugador (si tienen submission asociada)
+  const doDissolve = (placements) => applyDissolveTeam(t, placements);
+  if (t.p1Data || t.p2Data) {
+    const placements = [];
+    const askP1 = (next) => {
+      if (!t.p1Data) return next();
+      openReturnPlayerModal(`${t.p1Data.firstName} ${t.p1Data.lastName}`, (dest) => {
+        if (dest === 'cancel') return;
+        placements.push({ sub: t.p1Data, dest });
+        next();
+      });
+    };
+    const askP2 = (next) => {
+      if (!t.p2Data) return next();
+      openReturnPlayerModal(`${t.p2Data.firstName} ${t.p2Data.lastName}`, (dest) => {
+        if (dest === 'cancel') return;
+        placements.push({ sub: t.p2Data, dest });
+        next();
+      });
+    };
+    askP1(() => askP2(() => doDissolve(placements)));
+  } else {
+    doDissolve([]);
+  }
+}
+
+// Aplicar la eliminación en fase setup (borrado físico)
+function applyRemoveTeam(team, placements) {
+  // Devolver jugadores al pool según destinos elegidos
+  for (const { sub, dest } of placements) returnSubmissionToPool(sub, dest);
+  state.teams = state.teams.filter(x => x.id !== team.id);
+  // También hay que limpiar referencias en grupos si ya hubo sorteo (raro en setup, pero por las dudas)
+  if (state.groups && state.groups.length > 0) {
+    state.groups.forEach(g => {
+      g.teamIds = (g.teamIds || []).filter(tid => tid !== team.id);
+    });
+  }
   saveState();
+  renderAll();
+  toast('Equipo eliminado');
+}
+
+// Aplicar la disolución en fase activa (marcar disbanded, borrar partidos pendientes,
+// preservar jugados, registrar modificación)
+function applyDissolveTeam(team, placements) {
+  // Devolver jugadores al pool
+  for (const { sub, dest } of placements) returnSubmissionToPool(sub, dest);
+
+  // Marcar equipo como disuelto (no borramos para preservar partidos jugados)
+  team.disbanded = true;
+  team.disbandedAt = Date.now();
+  if (!Array.isArray(team.changeLog)) team.changeLog = [];
+  team.changeLog.push({
+    type: 'disbanded',
+    at: Date.now(),
+    reason: 'Equipo disuelto durante el torneo',
+  });
+
+  // Borrar partidos PENDIENTES (no jugados) donde participa el equipo.
+  // Los partidos jugados se preservan con el id del equipo (teamName los
+  // mostrará con "(ex) ..." prefix).
+  const isMatchPending = (m) => !matchIsPlayed(m);
+  if (Array.isArray(state.matches)) {
+    state.matches = state.matches.filter(m =>
+      !(isMatchPending(m) && (m.homeId === team.id || m.awayId === team.id))
+    );
+  }
+  if (Array.isArray(state.koMatches)) {
+    // En KO no borramos los partidos, pero limpiamos las referencias si están pendientes
+    state.koMatches.forEach(m => {
+      if (isMatchPending(m)) {
+        if (m.homeId === team.id) m.homeId = null;
+        if (m.awayId === team.id) m.awayId = null;
+      }
+    });
+  }
+
+  // Quitar el equipo de los grupos (ya no cuenta para standings futuras)
+  if (state.groups && state.groups.length > 0) {
+    state.groups.forEach(g => {
+      g.teamIds = (g.teamIds || []).filter(tid => tid !== team.id);
+    });
+  }
+
+  saveState();
+  renderAll();
+  toast('Equipo disuelto. Partidos jugados preservados.');
+}
+
+// ========== Editor de equipos (fase activa) ==========
+// Abre un modal con 3 acciones: eliminar equipo / sacar jugador / reemplazar jugador.
+function openTeamEditor(teamId) {
+  const t = teamById(teamId);
+  if (!t || t.disbanded) return;
+  const modal = ensureTeamEditorModal();
+  $('team-editor-title').textContent = `Editar: ${t.p1} / ${t.p2}`;
+  const changes = (t.changeLog || []).length;
+  $('team-editor-history').innerHTML = changes === 0
+    ? '<span style="color:var(--muted);font-style:italic;">Sin modificaciones previas.</span>'
+    : (t.changeLog.map(c => {
+        const d = new Date(c.at);
+        const when = `${d.toLocaleDateString()} ${d.toLocaleTimeString().slice(0,5)}`;
+        return `<div class="team-editor-log-item">• ${when} — ${escapeHtml(c.reason || c.type)}</div>`;
+      }).join(''));
+  // Bind actions con el id del equipo
+  $('team-editor-remove-p1').onclick = () => { closeTeamEditor(); removePlayerFromTeam(teamId, 'p1'); };
+  $('team-editor-remove-p2').onclick = () => { closeTeamEditor(); removePlayerFromTeam(teamId, 'p2'); };
+  $('team-editor-replace-p1').onclick = () => { closeTeamEditor(); openReplacePlayerPicker(teamId, 'p1'); };
+  $('team-editor-replace-p2').onclick = () => { closeTeamEditor(); openReplacePlayerPicker(teamId, 'p2'); };
+  $('team-editor-dissolve').onclick = () => { closeTeamEditor(); removeTeam(teamId); };
+  $('team-editor-p1-name').textContent = t.p1;
+  $('team-editor-p2-name').textContent = t.p2;
+  modal.classList.add('show');
+}
+function closeTeamEditor() {
+  const m = $('team-editor-modal');
+  if (m) m.classList.remove('show');
+}
+function ensureTeamEditorModal() {
+  let m = $('team-editor-modal');
+  if (m) return m;
+  m = document.createElement('div');
+  m.id = 'team-editor-modal';
+  m.className = 'modal-backdrop';
+  m.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="team-editor-title">Editar equipo</h3>
+        <button type="button" class="modal-close" onclick="closeTeamEditor()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="team-editor-section">
+          <div class="team-editor-section-title">Jugador 1</div>
+          <div class="team-editor-player-row">
+            <span id="team-editor-p1-name" class="team-editor-player-name">—</span>
+            <div class="team-editor-player-actions">
+              <button class="btn btn-ghost btn-sm" id="team-editor-replace-p1">↻ Reemplazar</button>
+              <button class="btn btn-danger btn-sm" id="team-editor-remove-p1">✕ Sacar</button>
+            </div>
+          </div>
+        </div>
+        <div class="team-editor-section">
+          <div class="team-editor-section-title">Jugador 2</div>
+          <div class="team-editor-player-row">
+            <span id="team-editor-p2-name" class="team-editor-player-name">—</span>
+            <div class="team-editor-player-actions">
+              <button class="btn btn-ghost btn-sm" id="team-editor-replace-p2">↻ Reemplazar</button>
+              <button class="btn btn-danger btn-sm" id="team-editor-remove-p2">✕ Sacar</button>
+            </div>
+          </div>
+        </div>
+        <div class="team-editor-section team-editor-danger">
+          <button class="btn btn-danger" id="team-editor-dissolve">🗑 Eliminar equipo completo</button>
+        </div>
+        <div class="team-editor-section">
+          <div class="team-editor-section-title">Historial de modificaciones</div>
+          <div id="team-editor-history" class="team-editor-history"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(m);
+  // Click en backdrop cierra
+  m.addEventListener('click', (e) => { if (e.target === m) closeTeamEditor(); });
+  return m;
+}
+
+// Sacar un jugador de un equipo (sin reemplazarlo).
+// El equipo queda con un solo jugador y el sacado vuelve al pool según preferencia.
+function removePlayerFromTeam(teamId, side) {
+  const t = teamById(teamId);
+  if (!t || t.disbanded) return;
+  const sub = side === 'p1' ? t.p1Data : t.p2Data;
+  const name = side === 'p1' ? t.p1 : t.p2;
+  if (!sub) {
+    // Equipo legacy sin submission: pedimos confirmación simple
+    if (!confirm(`¿Sacar a "${name}" del equipo?\n\nEl equipo queda con un solo jugador.`)) return;
+    applyRemovePlayerFromTeam(t, side, null, null);
+    return;
+  }
+  openReturnPlayerModal(`${sub.firstName} ${sub.lastName}`, (dest) => {
+    if (dest === 'cancel') return;
+    applyRemovePlayerFromTeam(t, side, sub, dest);
+  });
+}
+
+function applyRemovePlayerFromTeam(team, side, sub, dest) {
+  const removedName = side === 'p1' ? team.p1 : team.p2;
+  // Vaciar al jugador del equipo. Dejamos un placeholder "(pendiente)" para
+  // que los partidos jugados previos sigan mostrando algo razonable, pero
+  // marcamos el equipo como incompleto para que no pueda jugar partidos nuevos
+  // hasta que se reemplace o se elimine.
+  if (side === 'p1') {
+    team.p1 = '(pendiente)';
+    team.p1Data = null;
+    team.p1Photo = null;
+  } else {
+    team.p2 = '(pendiente)';
+    team.p2Data = null;
+    team.p2Photo = null;
+  }
+  team.incomplete = true;
+
+  if (!Array.isArray(team.changeLog)) team.changeLog = [];
+  team.changeLog.push({
+    type: 'player-removed',
+    at: Date.now(),
+    reason: `Sacaron a ${removedName}`,
+  });
+
+  if (sub && dest) returnSubmissionToPool(sub, dest);
+
+  saveState();
+  renderAll();
+  toast(`${removedName} salió del equipo`);
+}
+
+// Abrir picker de sueltos para reemplazar un jugador
+function openReplacePlayerPicker(teamId, side) {
+  const t = teamById(teamId);
+  if (!t) return;
+
+  // Candidatos: submissions pendientes (no asignadas a ningún torneo) del mismo torneo si es posible
+  const subs = workspace.submissions || [];
+  const candidates = subs.filter(s =>
+    s.status === 'pending' &&
+    // Preferimos el mismo torneo pero no es obligatorio
+    (!s.tournamentName || s.tournamentName === state.name || true)
+  );
+
+  if (candidates.length === 0) {
+    toast('No hay jugadores disponibles en el pool');
+    return;
+  }
+
+  const modal = ensureReplacePickerModal();
+  const listEl = $('replace-picker-list');
+  const currentName = side === 'p1' ? t.p1 : t.p2;
+  $('replace-picker-title').textContent = `Reemplazar a ${currentName}`;
+  $('replace-picker-partner').textContent = side === 'p1' ? t.p2 : t.p1;
+
+  listEl.innerHTML = candidates.map(s => {
+    const name = `${s.firstName} ${s.lastName}${s.nickname ? ' (' + s.nickname + ')' : ''}`;
+    const lv = computeLevel(s.totalPts);
+    const sameTour = s.tournamentName === state.name;
+    return `
+      <div class="replace-picker-item${sameTour ? '' : ' is-different-tour'}">
+        <div>
+          <div class="replace-picker-name">${escapeHtml(name)}</div>
+          <div class="replace-picker-meta">
+            ${escapeHtml(lv.label)} · ${s.totalPts} PTS
+            ${s.tournamentName ? ` · ${escapeHtml(s.tournamentName)}` : ''}
+          </div>
+        </div>
+        <button class="btn btn-accent btn-sm" onclick="doReplacePlayer('${teamId}','${side}','${s.id}')">Elegir</button>
+      </div>
+    `;
+  }).join('');
+  modal.classList.add('show');
+}
+function closeReplacePicker() {
+  const m = $('replace-picker-modal');
+  if (m) m.classList.remove('show');
+}
+function ensureReplacePickerModal() {
+  let m = $('replace-picker-modal');
+  if (m) return m;
+  m = document.createElement('div');
+  m.id = 'replace-picker-modal';
+  m.className = 'modal-backdrop';
+  m.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="replace-picker-title">Reemplazar jugador</h3>
+        <button type="button" class="modal-close" onclick="closeReplacePicker()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:10px;">
+          Compañero actual: <strong id="replace-picker-partner" style="color:var(--ink);">—</strong>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;">
+          ELEGÍ UN JUGADOR DEL POOL
+        </div>
+        <div id="replace-picker-list"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(m);
+  m.addEventListener('click', (e) => { if (e.target === m) closeReplacePicker(); });
+  return m;
+}
+
+function doReplacePlayer(teamId, side, submissionId) {
+  const t = teamById(teamId);
+  const sub = (workspace.submissions || []).find(s => s.id === submissionId);
+  if (!t || !sub) { toast('No se pudo completar el reemplazo'); return; }
+
+  // Preguntamos a dónde va el jugador REEMPLAZADO (el que sale)
+  const outSub = side === 'p1' ? t.p1Data : t.p2Data;
+  const outName = side === 'p1' ? t.p1 : t.p2;
+
+  const doReplacement = (outDest) => {
+    const newName = `${sub.firstName} ${sub.lastName}${sub.nickname ? ' (' + sub.nickname + ')' : ''}`;
+    if (side === 'p1') {
+      t.p1 = newName;
+      t.p1Data = sub;
+      t.p1Photo = sub.photoUrl || null;
+    } else {
+      t.p2 = newName;
+      t.p2Data = sub;
+      t.p2Photo = sub.photoUrl || null;
+    }
+    t.incomplete = false;
+    if (!Array.isArray(t.changeLog)) t.changeLog = [];
+    t.changeLog.push({
+      type: 'player-replaced',
+      at: Date.now(),
+      reason: `${outName} → ${newName}`,
+    });
+
+    // El jugador que entra queda approved y adjudicado al torneo
+    sub.status = 'approved';
+    sub.addedToTournamentId = state.id;
+
+    // El jugador que sale vuelve al pool si lo teníamos
+    if (outSub && outDest) returnSubmissionToPool(outSub, outDest);
+
+    saveState();
+    closeReplacePicker();
+    renderAll();
+    toast(`Reemplazo: ${outName} → ${newName}`);
+  };
+
+  if (outSub) {
+    openReturnPlayerModal(`${outSub.firstName} ${outSub.lastName}`, (dest) => {
+      if (dest === 'cancel') return;
+      doReplacement(dest);
+    });
+  } else {
+    // Equipo legacy sin p1Data: no hay a quién devolver
+    doReplacement(null);
+  }
+}
+
+// ========== Modal "¿A dónde vuelve el jugador?" ==========
+// Muestra las 3 opciones y ejecuta el callback con el destino elegido
+// ('solo', 'waiting-partner', 'out', 'cancel').
+function openReturnPlayerModal(playerName, onChoice) {
+  const modal = ensureReturnPlayerModal();
+  $('return-player-name').textContent = playerName;
+  const btnSolo    = $('return-player-btn-solo');
+  const btnWaiting = $('return-player-btn-waiting');
+  const btnOut     = $('return-player-btn-out');
+  const btnCancel  = $('return-player-btn-cancel');
+  const close = (choice) => { modal.classList.remove('show'); onChoice(choice); };
+  btnSolo.onclick    = () => close('solo');
+  btnWaiting.onclick = () => close('waiting-partner');
+  btnOut.onclick     = () => close('out');
+  btnCancel.onclick  = () => close('cancel');
+  modal.classList.add('show');
+}
+function ensureReturnPlayerModal() {
+  let m = $('return-player-modal');
+  if (m) return m;
+  m = document.createElement('div');
+  m.id = 'return-player-modal';
+  m.className = 'modal-backdrop';
+  m.innerHTML = `
+    <div class="modal-box modal-box-sm">
+      <div class="modal-head">
+        <h3>¿A dónde vuelve el jugador?</h3>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom:14px;font-size:14px;">
+          <strong id="return-player-name">—</strong>
+        </div>
+        <div class="return-player-options">
+          <button class="btn btn-accent" id="return-player-btn-solo">
+            🙋 Jugadores sueltos<br>
+            <span class="btn-sub">Queda buscando compañero</span>
+          </button>
+          <button class="btn btn-ghost" id="return-player-btn-waiting">
+            👥 Pareja pendiente<br>
+            <span class="btn-sub">Listo para emparejar con alguien específico</span>
+          </button>
+          <button class="btn btn-ghost" id="return-player-btn-out">
+            🚪 Fuera del torneo<br>
+            <span class="btn-sub">No sigue participando</span>
+          </button>
+          <button class="btn btn-ghost" id="return-player-btn-cancel" style="margin-top:8px;">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(m);
+  m.addEventListener('click', (e) => {
+    if (e.target === m) { m.classList.remove('show'); /* no callback → action cancelada */ }
+  });
+  return m;
+}
+
+// Restaurar una submission al pool según el destino elegido
+function returnSubmissionToPool(sub, dest) {
+  if (!sub) return;
+  if (dest === 'out') {
+    // No vuelve a ningún pool; marcamos como withdrawn para historial
+    sub.status = 'withdrawn';
+    sub.withdrawnAt = Date.now();
+    delete sub.addedToTournamentId;
+    return;
+  }
+  // solo / waiting-partner → vuelve al pool de pendientes
+  sub.status = 'pending';
+  delete sub.addedToTournamentId;
+  // 'solo' = quiere jugar pero sin compañero asignado → lookingForPartner=true
+  // 'waiting-partner' = tiene compañero declarado (o lo tendrá) → lookingForPartner=false
+  sub.lookingForPartner = (dest === 'solo');
+}
+
+// ========== PAGOS (por jugador, estado binario DEBE/PAGÓ) ==========
+// El estado se guarda en submission.paymentStatus: 'pending' (default) | 'paid'.
+// submission.paymentAt guarda timestamp del último cambio.
+
+// Devuelve el monto configurado (o 0 si nunca se seteó)
+function getPaymentAmount() {
+  return (workspace.paymentConfig && workspace.paymentConfig.amount) || 0;
+}
+
+// ¿Pagó este jugador (submission)?
+function submissionPaid(sub) {
+  return !!(sub && sub.paymentStatus === 'paid');
+}
+
+// Toggle del estado de pago. Usado por los chips clickables.
+function togglePaymentStatus(submissionId) {
+  const sub = (workspace.submissions || []).find(s => s.id === submissionId);
+  if (!sub) return;
+  if (sub.paymentStatus === 'paid') {
+    sub.paymentStatus = 'pending';
+    sub.paymentAt = null;
+    toast(`Marcado como DEBE: ${sub.firstName} ${sub.lastName}`);
+  } else {
+    sub.paymentStatus = 'paid';
+    sub.paymentAt = Date.now();
+    toast(`✓ Pagó: ${sub.firstName} ${sub.lastName}`);
+  }
+  saveState();
+  renderAll();
+}
+
+// Devuelve las submissions que están en algún equipo armado (approved) de
+// cualquier torneo. Solo esas cuentan para el total de pagos esperados:
+// jugadores que todavía no entraron a un equipo no se les pide plata aún.
+function getAllPlayersInTeams() {
+  const subs = workspace.submissions || [];
+  return subs.filter(s => s.status === 'approved' && s.addedToTournamentId);
+}
+
+// Render del resumen y listado de pagos en el panel admin.
+function renderPayments() {
+  const summaryEl = $('payments-summary');
+  const listEl = $('payments-list');
+  const amountInput = $('payment-amount');
+  if (!summaryEl || !listEl || !amountInput) return;
+
+  // Sincronizar input con config actual (solo si el user no está editando)
+  if (document.activeElement !== amountInput) {
+    amountInput.value = getPaymentAmount() || '';
+  }
+
+  const inTeams = getAllPlayersInTeams();
+  if (inTeams.length === 0) {
+    summaryEl.innerHTML = `<div style="font-size:12px;color:var(--muted);font-style:italic;">Cuando armes equipos, acá vas a ver el estado de pago de cada jugador.</div>`;
+    listEl.innerHTML = '';
+    return;
+  }
+
+  const amount = getPaymentAmount();
+  const paid = inTeams.filter(submissionPaid);
+  const pending = inTeams.filter(s => !submissionPaid(s));
+  const collected = paid.length * amount;
+  const expected = inTeams.length * amount;
+  const money = n => amount > 0 ? `$${n.toLocaleString('es-UY')}` : '—';
+
+  summaryEl.innerHTML = `
+    <div class="payments-summary">
+      <div class="payments-summary-box">
+        <div class="payments-summary-big">${paid.length}<span class="sep">/</span>${inTeams.length}</div>
+        <div class="payments-summary-lbl">Pagaron</div>
+      </div>
+      <div class="payments-summary-box ${pending.length === 0 ? 'all-paid' : 'pending'}">
+        <div class="payments-summary-big">${pending.length}</div>
+        <div class="payments-summary-lbl">Deben</div>
+      </div>
+      <div class="payments-summary-box money">
+        <div class="payments-summary-big">${money(collected)}</div>
+        <div class="payments-summary-lbl">Recaudado${amount > 0 ? ` / ${money(expected)}` : ''}</div>
+      </div>
+    </div>
+  `;
+
+  // Listado: primero los que deben, después los que pagaron. Dentro de cada grupo, alfabético.
+  const sorted = [...inTeams].sort((a, b) => {
+    const pa = submissionPaid(a) ? 1 : 0;
+    const pb = submissionPaid(b) ? 1 : 0;
+    if (pa !== pb) return pa - pb;
+    return (a.firstName || '').localeCompare(b.firstName || '');
+  });
+
+  // Nombre del torneo para cada submission (buscar en workspace.tournaments)
+  const tourName = (tid) => {
+    const t = workspace.tournaments.find(x => x.id === tid);
+    return t ? `${t.name} · DIV. ${t.division}` : '—';
+  };
+
+  listEl.innerHTML = `
+    <div class="payments-list-head">Jugadores en equipos</div>
+    ${sorted.map(s => {
+      const paid = submissionPaid(s);
+      const name = `${s.firstName} ${s.lastName}${s.nickname ? ' (' + s.nickname + ')' : ''}`;
+      const paidAtStr = paid && s.paymentAt
+        ? new Date(s.paymentAt).toLocaleDateString('es-UY', { day: '2-digit', month: '2-digit' })
+        : '';
+      return `
+        <div class="payments-row ${paid ? 'is-paid' : 'is-pending'}">
+          <div class="payments-row-info">
+            <div class="payments-row-name">${escapeHtml(name)}</div>
+            <div class="payments-row-meta">${escapeHtml(tourName(s.addedToTournamentId))}</div>
+          </div>
+          <button class="payment-chip ${paid ? 'is-paid' : 'is-pending'}"
+                  onclick="togglePaymentStatus('${s.id}')"
+                  title="Click para ${paid ? 'marcar como pendiente' : 'marcar como pagado'}">
+            ${paid ? `✓ PAGÓ${paidAtStr ? ' · ' + paidAtStr : ''}` : '✕ DEBE'}
+          </button>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+// Wire up del input de monto (se llama una sola vez al iniciar)
+function setupPaymentAmountInput() {
+  const input = $('payment-amount');
+  const btn = $('payment-amount-save-btn');
+  if (!input || !btn) return;
+  const save = () => {
+    const val = Math.max(0, parseInt(input.value) || 0);
+    if (!workspace.paymentConfig) workspace.paymentConfig = {};
+    workspace.paymentConfig.amount = val;
+    saveState();
+    renderPayments();
+    toast(val > 0 ? `Monto actualizado: $${val.toLocaleString('es-UY')}` : 'Monto deshabilitado');
+  };
+  btn.onclick = save;
+  input.addEventListener('keypress', (e) => { if (e.key === 'Enter') save(); });
 }
 
 function renderTeams() {
   const list = $('teams-list');
   const count = $('teams-count');
-  count.textContent = `${state.teams.length} pareja${state.teams.length === 1 ? '' : 's'}`;
-  if (state.teams.length === 0) {
+  const activeTeams = getActiveTeams();
+  count.textContent = `${activeTeams.length} pareja${activeTeams.length === 1 ? '' : 's'}`;
+  if (activeTeams.length === 0) {
     list.innerHTML = `<div class="empty" style="grid-column:1/-1;">
       <div class="empty-title">Sin equipos</div>
       <p>Agregá la primera pareja para arrancar.</p>
     </div>`;
     return;
   }
-  list.innerHTML = state.teams.map((t, i) => `
-    <div class="team-card">
-      <span class="team-num">${String(i + 1).padStart(2, '0')}</span>
-      <div>
-        <div class="team-name">${escapeHtml(t.p1)} <span style="color:var(--accent)">/</span> ${escapeHtml(t.p2)}</div>
+  list.innerHTML = activeTeams.map((t, i) => {
+    const changes = (t.changeLog || []).length;
+    const modBadge = changes > 0
+      ? `<span class="team-mod-badge" title="Equipo modificado ${changes} ${changes === 1 ? 'vez' : 'veces'}">⚙ MODIFICADO (${changes})</span>`
+      : '';
+    // En fase setup: botón de eliminar simple. En fase activa: menú de edición.
+    const actionsHtml = (state.phase === 'setup')
+      ? `<button class="btn btn-ghost btn-sm" onclick="removeTeam('${t.id}')" title="Eliminar">✕</button>`
+      : `<button class="btn btn-ghost btn-sm" onclick="openTeamEditor('${t.id}')" title="Editar equipo">⚙</button>`;
+
+    // Chips de pago por jugador (solo si tienen submission asociada — si no, no
+    // hay dónde guardar el estado). Un chip por jugador, independientes.
+    const paymentChip = (sub) => {
+      if (!sub) return '';
+      const paid = submissionPaid(sub);
+      return `<button class="payment-chip ${paid ? 'is-paid' : 'is-pending'}"
+                onclick="event.stopPropagation(); togglePaymentStatus('${sub.id}')"
+                title="${paid ? 'Pagó — click para desmarcar' : 'Debe — click para marcar como pagado'}">
+                ${paid ? '✓ PAGÓ' : '✕ DEBE'}
+              </button>`;
+    };
+    const paymentsLine = (t.p1Data || t.p2Data)
+      ? `<div class="team-payment-line">
+           ${t.p1Data ? `<span class="pname">${escapeHtml(t.p1Data.firstName)}:</span>${paymentChip(t.p1Data)}` : ''}
+           ${t.p2Data ? `<span class="pname">${escapeHtml(t.p2Data.firstName)}:</span>${paymentChip(t.p2Data)}` : ''}
+         </div>`
+      : '';
+
+    return `
+      <div class="team-card">
+        <span class="team-num">${String(i + 1).padStart(2, '0')}</span>
+        <div>
+          <div class="team-name">${escapeHtml(t.p1)} <span style="color:var(--accent)">/</span> ${escapeHtml(t.p2)}</div>
+          ${modBadge}
+          ${paymentsLine}
+        </div>
+        ${actionsHtml}
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="removeTeam('${t.id}')" title="Eliminar">✕</button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 $('clear-teams-btn').addEventListener('click', () => {
   if (state.phase !== 'setup') { toast('No se puede en esta fase'); return; }
-  if (state.teams.length === 0) return;
+  if (getActiveTeams().length === 0) return;
   if (!confirm('¿Vaciar la lista de equipos?')) return;
   state.teams = [];
   renderTeams();
@@ -5368,7 +6311,7 @@ function escapeHtml(str) {
 
 // ---------- SORTEO DE GRUPOS ----------
 $('generate-groups-btn').addEventListener('click', () => {
-  if (state.teams.length < 4) {
+  if (getActiveTeams().length < 4) {
     toast('Mínimo 4 equipos');
     return;
   }
@@ -5383,7 +6326,7 @@ $('generate-groups-btn').addEventListener('click', () => {
 
 function generateGroups() {
   const size = state.settings.groupSize;
-  const shuffled = shuffle(state.teams);
+  const shuffled = shuffle(getActiveTeams());
   const nGroups = Math.ceil(shuffled.length / size);
   const groups = [];
   const letters = ['A','B','C','D','E','F','G','H'];
@@ -6340,7 +7283,7 @@ function renderAll() {
   $('single-config').style.display = state.settings.matchMode === 'single' ? '' : 'none';
   $('sets-config').style.display = state.settings.matchMode === 'bestof3' ? '' : 'none';
   document.querySelector('.hero-title').innerHTML = escapeHtml(state.name).replace(/\s(\S+)$/, ' <span class="accent">$1</span>');
-  $('hero-tagline').textContent = `DIV. ${state.division || 'A'} · ${(state.teams || []).length} PAREJAS`;
+  $('hero-tagline').textContent = `DIV. ${state.division || 'A'} · ${getActiveTeams().length} PAREJAS`;
 }
 
 // ============================================================
@@ -6401,7 +7344,7 @@ function renderDashboard() {
     </div>
     <div class="dh-hero-name">${heroName}</div>
     <div class="dh-hero-numbers">
-      <div class="dh-hero-num"><span class="big">${(state.teams || []).length}</span><span class="lbl">Parejas</span></div>
+      <div class="dh-hero-num"><span class="big">${getActiveTeams().length}</span><span class="lbl">Parejas</span></div>
       <div class="dh-hero-num"><span class="big">${(state.groups || []).length}</span><span class="lbl">Grupos</span></div>
       <div class="dh-hero-num"><span class="big">${doneMatches}</span><span class="lbl">Jugados</span></div>
       <div class="dh-hero-num"><span class="big">${totalMatches - doneMatches}</span><span class="lbl">Pendientes</span></div>
@@ -6466,7 +7409,7 @@ function renderDashboard() {
   // Stats
   $('summary-stats').innerHTML = `
     <div class="dh-stat accent">
-      <div class="val">${(state.teams || []).length}</div>
+      <div class="val">${getActiveTeams().length}</div>
       <div class="lbl">Parejas</div>
     </div>
     <div class="dh-stat green">
@@ -8137,6 +9080,9 @@ function renderInscriptions() {
 
   $('admin-whatsapp').value = workspace.adminWhatsApp || '';
 
+  // Render del panel de pagos (resumen + listado por jugador)
+  renderPayments();
+
   // Selector de torneo para invitar
   const sel = $('invite-tournament-select');
   if (sel) {
@@ -8471,6 +9417,9 @@ function initInscriptionsControls() {
     saveState();
     toast('Número guardado');
   });
+
+  // Wire-up del input de monto de pagos
+  setupPaymentAmountInput();
 
   $('generate-invite-btn').addEventListener('click', async (ev) => {
     if (!workspace.adminWhatsApp) {
@@ -9360,6 +10309,11 @@ window.submitAdminLogin = submitAdminLogin;
 window.exitAdminMode = exitAdminMode;
 
 window.removeTeam = removeTeam;
+window.openTeamEditor = openTeamEditor;
+window.closeTeamEditor = closeTeamEditor;
+window.closeReplacePicker = closeReplacePicker;
+window.doReplacePlayer = doReplacePlayer;
+window.togglePaymentStatus = togglePaymentStatus;
 window.editKOMatch = editKOMatch;
 window.closeMatchEditor = closeMatchEditor;
 window.clearMatchResult = clearMatchResult;

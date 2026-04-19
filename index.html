@@ -4585,6 +4585,17 @@ tr.qualified .pstand-pos { background: var(--green); }
   </div>
 </div>
 
+<!-- Supabase SDK (módulo ESM desde jsDelivr) -->
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+  const SUPABASE_URL = 'https://qecsclnshtewdsffnbat.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_oWgB0YEFpI6t90Kdf1Yjtw_1w6KiJHl';
+  window.sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+  // Señal de que el cliente está listo (para el init principal)
+  window.sbReady = true;
+  window.dispatchEvent(new Event('sb-ready'));
+</script>
+
 <script>
 // ============================================================
 //  FRONTÓN CUP · gestor de torneos con persistencia
@@ -6783,8 +6794,10 @@ function computeLevel(totalPts) {
   return { key: 'avanzado', label: 'Avanzado', suggest: 'A / Open' };
 }
 
-// ========== Encoding de datos para links ==========
-// Usamos JSON + base64url para que quepa en una URL
+// ========== Encoding legacy (base64url) ==========
+// Se mantiene para:
+//   1. Fallback si Supabase falla al generar un link
+//   2. Retrocompatibilidad con links viejos ya compartidos por WhatsApp
 function encodePayload(obj) {
   const str = JSON.stringify(obj);
   // btoa maneja ASCII; usamos encodeURIComponent para UTF-8 seguro
@@ -6804,8 +6817,77 @@ function decodePayload(encoded) {
   }
 }
 
+// ========== shortLink: capa sobre Supabase ==========
+// put(kind, payload) → string id corto (o null si falla)
+// get(id) → {kind, payload} o null si no existe / error
+const shortLink = {
+  // Generador de IDs: 10 chars alfanuméricos, distingue mayúsc/minúsc → 62^10 combinaciones
+  _alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+  _genId(len = 10) {
+    const a = this._alphabet;
+    const len2 = len;
+    const crypto = window.crypto || window.msCrypto;
+    let out = '';
+    if (crypto && crypto.getRandomValues) {
+      const arr = new Uint8Array(len2);
+      crypto.getRandomValues(arr);
+      for (let i = 0; i < len2; i++) out += a[arr[i] % a.length];
+    } else {
+      // Fallback muy poco probable; Math.random es suficiente para IDs no-secretos
+      for (let i = 0; i < len2; i++) out += a[Math.floor(Math.random() * a.length)];
+    }
+    return out;
+  },
+
+  // Heurística: ¿esto parece un ID corto nuestro o un payload base64 viejo?
+  // Los IDs nuevos tienen [A-Za-z0-9]{6,32}. Los payloads base64url pueden contener - y _
+  // y típicamente superan los 40 chars.
+  isShortId(s) {
+    return typeof s === 'string' && /^[A-Za-z0-9]{6,32}$/.test(s);
+  },
+
+  async put(kind, payload) {
+    if (!window.sb) return null;
+    const id = this._genId();
+    try {
+      const { error } = await window.sb
+        .from('links')
+        .insert({ id, kind, payload });
+      if (error) {
+        console.warn('[shortLink] insert error', error);
+        return null;
+      }
+      return id;
+    } catch (e) {
+      console.warn('[shortLink] insert exception', e);
+      return null;
+    }
+  },
+
+  async get(id) {
+    if (!window.sb) return null;
+    try {
+      const { data, error } = await window.sb
+        .from('links')
+        .select('kind, payload')
+        .eq('id', id)
+        .maybeSingle();
+      if (error) {
+        console.warn('[shortLink] select error', error);
+        return null;
+      }
+      return data || null;
+    } catch (e) {
+      console.warn('[shortLink] select exception', e);
+      return null;
+    }
+  },
+};
+
 // ========== Generar link de invitación (admin → jugador) ==========
-function buildInviteLink(invitation) {
+// ASYNC: intenta guardar en Supabase y devolver link corto.
+// Fallback: si Supabase falla, devuelve link base64url largo (comportamiento legacy).
+async function buildInviteLink(invitation) {
   const base = window.location.href.split('#')[0];
   const payload = {
     t: 'inv',  // tipo: invitación
@@ -6813,30 +6895,58 @@ function buildInviteLink(invitation) {
     tn: invitation.tournamentName,
     td: invitation.tournamentDivision,
     adm: workspace.adminWhatsApp || '',
+    pn: invitation.partnerName || undefined, // solo si vino (partnerLink)
   };
+  // Limpiar claves undefined para no ensuciar el JSON
+  if (payload.pn === undefined) delete payload.pn;
+
+  const id = await shortLink.put('invite', payload);
+  if (id) return `${base}#invite=${id}`;
+  // Fallback: link largo legacy
   return `${base}#invite=${encodePayload(payload)}`;
 }
 
 // ========== Generar link de submission (jugador → admin) ==========
-function buildSubmissionLink(submission) {
+// ASYNC: mismo patrón.
+async function buildSubmissionLink(submission) {
   const base = window.location.href.split('#')[0];
   const payload = {
     t: 'sub',  // tipo: submission
     s: submission,
   };
+  const id = await shortLink.put('submit', payload);
+  if (id) return `${base}#submit=${id}`;
+  // Fallback: link largo legacy
   return `${base}#submit=${encodePayload(payload)}`;
 }
 
 // ========== Detectar modo de la URL ==========
-function detectMode() {
+// ASYNC ahora porque puede tener que resolver un ID corto vía Supabase.
+// Acepta dos formatos:
+//   - #invite=<shortId>    → lee de Supabase
+//   - #invite=<base64url>  → decodifica localmente (legacy, retrocompat)
+async function detectMode() {
   const hash = window.location.hash;
   if (hash.startsWith('#invite=')) {
-    return { kind: 'invite', payload: decodePayload(hash.slice(8)) };
+    const token = hash.slice(8);
+    return { kind: 'invite', payload: await resolveToken(token, 'invite') };
   }
   if (hash.startsWith('#submit=')) {
-    return { kind: 'submit', payload: decodePayload(hash.slice(8)) };
+    const token = hash.slice(8);
+    return { kind: 'submit', payload: await resolveToken(token, 'submit') };
   }
   return { kind: 'normal' };
+}
+
+async function resolveToken(token, expectedKind) {
+  // Intento 1: ¿es un ID corto? → buscar en Supabase
+  if (shortLink.isShortId(token)) {
+    const row = await shortLink.get(token);
+    if (row && row.kind === expectedKind) return row.payload;
+    // Si no encontramos, seguimos al fallback (puede ser base64 corto por casualidad)
+  }
+  // Intento 2: decodificar como base64url legacy
+  return decodePayload(token);
 }
 
 // ========== MODO PLANILLA (jugador invitado) ==========
@@ -6896,7 +7006,7 @@ function togglePartnerMode(mode) {
   }
 }
 
-function submitEnrollment() {
+async function submitEnrollment() {
   // Validar datos básicos
   const firstName = $('enr-first-name').value.trim();
   const lastName = $('enr-last-name').value.trim();
@@ -6943,7 +7053,12 @@ function submitEnrollment() {
     levelSuggest: level.suggest,
   };
 
-  const subLink = buildSubmissionLink(submission);
+  // Feedback mientras hablamos con Supabase
+  const submitBtn = $('enr-submit-btn');
+  const prevBtnLabel = submitBtn ? submitBtn.textContent : null;
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Generando link...'; }
+
+  const subLink = await buildSubmissionLink(submission);
   const adminWa = payload.adm || '';
 
   // Pantalla de éxito
@@ -6964,15 +7079,13 @@ function submitEnrollment() {
 
   // Si hay compañero y WhatsApp del compañero, generar link para él
   if (!noPartner && partnerName && partnerWhatsapp) {
-    const partnerPayload = {
-      t: 'inv',
+    // Usamos buildInviteLink para aprovechar el flujo de link corto + fallback
+    const partnerLink = await buildInviteLink({
       id: uid(),
-      tn: payload.tn || '',
-      td: payload.td || '',
-      adm: adminWa,
-      pn: `${firstName} ${lastName}`,
-    };
-    const partnerLink = `${window.location.href.split('#')[0]}#invite=${encodePayload(partnerPayload)}`;
+      tournamentName: payload.tn || '',
+      tournamentDivision: payload.td || '',
+      partnerName: `${firstName} ${lastName}`,
+    });
     const partnerMsg = `Hola ${partnerName}! Te invito a jugar el torneo ${payload.tn || ''} conmigo. Completá tu ficha acá:\n\n${partnerLink}`;
 
     $('enr-partner-block').style.display = 'block';
@@ -6984,6 +7097,9 @@ function submitEnrollment() {
     $('enr-partner-block').style.display = 'none';
     $('enr-manual-partner-box').style.display = 'none';
   }
+
+  // Restaurar botón (por si el jugador vuelve atrás)
+  if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = prevBtnLabel; }
 
   // Scroll arriba
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -7346,10 +7462,10 @@ function viewSubmissionDetail(id) {
   $('archive-modal').classList.add('show');
 }
 
-function reshareInvitation(invId) {
+async function reshareInvitation(invId) {
   const inv = (workspace.invitations || []).find(i => i.id === invId);
   if (!inv) return;
-  const link = buildInviteLink({
+  const link = await buildInviteLink({
     id: inv.id,
     tournamentName: inv.tournamentName,
     tournamentDivision: inv.tournamentDivision,
@@ -7366,7 +7482,7 @@ function initInscriptionsControls() {
     toast('Número guardado');
   });
 
-  $('generate-invite-btn').addEventListener('click', () => {
+  $('generate-invite-btn').addEventListener('click', async (ev) => {
     if (!workspace.adminWhatsApp) {
       if (!confirm('No cargaste tu número de WhatsApp. Sin eso, los jugadores no te pueden enviar la ficha directo. ¿Generar el link igual?')) return;
     }
@@ -7389,8 +7505,15 @@ function initInscriptionsControls() {
     workspace.invitations.push(inv);
     saveState();
 
-    const link = buildInviteLink(inv);
+    // Feedback mientras contactamos Supabase
+    const btn = ev.currentTarget;
+    const prevLabel = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Generando...';
+
+    const link = await buildInviteLink(inv);
     const msg = `Hola ${inviterName}! Te invito al torneo "${targetT.name}" (Div. ${targetT.division}). Completá tu ficha de inscripción acá:\n\n${link}`;
+
+    btn.disabled = false; btn.textContent = prevLabel;
 
     // Mostrar output con link clickeable + botones
     $('invite-output').style.display = 'block';
@@ -7407,22 +7530,23 @@ function initInscriptionsControls() {
     renderAll();
   });
 
-  $('manual-import-btn').addEventListener('click', () => {
+  $('manual-import-btn').addEventListener('click', async () => {
     const input = $('manual-import-input').value.trim();
     if (!input) { toast('Pegá el link'); return; }
     // extraer el hash
     const match = input.match(/#submit=([^&\s]+)/);
     if (!match) { toast('No parece un link de inscripción'); return; }
-    const payload = decodePayload(match[1]);
-    if (!payload) { toast('Link inválido'); return; }
+    // Resolvemos: si es ID corto busca en Supabase, si es base64 decodifica localmente
+    const payload = await resolveToken(match[1], 'submit');
+    if (!payload) { toast('Link inválido o expirado'); return; }
     handleIncomingSubmission(payload);
     $('manual-import-input').value = '';
   });
 }
 
 // ========== INIT principal con detección de modo ==========
-function initRouteMode() {
-  const mode = detectMode();
+async function initRouteMode() {
+  const mode = await detectMode();
   if (mode.kind === 'invite' && mode.payload) {
     enterEnrollmentMode(mode.payload);
     return 'enrollment';
@@ -8226,16 +8350,42 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+// Espera a que window.sb esté inicializado (módulo ESM carga async).
+// Resuelve a true si está listo dentro del timeout, false si se vence (→ fallback base64).
+function waitForSupabase(timeoutMs = 3000) {
+  return new Promise((resolve) => {
+    if (window.sbReady) return resolve(true);
+    let done = false;
+    const onReady = () => { if (!done) { done = true; resolve(true); } };
+    window.addEventListener('sb-ready', onReady, { once: true });
+    setTimeout(() => {
+      if (!done) { done = true; resolve(!!window.sbReady); }
+    }, timeoutMs);
+  });
+}
+
 // ---------- INIT ----------
 (async function init() {
-  // 1. Detectar modo de URL ANTES de cargar todo
-  const hashMode = detectMode();
+  // 0. Esperar a que el cliente Supabase esté disponible (timeout 3s → fallback)
+  await waitForSupabase(3000);
+
+  // 1. Detectar modo de URL ANTES de cargar todo (ahora async: puede consultar Supabase)
+  const hashMode = await detectMode();
 
   // 2. Si es modo planilla (jugador invitado), mostrar solo eso
   if (hashMode.kind === 'invite' && hashMode.payload) {
     $('loading-state') && ($('loading-state').style.display = 'none');
     enterEnrollmentMode(hashMode.payload);
     return;
+  }
+
+  // 2b. Si el hash es un link de invite/submit pero no pudimos resolver el payload,
+  //     avisar y caer al modo normal. Causas típicas: ID inexistente o Supabase caído.
+  if ((hashMode.kind === 'invite' || hashMode.kind === 'submit') && !hashMode.payload) {
+    $('loading-state') && ($('loading-state').style.display = 'none');
+    setTimeout(() => {
+      alert('El link de inscripción no es válido o expiró. Pedile al organizador uno nuevo.');
+    }, 200);
   }
 
   // 3. Cargar datos

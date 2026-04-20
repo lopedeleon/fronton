@@ -1063,6 +1063,81 @@ table.standings tr.qualified-third td:first-child::before {
   letter-spacing: 0.08em;
 }
 
+/* ==== Autocomplete del form "Agregar pareja" ==== */
+.ac-wrap {
+  position: relative;
+  min-width: 0;
+}
+.ac-wrap > input { width: 100%; }
+.ac-dropdown {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  max-height: 320px;
+  overflow-y: auto;
+  box-shadow: 4px 4px 0 var(--ink-soft);
+}
+.ac-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding: 6px 10px;
+  background: var(--bg-paper);
+  border-bottom: 1px solid var(--ink-soft);
+}
+.ac-empty {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+}
+.ac-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--ink-soft);
+  transition: background 0.1s;
+}
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover { background: var(--ink); color: var(--bg); }
+.ac-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.ac-item-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+.ac-item-level {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.ac-item:hover .ac-item-level { color: var(--bg); opacity: 0.85; }
+.ac-diff {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 6px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.ac-diff.near { background: var(--green); color: var(--bg); }
+.ac-diff.mid  { background: var(--gold); color: var(--ink); }
+.ac-diff.far  { background: var(--accent); color: var(--bg); }
+
 /* ==== Chips de receptores de efectivo (en Ajustes) ==== */
 .cash-receivers-chips {
   display: flex;
@@ -5964,17 +6039,231 @@ document.querySelectorAll('.tab').forEach(tab => {
 $('add-team-btn').addEventListener('click', addTeam);
 $('player1').addEventListener('keypress', e => { if (e.key === 'Enter') $('player2').focus(); });
 $('player2').addEventListener('keypress', e => { if (e.key === 'Enter') addTeam(); });
+// Wiring del autocomplete (se ejecuta una vez al cargar). Al renderizar de
+// nuevo el form no recreamos los inputs, así que un solo wiring alcanza.
+setupTeamAddAutocomplete();
 
 function addTeam() {
-  const p1 = $('player1').value.trim();
-  const p2 = $('player2').value.trim();
+  const input1 = $('player1');
+  const input2 = $('player2');
+  const p1 = input1.value.trim();
+  const p2 = input2.value.trim();
   if (!p1 || !p2) { toast('Faltan jugadores'); return; }
-  state.teams.push({ id: uid(), p1, p2 });
-  $('player1').value = '';
-  $('player2').value = '';
-  $('player1').focus();
-  renderTeams();
+
+  // Los dropdowns del autocomplete guardan el submissionId en data-selected-sub
+  // cuando el admin eligió un item. Si ambos son submissions, reusamos
+  // addPairToTournament (pone status=approved, adjudica el torneo, crea p1Data/p2Data).
+  const id1 = input1.dataset.selectedSub || '';
+  const id2 = input2.dataset.selectedSub || '';
+
+  if (id1 && id2) {
+    // Flujo normal: ambos del pool → addPairToTournament se encarga de todo
+    addPairToTournament(id1, id2);
+    input1.value = ''; input2.value = '';
+    delete input1.dataset.selectedSub; delete input2.dataset.selectedSub;
+    input1.focus();
+    return;
+  }
+
+  // Caso mixto o totalmente libre: creamos el equipo manualmente.
+  // Si alguno de los dos SÍ es submission del pool, igual aprovechamos eso.
+  const sub1 = id1 ? (workspace.submissions || []).find(s => s.id === id1) : null;
+  const sub2 = id2 ? (workspace.submissions || []).find(s => s.id === id2) : null;
+  const team = {
+    id: uid(),
+    p1: sub1 ? `${sub1.firstName} ${sub1.lastName}${sub1.nickname ? ' (' + sub1.nickname + ')' : ''}` : p1,
+    p2: sub2 ? `${sub2.firstName} ${sub2.lastName}${sub2.nickname ? ' (' + sub2.nickname + ')' : ''}` : p2,
+    p1Data: sub1 || null,
+    p2Data: sub2 || null,
+    p1Photo: sub1 ? (sub1.photoUrl || null) : null,
+    p2Photo: sub2 ? (sub2.photoUrl || null) : null,
+  };
+  state.teams.push(team);
+  // Si vino del pool, actualizamos su estado
+  if (sub1) { sub1.status = 'approved'; sub1.addedToTournamentId = state.id; }
+  if (sub2) { sub2.status = 'approved'; sub2.addedToTournamentId = state.id; }
+
+  input1.value = ''; input2.value = '';
+  delete input1.dataset.selectedSub; delete input2.dataset.selectedSub;
+  input1.focus();
+  renderAll();
   saveState();
+  toast(`Pareja agregada: ${team.p1} / ${team.p2}`);
+}
+
+// ========== Autocomplete del form "Agregar pareja" ==========
+// Muestra inscriptos del torneo actual que todavía no estén asignados a un
+// equipo. El admin puede:
+//   · Click en una sugerencia → rellena el input y guarda el submissionId
+//   · Seguir tipeando libre → no asocia submission (jugador no inscripto por form)
+// En el input #2, ordenamos las sugerencias por cercanía de puntos al jugador #1.
+function setupTeamAddAutocomplete() {
+  const i1 = $('player1');
+  const i2 = $('player2');
+  if (!i1 || !i2) return;
+
+  // Crear los contenedores de dropdown (se insertan después de cada input)
+  ensureAutocompleteDropdown(i1, 'player1-ac');
+  ensureAutocompleteDropdown(i2, 'player2-ac');
+
+  // Cualquier cambio en input1 invalida la selección previa
+  const clearSelectedIfDiverged = (input) => {
+    if (!input.dataset.selectedSub) return;
+    const sid = input.dataset.selectedSub;
+    const sub = (workspace.submissions || []).find(s => s.id === sid);
+    const expected = sub ? `${sub.firstName} ${sub.lastName}` : '';
+    if (input.value.trim() !== expected) {
+      delete input.dataset.selectedSub;
+    }
+  };
+
+  const onInput1 = () => {
+    clearSelectedIfDiverged(i1);
+    renderAutocompleteDropdown(i1, 'player1-ac', { forInput: 1 });
+    // Si había una sugerencia elegida en i2, la mantenemos. Si el dropdown de i2
+    // está abierto, re-renderizamos para actualizar el orden por cercanía.
+    if ($('player2-ac').style.display !== 'none') {
+      renderAutocompleteDropdown(i2, 'player2-ac', { forInput: 2 });
+    }
+  };
+  const onInput2 = () => {
+    clearSelectedIfDiverged(i2);
+    renderAutocompleteDropdown(i2, 'player2-ac', { forInput: 2 });
+  };
+
+  i1.addEventListener('input', onInput1);
+  i1.addEventListener('focus', onInput1);
+  i2.addEventListener('input', onInput2);
+  i2.addEventListener('focus', onInput2);
+
+  // Click afuera cierra los dropdowns abiertos
+  document.addEventListener('click', (ev) => {
+    if (!ev.target.closest('.ac-wrap') && !ev.target.closest('.ac-dropdown')) {
+      const d1 = $('player1-ac'); if (d1) d1.style.display = 'none';
+      const d2 = $('player2-ac'); if (d2) d2.style.display = 'none';
+    }
+  });
+}
+
+function ensureAutocompleteDropdown(input, dropdownId) {
+  if ($(dropdownId)) return;
+  // Envolvemos el input en un wrapper posicionado (relative) para anclar el dropdown
+  if (!input.parentElement.classList.contains('ac-wrap')) {
+    const wrap = document.createElement('div');
+    wrap.className = 'ac-wrap';
+    input.parentElement.insertBefore(wrap, input);
+    wrap.appendChild(input);
+    const dd = document.createElement('div');
+    dd.id = dropdownId;
+    dd.className = 'ac-dropdown';
+    dd.style.display = 'none';
+    wrap.appendChild(dd);
+  }
+}
+
+// Devuelve las submissions candidatas para emparejar en este torneo:
+//   - status === 'pending' (no asignadas a equipo todavía)
+//   - pertenecen al torneo actual (o declararon este tournamentName al inscribirse)
+function getEligibleSubsForCurrentTournament() {
+  const subs = workspace.submissions || [];
+  return subs.filter(s => {
+    if (s.status !== 'pending') return false;
+    // Acepta si la submission declaró este torneo por nombre, o si fue importada
+    // sin torneo (pool genérico). Las que declararon OTRO torneo las excluimos.
+    if (s.tournamentName && s.tournamentName !== state.name) return false;
+    return true;
+  });
+}
+
+function renderAutocompleteDropdown(input, dropdownId, opts = {}) {
+  const dd = $(dropdownId);
+  if (!dd) return;
+  const query = input.value.trim().toLowerCase();
+  let candidates = getEligibleSubsForCurrentTournament();
+
+  // Excluir el elegido en el otro input (no queremos al mismo jugador dos veces)
+  const otherInput = opts.forInput === 2 ? $('player1') : $('player2');
+  const otherSub = otherInput && otherInput.dataset.selectedSub;
+  if (otherSub) candidates = candidates.filter(s => s.id !== otherSub);
+
+  // Filtrar por el texto tipeado (coincidencia parcial case-insensitive)
+  if (query) {
+    candidates = candidates.filter(s => {
+      const full = `${s.firstName} ${s.lastName} ${s.nickname || ''}`.toLowerCase();
+      return full.includes(query);
+    });
+  }
+
+  // Ordenar: en input2 con un input1 elegido, ordenar por cercanía de puntos
+  if (opts.forInput === 2 && otherSub) {
+    const refSub = (workspace.submissions || []).find(s => s.id === otherSub);
+    if (refSub) {
+      const refPts = refSub.totalPts || 0;
+      candidates.sort((a, b) => Math.abs((a.totalPts || 0) - refPts) - Math.abs((b.totalPts || 0) - refPts));
+    }
+  } else {
+    // Orden alfabético por nombre
+    candidates.sort((a, b) => (a.firstName || '').localeCompare(b.firstName || ''));
+  }
+
+  // Limitar a 8 sugerencias para no saturar visualmente
+  candidates = candidates.slice(0, 8);
+
+  if (candidates.length === 0) {
+    if (query) {
+      dd.innerHTML = `<div class="ac-empty">Sin coincidencias en el pool. Podés escribir un nombre libre.</div>`;
+      dd.style.display = '';
+    } else {
+      // Sin query y sin candidatos → no mostramos nada
+      dd.style.display = 'none';
+    }
+    return;
+  }
+
+  const showSuggestLabel = opts.forInput === 2 && otherSub;
+  dd.innerHTML = (showSuggestLabel ? '<div class="ac-label">SUGERIDOS POR NIVEL CERCANO</div>' : '') +
+    candidates.map(s => {
+      const lv = computeLevel(s.totalPts || 0);
+      const diff = showSuggestLabel
+        ? (() => {
+            const ref = (workspace.submissions || []).find(x => x.id === otherSub);
+            return ref ? Math.abs((s.totalPts || 0) - (ref.totalPts || 0)) : 0;
+          })()
+        : 0;
+      const diffBadge = showSuggestLabel
+        ? `<span class="ac-diff ${diff <= 5 ? 'near' : diff <= 10 ? 'mid' : 'far'}">dif ${diff}</span>`
+        : '';
+      return `
+        <div class="ac-item" data-sub-id="${s.id}" data-name="${escapeHtml(s.firstName + ' ' + s.lastName)}">
+          <div class="ac-item-main">
+            <span class="ac-item-name">${escapeHtml(s.firstName)} ${escapeHtml(s.lastName)}</span>
+            <span class="ac-item-level lvl-${lv.key}">${escapeHtml(lv.label)} · ${s.totalPts || 0}pts</span>
+          </div>
+          ${diffBadge}
+        </div>
+      `;
+    }).join('');
+
+  // Cada item: click rellena el input y guarda el submissionId
+  dd.querySelectorAll('.ac-item').forEach(it => {
+    it.onclick = () => {
+      input.value = it.dataset.name;
+      input.dataset.selectedSub = it.dataset.subId;
+      dd.style.display = 'none';
+      // Si completamos input1, re-renderizar dropdown2 para sort por cercanía
+      if (opts.forInput === 1) {
+        // Refresh del listado de input2 si está visible
+        const dd2 = $('player2-ac');
+        if (dd2 && dd2.style.display !== 'none') {
+          renderAutocompleteDropdown($('player2'), 'player2-ac', { forInput: 2 });
+        }
+        // Si no hay jugador 2 elegido todavía, mover el foco ahí
+        if (!$('player2').value.trim()) $('player2').focus();
+      }
+    };
+  });
+
+  dd.style.display = '';
 }
 
 // Intenta recuperar la submission asociada a un lado (p1/p2) de un team.

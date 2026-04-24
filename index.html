@@ -922,12 +922,15 @@ table.standings tr.qualified-third td:first-child::before {
   gap: 8px;
   margin-bottom: 8px;
 }
+.payments-summary.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
 .payments-summary-box {
   background: var(--bg-paper);
   border: 2px solid var(--ink);
   padding: 10px 12px;
   text-align: center;
 }
+.payments-summary-box.paid-box { }
+.payments-summary-box.partial-box { background: #f4c542; color: var(--ink); border-color: #b8891f; }
 .payments-summary-box.all-paid { background: var(--green); color: var(--bg); border-color: var(--green); }
 .payments-summary-box.pending  { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 .payments-summary-box.money    { background: var(--ink); color: var(--bg); border-color: var(--ink); }
@@ -950,9 +953,164 @@ table.standings tr.qualified-third td:first-child::before {
   margin-top: 4px;
   opacity: 0.85;
 }
+.payments-summary-extra {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  margin-top: 3px;
+  color: var(--gold);
+  font-weight: 600;
+}
+@media (max-width: 700px) {
+  .payments-summary.four { grid-template-columns: 1fr 1fr; }
+}
 @media (max-width: 520px) {
   .payments-summary { grid-template-columns: 1fr; }
+  .payments-summary.four { grid-template-columns: 1fr 1fr; }
   .payments-summary-big { font-size: 22px; }
+}
+
+/* Sección "Jugadores con saldo pendiente" con botones WhatsApp */
+.payments-pending-section {
+  background: var(--bg-paper);
+  border: 2px solid var(--accent);
+  border-left-width: 6px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+.payments-pending-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--accent);
+}
+.payments-pending-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.payments-pending-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  background: var(--accent);
+  color: var(--bg);
+  padding: 2px 8px;
+  font-weight: 700;
+}
+.payments-pending-sub {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+  font-style: italic;
+}
+.payments-pending-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px dotted rgba(26,20,16,0.12);
+}
+.payments-pending-row:last-child { border-bottom: none; }
+.payments-pending-info { min-width: 0; flex: 1; }
+.payments-pending-name {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.payments-pending-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.btn.btn-whatsapp {
+  background: #25D366;
+  color: #fff;
+  border-color: #25D366;
+}
+.btn.btn-whatsapp:hover { background: #1fb957; border-color: #1fb957; }
+
+/* Chip y fila de pago parcial (naranja) */
+.payment-chip.is-partial {
+  background: #f4c542;
+  color: var(--ink);
+  border-color: #b8891f;
+  font-weight: 700;
+}
+.payment-chip.is-partial:hover { background: #e0b42e; }
+.payments-row.is-partial { border-left: 4px solid #b8891f; }
+
+/* Modal: sección de monto (selector total/parcial) */
+.pay-reg-amount-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pay-reg-amount-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 2px solid var(--ink);
+  background: var(--bg);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+}
+.pay-reg-amount-opt:hover { background: rgba(200,48,28,0.04); }
+.pay-reg-amount-opt input[type="radio"] { margin: 0; flex-shrink: 0; accent-color: var(--accent); }
+.pay-reg-amount-opt:has(input:checked) {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+#pay-reg-amount-custom {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--ink);
+  font-family: 'Archivo', sans-serif;
+  font-size: 15px;
+}
+
+/* Grand totals del arqueo: recaudado vs esperado vs pendiente */
+.arqueo-grand-totals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.arqueo-grand-box {
+  padding: 12px 14px;
+  border: 2px solid var(--ink);
+  text-align: center;
+}
+.arqueo-grand-box.collected { background: var(--green); color: var(--bg); border-color: var(--green); }
+.arqueo-grand-box.expected { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.arqueo-grand-box.pending { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.arqueo-grand-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+.arqueo-grand-big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+.arqueo-table-row.is-partial {
+  background: rgba(244,197,66,0.12) !important;
 }
 
 /* Cabecera del listado de jugadores */
@@ -6770,9 +6928,36 @@ function getPaymentAmount() {
   return (workspace.paymentConfig && workspace.paymentConfig.amount) || 0;
 }
 
-// ¿Pagó este jugador (submission)?
+// ¿Pagó este jugador (submission) el total?
 function submissionPaid(sub) {
   return !!(sub && sub.paymentStatus === 'paid');
+}
+
+// ¿Tiene un pago parcial registrado (pagó algo pero no el total)?
+function submissionPartial(sub) {
+  return !!(sub && sub.paymentStatus === 'partial');
+}
+
+// ¿Pagó al menos algo? (total o parcial)
+function submissionHasPayment(sub) {
+  return submissionPaid(sub) || submissionPartial(sub);
+}
+
+// Monto efectivamente pagado (respeta paidAmount; si no existe y está 'paid',
+// asume que pagó el monto configurado — compatibilidad con pagos viejos).
+function submissionPaidAmount(sub) {
+  if (!sub) return 0;
+  if (typeof sub.paidAmount === 'number' && sub.paidAmount >= 0) return sub.paidAmount;
+  // Compatibilidad: pago viejo marcado como 'paid' sin paidAmount = pagó total
+  if (sub.paymentStatus === 'paid') return getPaymentAmount();
+  return 0;
+}
+
+// Saldo pendiente de este jugador
+function submissionPendingAmount(sub) {
+  const total = getPaymentAmount();
+  if (!total) return 0;
+  return Math.max(0, total - submissionPaidAmount(sub));
 }
 
 // ¿Es un pago "incompleto" (marcado como pagado pero sin método ni receptor)?
@@ -6780,7 +6965,7 @@ function submissionPaid(sub) {
 // o importados desde un backup viejo. Los chips de estos pagos se ven amarillos
 // con warning y al tocarlos abren el modal para completar datos.
 function submissionPaymentIncomplete(sub) {
-  if (!submissionPaid(sub)) return false;
+  if (!submissionHasPayment(sub)) return false;
   // Sin método registrado
   if (!sub.paymentMethod) return true;
   // Efectivo sin receptor registrado
@@ -6789,7 +6974,8 @@ function submissionPaymentIncomplete(sub) {
 }
 
 // Toggle del estado de pago.
-//   DEBE → abre modal para registrar detalles
+//   DEBE → abre modal para registrar detalles (pago total o parcial)
+//   PARCIAL → abre modal para completar otro pago (puede ser el saldo)
 //   PAGÓ incompleto → abre modal para completar datos (sin deshacer)
 //   PAGÓ completo → pide confirmación para deshacer
 function togglePaymentStatus(submissionId) {
@@ -6809,30 +6995,75 @@ function togglePaymentStatus(submissionId) {
     sub.paymentMethod = null;
     sub.paymentReceiver = null;
     sub.paymentNotes = null;
+    sub.paidAmount = 0;
     saveState();
     renderAll();
     toast(`Marcado como DEBE: ${sub.firstName} ${sub.lastName}`);
     return;
   }
+
+  if (sub.paymentStatus === 'partial') {
+    // Pago parcial: abrir modal para registrar un pago adicional (puede completar el saldo)
+    openPaymentRegisterModal(sub, { addingToPartial: true });
+    return;
+  }
+
   // DEBE → abrir modal para registrar desde cero
   openPaymentRegisterModal(sub);
 }
 
-// Modal de registro de pago: método, receptor (si efectivo), notas.
+// Modal de registro de pago: monto, método, receptor (si efectivo), notas.
 // Opciones:
 //   - completing: true si estamos completando datos de un pago ya existente
 //     (marca el título, y preserva el paymentAt original al guardar)
+//   - addingToPartial: true si el jugador ya tiene un pago parcial y estamos
+//     agregando un pago adicional (típicamente: saldar el resto)
 function openPaymentRegisterModal(sub, opts = {}) {
   const modal = ensurePaymentRegisterModal();
   const completing = !!opts.completing;
+  const addingToPartial = !!opts.addingToPartial;
   $('pay-reg-player').textContent = `${sub.firstName} ${sub.lastName}`;
   const amount = getPaymentAmount();
-  $('pay-reg-amount').textContent = amount > 0 ? `$${amount.toLocaleString('es-UY')}` : '—';
+  const paidSoFar = submissionPaidAmount(sub);
+  const pendingAmount = submissionPendingAmount(sub);
+
+  // Mostrar el "monto total" + aclaración si ya tiene parcial
+  if (amount > 0) {
+    if (addingToPartial && paidSoFar > 0) {
+      $('pay-reg-amount').innerHTML = `$${amount.toLocaleString('es-UY')} <span style="color:var(--muted);font-weight:400;font-size:11px;">(ya pagó $${paidSoFar.toLocaleString('es-UY')} · saldo $${pendingAmount.toLocaleString('es-UY')})</span>`;
+    } else {
+      $('pay-reg-amount').textContent = `$${amount.toLocaleString('es-UY')}`;
+    }
+  } else {
+    $('pay-reg-amount').textContent = '—';
+  }
+
+  // Etiqueta del botón "Total": si hay parcial, el "total" es el saldo restante;
+  // si no, es el monto completo
+  const totalLabel = $('pay-reg-amount-total-label');
+  if (totalLabel) {
+    if (addingToPartial && pendingAmount > 0) {
+      totalLabel.textContent = `$${pendingAmount.toLocaleString('es-UY')} (saldo restante)`;
+    } else if (amount > 0) {
+      totalLabel.textContent = `$${amount.toLocaleString('es-UY')}`;
+    } else {
+      totalLabel.textContent = 'monto no configurado';
+    }
+  }
+
+  // Si estamos "completing" datos de un pago ya existente, ocultamos la sección de monto
+  // (no queremos que cambien el monto al completar datos faltantes).
+  const amountSec = $('pay-reg-amount-section');
+  if (amountSec) amountSec.style.display = completing ? 'none' : '';
 
   // Título y botón de guardar cambian según modo
   const titleEl = modal.querySelector('.modal-head h3');
   const saveBtn = $('pay-reg-save-btn');
-  if (titleEl) titleEl.textContent = completing ? 'Completar datos del pago' : 'Registrar pago';
+  if (titleEl) {
+    titleEl.textContent = completing ? 'Completar datos del pago'
+      : addingToPartial ? 'Registrar pago adicional'
+      : 'Registrar pago';
+  }
   if (saveBtn) saveBtn.textContent = completing ? '✓ Completar datos' : '✓ Registrar pago';
 
   // Reset del form — si estamos completando, pre-cargamos lo que ya existe
@@ -6845,16 +7076,53 @@ function openPaymentRegisterModal(sub, opts = {}) {
   }
   $('pay-reg-notes').value = completing ? (sub.paymentNotes || '') : '';
   $('pay-reg-receiver-other').value = '';
+  // Reset del monto: por default "Total"
+  const totalRadio = $('pay-reg-amount-total');
+  if (totalRadio) totalRadio.checked = true;
+  const customInput = $('pay-reg-amount-custom');
+  if (customInput) customInput.value = '';
   updatePaymentMethodUI();
+  updatePaymentAmountUI();
 
   // Receptores disponibles (chips de selección rápida + opción "otro")
-  // Si estamos completando y ya tenía un receptor, lo preseleccionamos
   renderCashReceiverOptions(completing ? sub.paymentReceiver : null);
 
-  // Guardar: en modo "completing" preservamos paymentAt original
-  $('pay-reg-save-btn').onclick = () => savePaymentRegistration(sub.id, { preserveDate: completing });
+  // Guardar: en modo "completing" preservamos paymentAt original; en modo "addingToPartial"
+  // sumamos al paidAmount existente en vez de reemplazar.
+  $('pay-reg-save-btn').onclick = () => savePaymentRegistration(sub.id, {
+    preserveDate: completing,
+    addingToPartial,
+  });
   $('pay-reg-cancel-btn').onclick = () => modal.classList.remove('show');
   modal.classList.add('show');
+}
+
+// Habilita/oculta el campo de monto libre según el tipo elegido (total/parcial)
+function updatePaymentAmountUI() {
+  const totalRadio = $('pay-reg-amount-total');
+  const partialRadio = $('pay-reg-amount-partial');
+  const customWrap = $('pay-reg-amount-custom-wrap');
+  if (!totalRadio || !partialRadio || !customWrap) return;
+  customWrap.style.display = partialRadio.checked ? '' : 'none';
+  updatePaymentAmountPreview();
+}
+
+// Preview dinámico: cuando tipea un monto parcial, muestra cuánto queda pendiente
+function updatePaymentAmountPreview() {
+  const preview = $('pay-reg-amount-preview');
+  if (!preview) return;
+  const partialRadio = $('pay-reg-amount-partial');
+  if (!partialRadio || !partialRadio.checked) { preview.textContent = ''; return; }
+  const custom = parseInt($('pay-reg-amount-custom').value) || 0;
+  const total = getPaymentAmount();
+  if (!total) { preview.textContent = 'Configurá el monto de inscripción primero.'; return; }
+  if (custom <= 0) { preview.textContent = 'Ingresá un monto mayor a 0.'; return; }
+  if (custom >= total) {
+    preview.innerHTML = `<span style="color:var(--green);">✓ Cubre el total ($${total.toLocaleString('es-UY')})</span>`;
+  } else {
+    const remaining = total - custom;
+    preview.innerHTML = `Queda pendiente: <strong>$${remaining.toLocaleString('es-UY')}</strong>`;
+  }
 }
 
 // Renderiza los receptores configurados como botones de radio visuales.
@@ -6913,12 +7181,37 @@ function updatePaymentMethodUI() {
 
 // Confirmar registro del pago con los datos del modal.
 // opts.preserveDate: si true, mantiene el paymentAt original (caso "completar
-// datos faltantes" — no queremos que la fecha cambie a hoy).
+//   datos faltantes" — no queremos que la fecha cambie a hoy).
+// opts.addingToPartial: si true, suma el nuevo monto al paidAmount existente
+//   (en vez de reemplazarlo).
 function savePaymentRegistration(submissionId, opts = {}) {
   const sub = (workspace.submissions || []).find(s => s.id === submissionId);
   if (!sub) return;
   const isCash = $('pay-reg-method-cash').checked;
   const method = isCash ? 'cash' : 'transfer';
+
+  // Determinar monto de esta operación
+  const totalAmount = getPaymentAmount();
+  const partialRadio = $('pay-reg-amount-partial');
+  const isPartialInput = partialRadio && partialRadio.checked;
+  let thisOpAmount;
+  if (opts.preserveDate) {
+    // Modo "completar datos faltantes": no cambiamos monto
+    thisOpAmount = submissionPaidAmount(sub) || totalAmount;
+  } else if (isPartialInput) {
+    thisOpAmount = parseInt($('pay-reg-amount-custom').value) || 0;
+    if (thisOpAmount <= 0) {
+      toast('Ingresá un monto mayor a 0');
+      return;
+    }
+  } else {
+    // Total: si es addingToPartial, el "total" es el saldo restante
+    if (opts.addingToPartial) {
+      thisOpAmount = submissionPendingAmount(sub);
+    } else {
+      thisOpAmount = totalAmount;
+    }
+  }
 
   let receiver = null;
   if (isCash) {
@@ -6938,18 +7231,55 @@ function savePaymentRegistration(submissionId, opts = {}) {
 
   const notes = $('pay-reg-notes').value.trim() || null;
 
-  sub.paymentStatus = 'paid';
+  // Calcular nuevo paidAmount total
+  const prevPaid = submissionPaidAmount(sub);
+  let newPaidAmount;
+  if (opts.preserveDate) {
+    // Completar datos: no cambiamos monto
+    newPaidAmount = prevPaid;
+  } else if (opts.addingToPartial) {
+    // Sumamos al existente
+    newPaidAmount = prevPaid + thisOpAmount;
+  } else {
+    // Nuevo pago: reemplaza
+    newPaidAmount = thisOpAmount;
+  }
+
+  // Estado final: 'paid' si cubre el total configurado, 'partial' si no.
+  // Si no hay monto configurado, cualquier registro = 'paid' (comportamiento legacy).
+  const fullyPaid = !totalAmount || newPaidAmount >= totalAmount;
+
+  sub.paymentStatus = fullyPaid ? 'paid' : 'partial';
+  sub.paidAmount = newPaidAmount;
   // Preservar la fecha original si estamos completando datos, si no usar ahora
   if (!opts.preserveDate || !sub.paymentAt) sub.paymentAt = Date.now();
   sub.paymentMethod = method;
   sub.paymentReceiver = receiver;
   sub.paymentNotes = notes;
 
+  // Historial de operaciones (para poder trazar pagos parciales acumulados)
+  if (!Array.isArray(sub.paymentHistory)) sub.paymentHistory = [];
+  if (!opts.preserveDate) {
+    sub.paymentHistory.push({
+      at: Date.now(),
+      amount: thisOpAmount,
+      method,
+      receiver,
+      notes,
+    });
+  }
+
   saveState();
   $('payment-register-modal').classList.remove('show');
   renderAll();
-  const action = opts.preserveDate ? 'Datos completados' : '✓ Pagó';
-  toast(`${action}: ${sub.firstName} ${sub.lastName}${isCash ? ' (efectivo a ' + receiver + ')' : ' (transferencia)'}`);
+
+  let action;
+  if (opts.preserveDate) action = 'Datos completados';
+  else if (fullyPaid) action = opts.addingToPartial ? '✓ Saldo cubierto' : '✓ Pagó';
+  else action = '⚠ Pago parcial';
+
+  const moneyStr = totalAmount > 0 ? ` ($${thisOpAmount.toLocaleString('es-UY')})` : '';
+  toast(`${action}: ${sub.firstName} ${sub.lastName}${moneyStr}${isCash ? ' (efectivo a ' + receiver + ')' : ' (transferencia)'}`);
 }
 
 // Modal DOM (creado on-demand, reusable)
@@ -6968,7 +7298,25 @@ function ensurePaymentRegisterModal() {
       <div class="modal-body">
         <div class="pay-reg-player-line">
           <strong id="pay-reg-player">—</strong>
-          <span class="pay-reg-amount">Monto: <strong id="pay-reg-amount">—</strong></span>
+          <span class="pay-reg-amount">Monto total: <strong id="pay-reg-amount">—</strong></span>
+        </div>
+
+        <div class="pay-reg-section" id="pay-reg-amount-section">
+          <div class="pay-reg-label">¿Cuánto paga ahora?</div>
+          <div class="pay-reg-amount-options">
+            <label class="pay-reg-amount-opt">
+              <input type="radio" name="pay-reg-amount-type" id="pay-reg-amount-total" value="total" checked onchange="updatePaymentAmountUI()">
+              <span>Total · <strong id="pay-reg-amount-total-label">—</strong></span>
+            </label>
+            <label class="pay-reg-amount-opt">
+              <input type="radio" name="pay-reg-amount-type" id="pay-reg-amount-partial" value="partial" onchange="updatePaymentAmountUI()">
+              <span>Parcial · otro monto</span>
+            </label>
+          </div>
+          <div id="pay-reg-amount-custom-wrap" style="display:none;margin-top:8px;">
+            <input type="number" id="pay-reg-amount-custom" min="1" step="50" placeholder="Monto pagado en esta operación">
+            <div id="pay-reg-amount-preview" style="margin-top:6px;font-size:12px;color:var(--ink-soft);"></div>
+          </div>
         </div>
 
         <div class="pay-reg-section">
@@ -7007,6 +7355,11 @@ function ensurePaymentRegisterModal() {
   `;
   document.body.appendChild(m);
   m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); });
+  // Listener para el preview de monto parcial
+  const customInput = m.querySelector('#pay-reg-amount-custom');
+  if (customInput) {
+    customInput.addEventListener('input', updatePaymentAmountPreview);
+  }
   return m;
 }
 
@@ -7038,65 +7391,139 @@ function renderPayments() {
   }
 
   const amount = getPaymentAmount();
-  const paid = inTeams.filter(submissionPaid);
-  const pending = inTeams.filter(s => !submissionPaid(s));
-  const collected = paid.length * amount;
+  const fullyPaid = inTeams.filter(submissionPaid);
+  const partial = inTeams.filter(submissionPartial);
+  const debe = inTeams.filter(s => !submissionHasPayment(s));
+  // Recaudado real: suma de paidAmount de todos (tanto 'paid' como 'partial')
+  const collectedReal = inTeams.reduce((sum, s) => sum + submissionPaidAmount(s), 0);
   const expected = inTeams.length * amount;
+  const pendingTotal = Math.max(0, expected - collectedReal);
   const money = n => amount > 0 ? `$${n.toLocaleString('es-UY')}` : '—';
 
+  // Summary con 4 cajas: Pagaron / Parcial / Deben / Recaudado vs Esperado
   summaryEl.innerHTML = `
-    <div class="payments-summary">
-      <div class="payments-summary-box">
-        <div class="payments-summary-big">${paid.length}<span class="sep">/</span>${inTeams.length}</div>
-        <div class="payments-summary-lbl">Pagaron</div>
+    <div class="payments-summary four">
+      <div class="payments-summary-box paid-box">
+        <div class="payments-summary-big">${fullyPaid.length}<span class="sep">/</span>${inTeams.length}</div>
+        <div class="payments-summary-lbl">Pagaron total</div>
       </div>
-      <div class="payments-summary-box ${pending.length === 0 ? 'all-paid' : 'pending'}">
-        <div class="payments-summary-big">${pending.length}</div>
+      <div class="payments-summary-box ${partial.length > 0 ? 'partial-box' : ''}">
+        <div class="payments-summary-big">${partial.length}</div>
+        <div class="payments-summary-lbl">Parcial</div>
+      </div>
+      <div class="payments-summary-box ${debe.length === 0 ? 'all-paid' : 'pending'}">
+        <div class="payments-summary-big">${debe.length}</div>
         <div class="payments-summary-lbl">Deben</div>
       </div>
       <div class="payments-summary-box money">
-        <div class="payments-summary-big">${money(collected)}</div>
+        <div class="payments-summary-big">${money(collectedReal)}</div>
         <div class="payments-summary-lbl">Recaudado${amount > 0 ? ` / ${money(expected)}` : ''}</div>
+        ${amount > 0 && pendingTotal > 0 ? `<div class="payments-summary-extra">Faltan ${money(pendingTotal)}</div>` : ''}
       </div>
     </div>
   `;
 
-  // Listado: primero los que deben, después los que pagaron. Dentro de cada grupo, alfabético.
+  // Listado ordenado: primero deben, después parciales, después pagados completos
+  // Dentro de cada grupo, alfabético por nombre.
   const sorted = [...inTeams].sort((a, b) => {
-    const pa = submissionPaid(a) ? 1 : 0;
-    const pb = submissionPaid(b) ? 1 : 0;
+    const prio = (s) => {
+      if (!submissionHasPayment(s)) return 0; // DEBE primero
+      if (submissionPartial(s)) return 1;     // PARCIAL después
+      return 2;                                // PAGÓ al final
+    };
+    const pa = prio(a), pb = prio(b);
     if (pa !== pb) return pa - pb;
     return (a.firstName || '').localeCompare(b.firstName || '');
   });
 
-  // Nombre del torneo para cada submission (buscar en workspace.tournaments)
+  // Nombre del torneo para cada submission
   const tourName = (tid) => {
     const t = workspace.tournaments.find(x => x.id === tid);
     return t ? `${t.name} · DIV. ${t.division}` : '—';
   };
 
+  // ========== Sección PENDIENTES CON SALDO (solo si hay) ==========
+  // Incluye tanto DEBEN como PARCIALES
+  const pendingWithSaldo = inTeams.filter(s => !submissionPaid(s));
+  const pendingSection = (amount > 0 && pendingWithSaldo.length > 0) ? `
+    <div class="payments-pending-section">
+      <div class="payments-pending-head">
+        <div class="payments-pending-title">💬 Jugadores con saldo pendiente</div>
+        <span class="payments-pending-count">${pendingWithSaldo.length}</span>
+      </div>
+      <div class="payments-pending-sub">Tocá el botón de WhatsApp para enviar un recordatorio respetuoso con el monto adeudado.</div>
+      ${pendingWithSaldo
+        .sort((a, b) => submissionPendingAmount(b) - submissionPendingAmount(a))
+        .map(s => {
+          const name = `${s.firstName} ${s.lastName}${s.nickname ? ' (' + s.nickname + ')' : ''}`;
+          const paidSoFar = submissionPaidAmount(s);
+          const pend = submissionPendingAmount(s);
+          const isPartial = submissionPartial(s);
+          const wa = (s.whatsapp || '').replace(/\D/g, '');
+          const canSend = wa.length > 0;
+          const subLabel = isPartial
+            ? `Pagó $${paidSoFar.toLocaleString('es-UY')} · debe $${pend.toLocaleString('es-UY')}`
+            : `Debe todo: $${pend.toLocaleString('es-UY')}`;
+          return `
+            <div class="payments-pending-row">
+              <div class="payments-pending-info">
+                <div class="payments-pending-name">${escapeHtml(name)}</div>
+                <div class="payments-pending-meta">${escapeHtml(subLabel)}${s.whatsapp ? ' · WA ' + escapeHtml(s.whatsapp) : ''}</div>
+              </div>
+              ${canSend
+                ? `<button class="btn btn-whatsapp btn-sm" onclick="sendPendingReminder('${s.id}')">💬 Recordar</button>`
+                : `<span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;">SIN WHATSAPP</span>`}
+            </div>
+          `;
+        }).join('')}
+    </div>
+  ` : '';
+
+  // ========== Listado principal de jugadores ==========
   listEl.innerHTML = `
+    ${pendingSection}
     <div class="payments-list-head">Jugadores en equipos</div>
     ${sorted.map(s => {
-      const paid = submissionPaid(s);
+      const hasPay = submissionHasPayment(s);
+      const isPaid = submissionPaid(s);
+      const isPartial = submissionPartial(s);
       const incomplete = submissionPaymentIncomplete(s);
       const name = `${s.firstName} ${s.lastName}${s.nickname ? ' (' + s.nickname + ')' : ''}`;
-      const paidAtStr = paid && s.paymentAt
+      const paidAtStr = hasPay && s.paymentAt
         ? new Date(s.paymentAt).toLocaleDateString('es-UY', { day: '2-digit', month: '2-digit' })
         : '';
-      // Estado del chip: 3 variantes (debe / pagado completo / pagado incompleto)
+      const paidSoFar = submissionPaidAmount(s);
+      const pend = submissionPendingAmount(s);
+
+      // Estado del chip: 4 variantes (debe / parcial / pagado completo / pagado incompleto)
       let chipCls, chipTxt, chipTitle;
-      if (!paid) {
-        chipCls = 'is-pending'; chipTxt = '✕ DEBE'; chipTitle = 'Click para registrar pago';
+      if (!hasPay) {
+        chipCls = 'is-pending';
+        chipTxt = '✕ DEBE';
+        chipTitle = 'Click para registrar pago';
       } else if (incomplete) {
-        chipCls = 'is-incomplete'; chipTxt = `⚠ PAGÓ · FALTAN DATOS${paidAtStr ? ' · ' + paidAtStr : ''}`;
+        chipCls = 'is-incomplete';
+        chipTxt = `⚠ PAGÓ · FALTAN DATOS${paidAtStr ? ' · ' + paidAtStr : ''}`;
         chipTitle = 'Este pago no tiene método/receptor registrado. Click para completar.';
+      } else if (isPartial) {
+        chipCls = 'is-partial';
+        chipTxt = amount > 0
+          ? `◐ PARCIAL · $${paidSoFar.toLocaleString('es-UY')}/$${amount.toLocaleString('es-UY')}${paidAtStr ? ' · ' + paidAtStr : ''}`
+          : `◐ PARCIAL${paidAtStr ? ' · ' + paidAtStr : ''}`;
+        chipTitle = `Pagó $${paidSoFar.toLocaleString('es-UY')}, falta $${pend.toLocaleString('es-UY')}. Click para registrar otro pago.`;
       } else {
-        chipCls = 'is-paid'; chipTxt = `✓ PAGÓ${paidAtStr ? ' · ' + paidAtStr : ''}`;
+        chipCls = 'is-paid';
+        chipTxt = `✓ PAGÓ${paidAtStr ? ' · ' + paidAtStr : ''}`;
         chipTitle = 'Click para marcar como pendiente';
       }
+
+      const rowCls = !hasPay ? 'is-pending'
+        : incomplete ? 'is-incomplete'
+        : isPartial ? 'is-partial'
+        : 'is-paid';
+
       return `
-        <div class="payments-row ${paid ? (incomplete ? 'is-incomplete' : 'is-paid') : 'is-pending'}">
+        <div class="payments-row ${rowCls}">
           <div class="payments-row-info">
             <div class="payments-row-name">${escapeHtml(name)}</div>
             <div class="payments-row-meta">${escapeHtml(tourName(s.addedToTournamentId))}</div>
@@ -7111,11 +7538,46 @@ function renderPayments() {
     }).join('')}
   `;
 
-  // Si el panel de arqueo está abierto, re-renderizarlo para reflejar el cambio
+  // Si el panel de arqueo está abierto, re-renderizarlo
   const arqueoPanel = $('arqueo-panel');
   if (arqueoPanel && arqueoPanel.style.display !== 'none') {
     renderArqueo();
   }
+}
+
+// ========== Recordatorio por WhatsApp ==========
+// Genera mensaje respetuoso con monto pagado, saldo pendiente y fecha del último
+// pago parcial (si corresponde).
+function sendPendingReminder(submissionId) {
+  const sub = (workspace.submissions || []).find(s => s.id === submissionId);
+  if (!sub) return;
+  const wa = (sub.whatsapp || '').replace(/\D/g, '');
+  if (!wa) { toast('Este jugador no tiene WhatsApp registrado'); return; }
+
+  const amount = getPaymentAmount();
+  const paidSoFar = submissionPaidAmount(sub);
+  const pend = submissionPendingAmount(sub);
+  const t = workspace.tournaments.find(x => x.id === sub.addedToTournamentId);
+  const tourLabel = t ? `${t.name} (Divisional ${t.division})` : 'el torneo';
+
+  // Nombre del club/admin (opcional, desde paymentConfig)
+  const cfg = workspace.paymentConfig || {};
+  const clubLine = cfg.accountHolder
+    ? `soy ${cfg.accountHolder} del Frontón Cup`
+    : `soy del Frontón Cup`;
+
+  let body;
+  if (submissionPartial(sub)) {
+    const paidDateStr = sub.paymentAt
+      ? new Date(sub.paymentAt).toLocaleDateString('es-UY', { day: '2-digit', month: '2-digit' })
+      : '';
+    body = `Hola ${sub.firstName}, ${clubLine}. Te inscribiste en ${tourLabel}. Registré tu pago parcial de $${paidSoFar.toLocaleString('es-UY')}${paidDateStr ? ' el ' + paidDateStr : ''}. Saldo pendiente: $${pend.toLocaleString('es-UY')}. Cuando puedas, muchas gracias.`;
+  } else {
+    body = `Hola ${sub.firstName}, ${clubLine}. Te inscribiste en ${tourLabel}. La inscripción es de $${amount.toLocaleString('es-UY')} y figura como pendiente. Cuando puedas, muchas gracias.`;
+  }
+
+  const url = `https://wa.me/${wa}?text=${encodeURIComponent(body)}`;
+  window.open(url, '_blank');
 }
 
 // Wire up del input de monto (se llama una sola vez al iniciar)
@@ -7244,93 +7706,130 @@ function renderArqueo() {
   const panel = $('arqueo-panel');
   if (!panel) return;
   const amount = getPaymentAmount();
-  const paidSubs = (workspace.submissions || []).filter(submissionPaid);
+  // Incluir tanto pagos completos como parciales
+  const withPayment = (workspace.submissions || []).filter(submissionHasPayment);
 
-  if (paidSubs.length === 0) {
+  if (withPayment.length === 0) {
     panel.innerHTML = `<div style="font-size:12px;color:var(--muted);font-style:italic;padding:10px;text-align:center;">Todavía no se registraron pagos.</div>`;
     return;
   }
 
-  // Agrupar totales por método
+  // Agrupar totales por método usando MONTO REAL
   const byMethod = { cash: 0, transfer: 0, unspecified: 0 };
-  // Agrupar totales por receptor (solo efectivo)
-  const byReceiver = {}; // { 'Lopé': 1, 'Juan': 3 } → cantidad de pagos recibidos
+  const byMethodCount = { cash: 0, transfer: 0, unspecified: 0 };
+  // Agrupar montos por receptor (solo efectivo)
+  const byReceiverAmount = {}; // { 'Lopé': 1500, 'Juan': 3000 } → monto total recibido
+  const byReceiverCount = {};  // { 'Lopé': 1, 'Juan': 3 } → cantidad de pagos
 
-  for (const s of paidSubs) {
+  for (const s of withPayment) {
+    const paid = submissionPaidAmount(s);
     if (s.paymentMethod === 'cash') {
-      byMethod.cash++;
+      byMethod.cash += paid;
+      byMethodCount.cash++;
       const r = s.paymentReceiver || '(sin nombre)';
-      byReceiver[r] = (byReceiver[r] || 0) + 1;
+      byReceiverAmount[r] = (byReceiverAmount[r] || 0) + paid;
+      byReceiverCount[r] = (byReceiverCount[r] || 0) + 1;
     } else if (s.paymentMethod === 'transfer') {
-      byMethod.transfer++;
+      byMethod.transfer += paid;
+      byMethodCount.transfer++;
     } else {
-      byMethod.unspecified++;
+      byMethod.unspecified += paid;
+      byMethodCount.unspecified++;
     }
   }
 
-  const money = n => amount > 0 ? `$${(n * amount).toLocaleString('es-UY')}` : `${n} pagos`;
+  const totalCollected = byMethod.cash + byMethod.transfer + byMethod.unspecified;
+  const totalExpected = getAllPlayersInTeams().length * amount;
+  const pendingTotal = Math.max(0, totalExpected - totalCollected);
+
+  const money = n => amount > 0 ? `$${n.toLocaleString('es-UY')}` : `${n}`;
   const fmtDate = (ts) => {
     if (!ts) return '—';
     const d = new Date(ts);
     return `${d.toLocaleDateString('es-UY', { day: '2-digit', month: '2-digit' })} ${d.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' })}`;
   };
 
-  // Tabla detallada: todos los pagos ordenados por fecha (más reciente primero)
-  const sorted = [...paidSubs].sort((a, b) => (b.paymentAt || 0) - (a.paymentAt || 0));
+  // Tabla detallada: todos los pagos ordenados por fecha
+  const sorted = [...withPayment].sort((a, b) => (b.paymentAt || 0) - (a.paymentAt || 0));
 
   panel.innerHTML = `
+    ${amount > 0 ? `
+      <div class="arqueo-grand-totals">
+        <div class="arqueo-grand-box collected">
+          <div class="arqueo-grand-lbl">Recaudado real</div>
+          <div class="arqueo-grand-big">${money(totalCollected)}</div>
+        </div>
+        <div class="arqueo-grand-box expected">
+          <div class="arqueo-grand-lbl">Total esperado</div>
+          <div class="arqueo-grand-big">${money(totalExpected)}</div>
+        </div>
+        ${pendingTotal > 0 ? `
+          <div class="arqueo-grand-box pending">
+            <div class="arqueo-grand-lbl">Pendiente de cobro</div>
+            <div class="arqueo-grand-big">${money(pendingTotal)}</div>
+          </div>` : ''}
+      </div>
+    ` : ''}
+
     <div class="arqueo-totals">
       <div class="arqueo-total-box cash">
         <div class="arqueo-total-lbl">💵 Efectivo</div>
         <div class="arqueo-total-big">${money(byMethod.cash)}</div>
-        <div class="arqueo-total-sub">${byMethod.cash} pago${byMethod.cash === 1 ? '' : 's'}</div>
+        <div class="arqueo-total-sub">${byMethodCount.cash} pago${byMethodCount.cash === 1 ? '' : 's'}</div>
       </div>
       <div class="arqueo-total-box transfer">
         <div class="arqueo-total-lbl">🏦 Transferencia</div>
         <div class="arqueo-total-big">${money(byMethod.transfer)}</div>
-        <div class="arqueo-total-sub">${byMethod.transfer} pago${byMethod.transfer === 1 ? '' : 's'}</div>
+        <div class="arqueo-total-sub">${byMethodCount.transfer} pago${byMethodCount.transfer === 1 ? '' : 's'}</div>
       </div>
-      ${byMethod.unspecified > 0 ? `
+      ${byMethodCount.unspecified > 0 ? `
         <div class="arqueo-total-box unspecified">
           <div class="arqueo-total-lbl">? Sin método</div>
           <div class="arqueo-total-big">${money(byMethod.unspecified)}</div>
-          <div class="arqueo-total-sub">${byMethod.unspecified} pago${byMethod.unspecified === 1 ? '' : 's'}</div>
+          <div class="arqueo-total-sub">${byMethodCount.unspecified} pago${byMethodCount.unspecified === 1 ? '' : 's'}</div>
         </div>` : ''}
     </div>
 
-    ${Object.keys(byReceiver).length > 0 ? `
+    ${Object.keys(byReceiverAmount).length > 0 ? `
       <div class="arqueo-section">
         <div class="arqueo-section-title">Efectivo por receptor</div>
         <div class="arqueo-receivers">
-          ${Object.entries(byReceiver)
+          ${Object.entries(byReceiverAmount)
             .sort((a,b) => b[1] - a[1])
-            .map(([name, count]) => `
+            .map(([name, totalAmt]) => {
+              const count = byReceiverCount[name] || 0;
+              return `
               <div class="arqueo-receiver-row">
                 <span class="arqueo-receiver-name">${escapeHtml(name)}</span>
-                <span class="arqueo-receiver-amount">${money(count)}</span>
+                <span class="arqueo-receiver-amount">${money(totalAmt)}</span>
                 <span class="arqueo-receiver-count">${count} pago${count === 1 ? '' : 's'}</span>
               </div>
-            `).join('')}
+            `; }).join('')}
         </div>
       </div>` : ''}
 
     <div class="arqueo-section">
-      <div class="arqueo-section-title">Detalle de pagos (${paidSubs.length})</div>
+      <div class="arqueo-section-title">Detalle de pagos (${withPayment.length})</div>
       <div class="arqueo-table">
         <div class="arqueo-table-head">
-          <span>Jugador</span><span>Método</span><span>Receptor</span><span>Fecha</span>
+          <span>Jugador</span><span>Método</span><span>Monto</span><span>Fecha</span>
         </div>
         ${sorted.map(s => {
           const method = s.paymentMethod === 'cash' ? '💵 Efectivo'
                        : s.paymentMethod === 'transfer' ? '🏦 Transferencia'
                        : '— sin método';
-          const recv = s.paymentMethod === 'cash' ? (s.paymentReceiver || '—') : '—';
+          const recv = s.paymentMethod === 'cash' ? (s.paymentReceiver || '—') : null;
+          const paid = submissionPaidAmount(s);
+          const isPartial = submissionPartial(s);
+          const amountLabel = amount > 0
+            ? (isPartial ? `${money(paid)} · <span style="color:var(--accent);font-weight:700;">PARCIAL</span>` : money(paid))
+            : (isPartial ? 'PARCIAL' : 'TOTAL');
           const notes = s.paymentNotes ? `<div class="arqueo-row-notes">📝 ${escapeHtml(s.paymentNotes)}</div>` : '';
           return `
-            <div class="arqueo-table-row">
-              <span><strong>${escapeHtml(s.firstName)} ${escapeHtml(s.lastName)}</strong>${notes}</span>
+            <div class="arqueo-table-row ${isPartial ? 'is-partial' : ''}">
+              <span><strong>${escapeHtml(s.firstName)} ${escapeHtml(s.lastName)}</strong>${recv ? `<div style="font-size:10px;color:var(--muted);">Recibió: ${escapeHtml(recv)}</div>` : ''}${notes}</span>
               <span>${method}</span>
-              <span>${escapeHtml(recv)}</span>
+              <span>${amountLabel}</span>
               <span>${fmtDate(s.paymentAt)}</span>
             </div>
           `;
@@ -7369,13 +7868,21 @@ function renderTeams() {
     const paymentChip = (side) => {
       const sub = findSubmissionForTeamSide(t, side);
       if (!sub) return '';
-      const paid = submissionPaid(sub);
+      const hasPay = submissionHasPayment(sub);
+      const isPaid = submissionPaid(sub);
+      const isPartial = submissionPartial(sub);
       const incomplete = submissionPaymentIncomplete(sub);
+      const amount = getPaymentAmount();
+      const paidSoFar = submissionPaidAmount(sub);
       let cls, txt, title;
-      if (!paid) {
+      if (!hasPay) {
         cls = 'is-pending'; txt = '✕ DEBE'; title = 'Click para registrar pago';
       } else if (incomplete) {
         cls = 'is-incomplete'; txt = '⚠ PAGÓ'; title = 'Faltan datos del pago. Click para completar.';
+      } else if (isPartial) {
+        cls = 'is-partial';
+        txt = amount > 0 ? `◐ $${paidSoFar.toLocaleString('es-UY')}/$${amount.toLocaleString('es-UY')}` : '◐ PARCIAL';
+        title = `Pago parcial. Click para registrar otro pago.`;
       } else {
         cls = 'is-paid'; txt = '✓ PAGÓ'; title = 'Click para desmarcar';
       }
@@ -11879,6 +12386,9 @@ window.doReplacePlayer = doReplacePlayer;
 window.togglePaymentStatus = togglePaymentStatus;
 window.removeCashReceiver = removeCashReceiver;
 window.updatePaymentMethodUI = updatePaymentMethodUI;
+window.updatePaymentAmountUI = updatePaymentAmountUI;
+window.updatePaymentAmountPreview = updatePaymentAmountPreview;
+window.sendPendingReminder = sendPendingReminder;
 window.goToArqueo = goToArqueo;
 window.requestReevaluation = requestReevaluation;
 window.editKOMatch = editKOMatch;

@@ -5132,6 +5132,267 @@ tr.qualified .pstand-pos { background: var(--green); }
   .submission-card { grid-template-columns: 1fr; text-align: center; }
   .submission-level-badge { justify-self: start; }
 }
+/* ================ JUGADORES CONOCIDOS (roster) ================ */
+.known-players-card {
+  border: 2px solid var(--ink);
+  position: relative;
+}
+.known-players-card::before {
+  content: "";
+  position: absolute;
+  top: -2px; left: -2px;
+  width: 8px; height: 100%;
+  background: var(--gold);
+}
+.known-players-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+.known-players-head select {
+  width: auto;
+  min-width: 160px;
+  max-width: 240px;
+  font-size: 12px;
+  padding: 6px 8px;
+}
+.known-players-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.known-players-search {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.known-players-search input {
+  font-family: 'Archivo', sans-serif;
+}
+.known-players-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.known-player-card {
+  border: 2px solid var(--ink);
+  background: var(--bg);
+  padding: 12px 12px 10px;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.known-player-card:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.known-player-card .pavatar {
+  align-self: center;
+}
+.known-player-info {
+  min-width: 0;
+}
+.known-player-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  margin-bottom: 2px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.known-player-name .nick {
+  font-family: 'Archivo', sans-serif;
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--accent);
+  margin-left: 6px;
+  letter-spacing: 0;
+}
+.known-player-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  margin-bottom: 2px;
+}
+.known-player-last {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+.known-player-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--ink-soft);
+}
+.known-player-actions .btn {
+  flex: 1 1 auto;
+}
+.known-player-actions .btn-remove {
+  flex: 0 0 auto;
+}
+.known-players-empty {
+  grid-column: 1 / -1;
+  padding: 20px 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  border: 1px dashed var(--ink-soft);
+}
+
+/* Hint "ya jugaron juntos" en la card de parejas listas */
+.ready-pair-prior {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  color: var(--green);
+  background: rgba(45, 106, 79, 0.08);
+  border-left: 2px solid var(--green);
+  padding: 4px 8px;
+  margin-bottom: 8px;
+}
+
+/* Sugerencia de pareja anterior en el formulario del jugador */
+.partner-suggestion {
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(212, 166, 74, 0.12);
+  border-left: 3px solid var(--gold);
+  font-size: 13px;
+  color: var(--ink);
+  display: none;
+}
+.partner-suggestion.show { display: block; }
+.partner-suggestion strong { color: var(--accent); }
+.partner-suggestion .ps-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+
+/* ================ MODAL DE DUPLICADO ================ */
+.dup-player-modal-box {
+  max-width: 720px;
+  width: 92vw;
+}
+.dup-modal-head {
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--ink);
+}
+.dup-modal-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.dup-modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+.dup-modal-sub {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.dup-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+@media (max-width: 600px) {
+  .dup-modal-grid { grid-template-columns: 1fr; }
+}
+.dup-card {
+  border: 2px solid var(--ink);
+  padding: 14px;
+  background: var(--bg);
+  position: relative;
+}
+.dup-card-existing { border-color: var(--gold); }
+.dup-card-new      { border-color: var(--accent); }
+.dup-card-tag {
+  position: absolute;
+  top: -10px; left: 12px;
+  padding: 3px 8px;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+}
+.dup-card-existing .dup-card-tag { background: var(--gold); color: var(--ink); }
+.dup-card-new .dup-card-tag      { background: var(--accent); color: var(--bg); }
+.dup-card .pavatar { margin-bottom: 8px; }
+.dup-card-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.dup-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 12px;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(26, 20, 16, 0.15);
+}
+.dup-card-row:last-child { border-bottom: none; }
+.dup-card-row span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.dup-card-row strong {
+  font-weight: 600;
+  color: var(--ink);
+  text-align: right;
+  word-break: break-word;
+}
+.dup-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 2px solid var(--ink);
+}
+@media (max-width: 600px) {
+  .dup-modal-actions { flex-direction: column-reverse; }
+  .dup-modal-actions .btn { width: 100%; }
+}
+
 </style>
 </head>
 <body>
@@ -5224,6 +5485,12 @@ tr.qualified .pstand-pos { background: var(--green); }
           <div class="enr-field">
             <label>WhatsApp del compañero/a <span class="opt">(para mandarle el link)</span></label>
             <input type="tel" id="enr-partner-whatsapp" placeholder="Ej: 59899...">
+          </div>
+          <!-- Sugerencia de pareja anterior: aparece si reconocemos al compañero
+               en el roster del workspace y tiene historial de duplas previas. -->
+          <div id="enr-partner-suggestion" class="partner-suggestion">
+            <div class="ps-eyebrow">Lo conocemos</div>
+            <div class="ps-text"></div>
           </div>
           <div class="enr-note">
             Cuando termines, la app genera un link para que lo mandes vía WhatsApp. Tu compañero/a completa su propia ficha con la misma facilidad.
@@ -5559,6 +5826,22 @@ tr.qualified .pstand-pos { background: var(--green); }
       </div>
     </div>
 
+    <!-- ============== JUGADORES CONOCIDOS (roster global) ============== -->
+    <div class="form-card known-players-card" data-role="known-players">
+      <div class="known-players-head">
+        <div>
+          <label style="margin-bottom:4px;">📇 Jugadores conocidos</label>
+          <div class="known-players-sub" id="known-players-sub">—</div>
+        </div>
+        <select id="known-players-target-tournament" title="Torneo destino para las invitaciones"></select>
+      </div>
+      <div class="known-players-search">
+        <input type="text" id="known-players-search-input" placeholder="Buscar por nombre o apodo…" autocomplete="off">
+        <button type="button" class="btn btn-ghost btn-sm" id="known-players-clear-search" title="Limpiar búsqueda">✕</button>
+      </div>
+      <div id="known-players-list" class="known-players-list"></div>
+    </div>
+
     <div class="form-card">
       <label>Invitar jugador</label>
       <div style="display:grid;grid-template-columns:1fr;gap:10px;">
@@ -5853,6 +6136,14 @@ tr.qualified .pstand-pos { background: var(--green); }
   </div>
 </div>
 
+<!-- Modal: detección de jugador duplicado al importar ficha -->
+<div class="modal-backdrop" id="dup-player-modal">
+  <div class="modal-box dup-player-modal-box">
+    <button class="modal-close" onclick="document.getElementById('dup-player-modal').classList.remove('show')" title="Cerrar">✕</button>
+    <div id="dup-player-modal-body"></div>
+  </div>
+</div>
+
 <!-- Supabase SDK (módulo ESM desde jsDelivr) -->
 <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -5953,12 +6244,20 @@ function blankTournament(opts = {}) {
 }
 
 let workspace = {
-  version: 2,
+  version: 3,
   activeTournamentId: null,
   tournaments: [],
   ads: [],
   invitations: [],
   submissions: [],
+  // Roster global de jugadores conocidos (se alimenta automáticamente al
+  // importar inscripciones). Cada entry tiene la forma:
+  //   { id, firstName, lastName, nickname, whatsapp, photoUrl,
+  //     totalPts, level, levelLabel,
+  //     firstSeenAt, lastActivityAt,
+  //     tournaments: [{tournamentId, tournamentName, tournamentDivision, joinedAt, partnerName, partnerWhatsapp}],
+  //     archivedTournaments: [...] // mismas tuplas para torneos terminados }
+  knownPlayers: [],
   adminWhatsApp: '',
   // PAGOS
   payments: [],         // [{id, tournamentId, submissionId, firstName, lastName, amount, concept, status:'pending'|'paid'|'waived', createdAt, paidAt, notes}]
@@ -5986,17 +6285,59 @@ function setActiveTournament(id) {
 }
 
 // ---------- STORAGE ----------
+// Ventana de actividad del roster (6 meses). Si un jugador no aparece en
+// ninguna inscripción nueva por más tiempo que esto, se borra del padrón.
+const KNOWN_PLAYERS_TTL_MS = 6 * 30 * 24 * 60 * 60 * 1000;
+
 async function loadState() {
   try {
     const result = await window.storage.get(STORAGE_KEY);
     if (result && result.value) {
       const parsed = JSON.parse(result.value);
 
-      if (parsed.version === 2 && Array.isArray(parsed.tournaments)) {
-        // formato nuevo
+      if (parsed.version === 3 && Array.isArray(parsed.tournaments)) {
+        // Formato v3 (actual)
         workspace = { ...workspace, ...parsed };
+      } else if (parsed.version === 2 && Array.isArray(parsed.tournaments)) {
+        // ===== Migración v2 → v3 =====
+        // Política elegida: empezar de cero con el roster.
+        // - Los torneos existentes se conservan pero se MARCAN como archivados
+        //   forzando phase='done' y finishedAt en una fecha pasada (24h atrás)
+        //   para que entren en el historial.
+        // - submissions[] e invitations[] del workspace se vacían (eran globales,
+        //   no podemos atribuirlas con seguridad post-hoc sin tocar UX).
+        // - knownPlayers[] arranca vacío y se va llenando con cada inscripción
+        //   nueva.
+        const legacyTournaments = (parsed.tournaments || []).map(t => {
+          const wasDone = t.phase === 'done';
+          return {
+            ...t,
+            phase: 'done',
+            finishedAt: t.finishedAt || (Date.now() - 24 * 60 * 60 * 1000),
+            // bandera explícita para distinguir lo que ya estaba terminado
+            // de lo que archivamos en la migración.
+            _migratedFromV2: !wasDone,
+          };
+        });
+        workspace = {
+          ...workspace,
+          ...parsed,
+          version: 3,
+          tournaments: legacyTournaments,
+          submissions: [],
+          invitations: [],
+          knownPlayers: [],
+        };
+        // Si todos los torneos quedaron archivados, creamos uno nuevo activo
+        // así el usuario puede arrancar de inmediato.
+        if (legacyTournaments.every(t => t.phase === 'done')) {
+          const fresh = blankTournament({ name: 'Nuevo torneo', division: 'A' });
+          workspace.tournaments.push(fresh);
+          workspace.activeTournamentId = fresh.id;
+        }
+        console.info('[migración v2→v3] torneos archivados:', legacyTournaments.length, '· roster reiniciado');
       } else {
-        // formato viejo (un solo torneo) → migrar
+        // Formato muy viejo (objeto plano, un solo torneo)
         const legacy = parsed;
         const migrated = blankTournament({
           name: legacy.name || 'Frontón Cup',
@@ -6008,11 +6349,16 @@ async function loadState() {
           groupMatches: (legacy.groupMatches || []).map(normalizeMatch),
           koMatches: (legacy.koMatches || []).map(normalizeMatch),
           settings: { ...DEFAULT_SETTINGS, ...(legacy.settings || {}) },
-          phase: legacy.phase || 'setup',
+          phase: 'done',
+          finishedAt: Date.now() - 24 * 60 * 60 * 1000,
           code: legacy.code || generateCode(),
+          _migratedFromV2: true,
         });
         workspace.tournaments = [migrated];
-        workspace.activeTournamentId = migrated.id;
+        const fresh = blankTournament({ name: 'Nuevo torneo', division: 'A' });
+        workspace.tournaments.push(fresh);
+        workspace.activeTournamentId = fresh.id;
+        workspace.knownPlayers = [];
       }
     }
     // si no hay torneos, crear uno inicial
@@ -6022,22 +6368,215 @@ async function loadState() {
       workspace.activeTournamentId = t.id;
     }
     if (!workspace.activeTournamentId) {
-      workspace.activeTournamentId = workspace.tournaments[0].id;
+      // Preferí un torneo activo (no archivado) si lo hay
+      const firstActive = workspace.tournaments.find(t => t.phase !== 'done');
+      workspace.activeTournamentId = (firstActive || workspace.tournaments[0]).id;
     }
+    // Asegurar campos nuevos en workspaces guardados antes de tenerlos
+    if (!Array.isArray(workspace.knownPlayers)) workspace.knownPlayers = [];
     setActiveTournament(workspace.activeTournamentId);
+
+    // Limpieza por inactividad del roster (>6 meses)
+    pruneInactiveKnownPlayers();
   } catch (e) {
     console.error('Error cargando:', e);
     const t = blankTournament({ name: 'Frontón Cup', division: 'A' });
     workspace.tournaments = [t];
     workspace.activeTournamentId = t.id;
+    workspace.knownPlayers = [];
     state = t;
   }
+}
+
+// Borra del padrón a quien no haya tenido actividad en los últimos
+// KNOWN_PLAYERS_TTL_MS. Devuelve cuántos se borraron.
+function pruneInactiveKnownPlayers() {
+  const cutoff = Date.now() - KNOWN_PLAYERS_TTL_MS;
+  const before = (workspace.knownPlayers || []).length;
+  workspace.knownPlayers = (workspace.knownPlayers || [])
+    .filter(p => (p.lastActivityAt || p.firstSeenAt || 0) >= cutoff);
+  const removed = before - workspace.knownPlayers.length;
+  if (removed > 0) {
+    console.info(`[roster] ${removed} jugador${removed === 1 ? '' : 'es'} removido${removed === 1 ? '' : 's'} por inactividad (>6 meses)`);
+  }
+  return removed;
 }
 
 function normalizeMatch(m) {
   if (m.scheduledAt === undefined) m.scheduledAt = null;
   if (m.status === undefined) m.status = m.played ? 'done' : 'upcoming';
   return m;
+}
+
+// ============================================================
+//  ROSTER GLOBAL · workspace.knownPlayers
+// ============================================================
+// Cada knownPlayer es la "ficha de fondo" de un jugador, agregada por
+// nombre+WhatsApp. Sus tournaments[] se van apilando con cada inscripción.
+
+// Normaliza un teléfono a sólo dígitos para comparar.
+function normalizeWhatsapp(wa) {
+  return String(wa || '').replace(/[^\d]/g, '');
+}
+
+// Normaliza un nombre completo: lowercase, sin tildes, sin espacios extra.
+function normalizeName(s) {
+  return String(s || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().trim().replace(/\s+/g, ' ');
+}
+
+// Busca un knownPlayer existente que coincida con la submission.
+// Match: WhatsApp normalizado igual, O (nombre+apellido normalizados iguales
+// y el otro tiene WA vacío). Devuelve null si no hay coincidencia.
+function findKnownPlayerForSubmission(sub, players = workspace.knownPlayers || []) {
+  const wa = normalizeWhatsapp(sub.whatsapp);
+  const fullName = normalizeName(`${sub.firstName} ${sub.lastName}`);
+  for (const p of players) {
+    const pwa = normalizeWhatsapp(p.whatsapp);
+    if (wa && pwa && wa === pwa) return p;
+    const pname = normalizeName(`${p.firstName} ${p.lastName}`);
+    if (pname && pname === fullName) {
+      // Si los dos tienen WA y son distintos, NO matcheamos por nombre solo.
+      if (wa && pwa && wa !== pwa) continue;
+      return p;
+    }
+  }
+  return null;
+}
+
+// Resuelve el tournamentId de una submission usando primero la invitación,
+// y si no, intentando match por nombre+división del torneo.
+function resolveTournamentIdForSubmission(sub) {
+  if (!sub) return null;
+  if (sub.addedToTournamentId) return sub.addedToTournamentId;
+  if (sub.invitationId) {
+    const inv = (workspace.invitations || []).find(i => i.id === sub.invitationId);
+    if (inv && inv.tournamentId) return inv.tournamentId;
+  }
+  if (sub.tournamentName) {
+    const t = (workspace.tournaments || []).find(t =>
+      t.name === sub.tournamentName && t.division === sub.tournamentDivision);
+    if (t) return t.id;
+  }
+  return null;
+}
+
+// Devuelve sólo las submissions que pertenecen al torneo dado.
+function getTournamentSubmissions(tournamentId) {
+  return (workspace.submissions || []).filter(s => resolveTournamentIdForSubmission(s) === tournamentId);
+}
+
+// Devuelve sólo las invitaciones del torneo dado.
+function getTournamentInvitations(tournamentId) {
+  return (workspace.invitations || []).filter(i => i.tournamentId === tournamentId);
+}
+
+// Inserta o actualiza al jugador en knownPlayers a partir de una submission.
+// Devuelve el knownPlayer resultante (creado o actualizado).
+function upsertKnownPlayerFromSubmission(sub) {
+  if (!sub) return null;
+  if (!Array.isArray(workspace.knownPlayers)) workspace.knownPlayers = [];
+
+  let player = findKnownPlayerForSubmission(sub);
+  const now = Date.now();
+  const tournamentId = resolveTournamentIdForSubmission(sub);
+  const t = tournamentId ? (workspace.tournaments || []).find(x => x.id === tournamentId) : null;
+  const tournamentEntry = {
+    submissionId: sub.id,
+    tournamentId: tournamentId,
+    tournamentName: sub.tournamentName || (t && t.name) || '',
+    tournamentDivision: sub.tournamentDivision || (t && t.division) || '',
+    joinedAt: sub.createdAt || sub.importedAt || now,
+    partnerName: sub.partnerName || '',
+    partnerWhatsapp: sub.partnerWhatsapp || '',
+  };
+
+  if (!player) {
+    player = {
+      id: uid(),
+      firstName: sub.firstName || '',
+      lastName: sub.lastName || '',
+      nickname: sub.nickname || '',
+      whatsapp: normalizeWhatsapp(sub.whatsapp),
+      photoUrl: sub.photoUrl || null,
+      totalPts: typeof sub.totalPts === 'number' ? sub.totalPts : null,
+      level: sub.level || null,
+      levelLabel: sub.levelLabel || null,
+      age: sub.age || null,
+      firstSeenAt: now,
+      lastActivityAt: now,
+      tournaments: [tournamentEntry],
+    };
+    workspace.knownPlayers.push(player);
+  } else {
+    // Refrescar campos "mutables" con los datos más recientes
+    player.firstName = sub.firstName || player.firstName;
+    player.lastName = sub.lastName || player.lastName;
+    if (sub.nickname) player.nickname = sub.nickname;
+    if (sub.whatsapp) player.whatsapp = normalizeWhatsapp(sub.whatsapp);
+    if (sub.photoUrl) player.photoUrl = sub.photoUrl;
+    if (typeof sub.totalPts === 'number') player.totalPts = sub.totalPts;
+    if (sub.level) player.level = sub.level;
+    if (sub.levelLabel) player.levelLabel = sub.levelLabel;
+    if (sub.age) player.age = sub.age;
+    player.lastActivityAt = now;
+    if (!Array.isArray(player.tournaments)) player.tournaments = [];
+    // Reemplazá la entry si ya existía la misma submissionId, o agregá nueva
+    const idx = player.tournaments.findIndex(x => x.submissionId === sub.id);
+    if (idx >= 0) player.tournaments[idx] = tournamentEntry;
+    else player.tournaments.push(tournamentEntry);
+  }
+  return player;
+}
+
+// Devuelve el último torneo registrado para un knownPlayer (label legible).
+function getKnownPlayerLastTournamentLabel(p) {
+  const arr = (p.tournaments || []).slice().sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0));
+  if (arr.length === 0) return '';
+  const e = arr[0];
+  return `${e.tournamentName}${e.tournamentDivision ? ` · Div. ${e.tournamentDivision}` : ''}`;
+}
+
+// Lista los compañeros previos de un knownPlayer, más recientes primero.
+// Devuelve [{name, whatsapp, tournamentName, joinedAt}].
+function getKnownPlayerPreviousPartners(p) {
+  if (!p || !Array.isArray(p.tournaments)) return [];
+  return p.tournaments
+    .filter(e => e.partnerName)
+    .sort((a, b) => (b.joinedAt || 0) - (a.joinedAt || 0))
+    .map(e => ({
+      name: e.partnerName,
+      whatsapp: normalizeWhatsapp(e.partnerWhatsapp),
+      tournamentName: e.tournamentName,
+      joinedAt: e.joinedAt,
+    }));
+}
+
+// Busca knownPlayer por nombre+WA (lo usamos para sugerir pareja anterior
+// cuando el jugador en su form indica con quién va a jugar).
+function findKnownPlayerByNameAndWa(name, whatsapp) {
+  const targetName = normalizeName(name);
+  const targetWa = normalizeWhatsapp(whatsapp);
+  return (workspace.knownPlayers || []).find(p => {
+    const pname = normalizeName(`${p.firstName} ${p.lastName}`);
+    const pwa = normalizeWhatsapp(p.whatsapp);
+    if (targetWa && pwa && targetWa === pwa) return true;
+    if (targetName && pname && targetName === pname) {
+      if (targetWa && pwa && targetWa !== pwa) return false;
+      return true;
+    }
+    return false;
+  }) || null;
+}
+
+// Borra a un jugador del padrón. Las submissions/inscripciones existentes
+// no se tocan: el jugador puede reaparecer en knownPlayers la próxima vez
+// que se inscriba a un torneo.
+function removeKnownPlayer(playerId) {
+  const before = (workspace.knownPlayers || []).length;
+  workspace.knownPlayers = (workspace.knownPlayers || []).filter(p => p.id !== playerId);
+  return (workspace.knownPlayers.length < before);
 }
 
 async function saveState() {
@@ -10722,6 +11261,54 @@ function enterEnrollmentMode(invitePayload, isReevaluation = false) {
   window._enrPhotoFile = null;
   // Flag para que submitEnrollment sepa qué flujo seguir
   window._isReevaluation = isReevaluation;
+
+  // Wiring de "sugerencia de pareja anterior": cuando el jugador escribe el
+  // nombre o el WA del compañero, si está en el roster con historial de
+  // duplas previas, le mostramos un hint amigable.
+  if (!isReevaluation) {
+    setupPartnerSuggestion();
+  }
+}
+
+// Muestra/oculta el hint "ya jugaron juntos" en el form del jugador.
+// Idempotente: usa .oninput para no apilar listeners.
+function setupPartnerSuggestion() {
+  const nameEl = $('enr-partner-name');
+  const waEl   = $('enr-partner-whatsapp');
+  const box    = $('enr-partner-suggestion');
+  if (!nameEl || !waEl || !box) return;
+
+  const refresh = () => {
+    const name = nameEl.value.trim();
+    const wa   = waEl.value.trim();
+    if (!name && !wa) {
+      box.classList.remove('show');
+      return;
+    }
+    const player = findKnownPlayerByNameAndWa(name, wa);
+    if (!player) {
+      box.classList.remove('show');
+      return;
+    }
+    const partners = getKnownPlayerPreviousPartners(player);
+    const txt = box.querySelector('.ps-text');
+    const fullName = `${player.firstName} ${player.lastName}`.trim();
+    if (partners.length > 0) {
+      // Mostramos hasta 2 parejas anteriores (las más recientes).
+      const top = partners.slice(0, 2)
+        .map(p => `<strong>${escapeHtml(p.name)}</strong>${p.tournamentName ? ` (${escapeHtml(p.tournamentName)})` : ''}`)
+        .join(', ');
+      txt.innerHTML = `${escapeHtml(fullName)} ya jugó antes con ${top}. Si querés repetir dupla, avisale para que se inscriba también.`;
+    } else {
+      txt.innerHTML = `${escapeHtml(fullName)} ya está en nuestro padrón. Cuando complete su ficha, sus datos se sincronizan automáticamente.`;
+    }
+    box.classList.add('show');
+  };
+
+  nameEl.oninput = refresh;
+  waEl.oninput = refresh;
+  // Estado inicial
+  refresh();
 }
 
 // Wiring del input de foto en el formulario de inscripción.
@@ -11010,28 +11597,146 @@ function copyText(id) {
 function handleIncomingSubmission(payload) {
   if (!payload || !payload.s) { toast('Link inválido'); return; }
   const sub = payload.s;
-  // Verificar si ya fue importada
+  // Verificar si ya fue importada por id (mismo link procesado dos veces)
   const existing = (workspace.submissions || []).find(s => s.id === sub.id);
   if (existing) {
     toast('Esta ficha ya estaba importada');
     return;
   }
+
+  // Detección de duplicado contra el roster: comparamos por nombre+WhatsApp.
+  // Si hay match, mostramos modal "Fusionar / Crear nuevo" antes de importar.
+  const dup = findKnownPlayerForSubmission(sub);
+  if (dup) {
+    openDuplicateModal(sub, dup);
+    return;
+  }
+  finalizeIncomingSubmission(sub, { mode: 'new' });
+}
+
+// Aplica la importación: pushea la submission, marca la invitación como
+// completa, alimenta el roster y refresca la UI.
+//   mode: 'new'    → crear knownPlayer nuevo (o el primer registro)
+//   mode: 'merge'  → fusionar la submission con el knownPlayer indicado
+function finalizeIncomingSubmission(sub, opts = {}) {
+  const mode = opts.mode || 'new';
+  const mergeWithPlayerId = opts.mergeWithPlayerId || null;
+
   if (!workspace.submissions) workspace.submissions = [];
   workspace.submissions.push({ ...sub, importedAt: Date.now(), status: 'pending' });
 
-  // si estaba relacionada a una invitación, marcarla como completada
   if (sub.invitationId && workspace.invitations) {
     const inv = workspace.invitations.find(i => i.id === sub.invitationId);
     if (inv) inv.completed = true;
   }
 
+  // Alimentar roster
+  if (mode === 'merge' && mergeWithPlayerId) {
+    // Forzamos que el upsert encuentre justo a ese player: garantizamos que
+    // el WhatsApp de la submission coincida con el del player. Si el WA viene
+    // distinto en la submission nueva, lo dejamos como está y dejamos que
+    // upsert lo actualice.
+    const target = (workspace.knownPlayers || []).find(p => p.id === mergeWithPlayerId);
+    if (target) {
+      // Guardrail: si por alguna razón findKnownPlayerForSubmission no
+      // matchearía con `target`, alineamos el WA para que sí lo haga.
+      const current = findKnownPlayerForSubmission(sub);
+      if (!current || current.id !== target.id) {
+        // No tocamos el sub.whatsapp original (es del jugador), solo nos
+        // apoyamos en el match por nombre normalizado del helper. Si aun
+        // así no matchea, hacemos un upsert manual.
+        upsertKnownPlayerFromSubmission({ ...sub, whatsapp: target.whatsapp || sub.whatsapp });
+      } else {
+        upsertKnownPlayerFromSubmission(sub);
+      }
+    } else {
+      upsertKnownPlayerFromSubmission(sub);
+    }
+  } else {
+    upsertKnownPlayerFromSubmission(sub);
+  }
+
   saveState();
   renderAll();
 
-  // limpiar hash y mostrar pestaña de inscripciones
   history.replaceState(null, '', window.location.href.split('#')[0]);
-  document.querySelector('[data-tab="inscriptions"]').click();
+  const inscBtn = document.querySelector('[data-tab="inscriptions"]');
+  if (inscBtn) inscBtn.click();
   toast(`Ficha de ${sub.firstName} ${sub.lastName} importada`);
+}
+
+// Modal: ya existe alguien con este nombre/WA → preguntar al admin qué hacer.
+function openDuplicateModal(sub, dupPlayer) {
+  const modal = $('dup-player-modal');
+  const body = $('dup-player-modal-body');
+  if (!modal || !body) {
+    // Fallback feo si el modal no está montado (no debería pasar)
+    if (confirm(`"${sub.firstName} ${sub.lastName}" ya existe en tu padrón. ¿Fusionar con el registro existente?\n\nAceptar = fusionar · Cancelar = crear nuevo`)) {
+      finalizeIncomingSubmission(sub, { mode: 'merge', mergeWithPlayerId: dupPlayer.id });
+    } else {
+      finalizeIncomingSubmission(sub, { mode: 'new' });
+    }
+    return;
+  }
+
+  const newName = `${sub.firstName} ${sub.lastName}`.trim();
+  const newWa = sub.whatsapp || '—';
+  const newNick = sub.nickname || '—';
+  const newPts = (typeof sub.totalPts === 'number') ? `${sub.totalPts} pts` : '—';
+  const newTour = sub.tournamentName ? `${sub.tournamentName}${sub.tournamentDivision ? ` · Div. ${sub.tournamentDivision}` : ''}` : '—';
+
+  const oldName = `${dupPlayer.firstName} ${dupPlayer.lastName}`.trim();
+  const oldWa = dupPlayer.whatsapp || '—';
+  const oldNick = dupPlayer.nickname || '—';
+  const oldPts = (typeof dupPlayer.totalPts === 'number') ? `${dupPlayer.totalPts} pts` : '—';
+  const oldTour = getKnownPlayerLastTournamentLabel(dupPlayer) || '—';
+  const oldCount = (dupPlayer.tournaments || []).length;
+
+  body.innerHTML = `
+    <div class="dup-modal-head">
+      <div class="dup-modal-eyebrow">Detección de duplicado</div>
+      <h3 class="dup-modal-title">Este jugador ya existe en tu padrón</h3>
+      <p class="dup-modal-sub">Coincidencia por nombre o WhatsApp. ¿Querés fusionarlo con el registro existente o crear uno nuevo?</p>
+    </div>
+    <div class="dup-modal-grid">
+      <div class="dup-card dup-card-existing">
+        <div class="dup-card-tag">YA EN PADRÓN</div>
+        ${renderAvatar(oldName, 'lg', dupPlayer.photoUrl || null)}
+        <div class="dup-card-name">${escapeHtml(oldName)}</div>
+        <div class="dup-card-row"><span>Apodo</span><strong>${escapeHtml(oldNick)}</strong></div>
+        <div class="dup-card-row"><span>WhatsApp</span><strong>${escapeHtml(oldWa)}</strong></div>
+        <div class="dup-card-row"><span>Nivel</span><strong>${escapeHtml(oldPts)}</strong></div>
+        <div class="dup-card-row"><span>Último torneo</span><strong>${escapeHtml(oldTour)}</strong></div>
+        <div class="dup-card-row"><span>Historial</span><strong>${oldCount} torneo${oldCount === 1 ? '' : 's'}</strong></div>
+      </div>
+      <div class="dup-card dup-card-new">
+        <div class="dup-card-tag">FICHA NUEVA</div>
+        ${renderAvatar(newName, 'lg', sub.photoUrl || null)}
+        <div class="dup-card-name">${escapeHtml(newName)}</div>
+        <div class="dup-card-row"><span>Apodo</span><strong>${escapeHtml(newNick)}</strong></div>
+        <div class="dup-card-row"><span>WhatsApp</span><strong>${escapeHtml(newWa)}</strong></div>
+        <div class="dup-card-row"><span>Nivel</span><strong>${escapeHtml(newPts)}</strong></div>
+        <div class="dup-card-row"><span>Torneo</span><strong>${escapeHtml(newTour)}</strong></div>
+      </div>
+    </div>
+    <div class="dup-modal-actions">
+      <button type="button" class="btn btn-ghost" id="dup-modal-cancel">Cancelar importación</button>
+      <button type="button" class="btn" id="dup-modal-create-new">Crear nuevo registro</button>
+      <button type="button" class="btn btn-accent" id="dup-modal-merge">Fusionar (recomendado)</button>
+    </div>
+  `;
+  modal.classList.add('show');
+
+  const close = () => modal.classList.remove('show');
+  $('dup-modal-cancel').onclick = () => { close(); toast('Importación cancelada'); };
+  $('dup-modal-create-new').onclick = () => {
+    close();
+    finalizeIncomingSubmission(sub, { mode: 'new' });
+  };
+  $('dup-modal-merge').onclick = () => {
+    close();
+    finalizeIncomingSubmission(sub, { mode: 'merge', mergeWithPlayerId: dupPlayer.id });
+  };
 }
 
 // Handler para cuando el admin clickea un link #reeval-result=... enviado
@@ -11092,6 +11797,9 @@ function handleIncomingReevalResult(payload) {
   sub.levelSuggest = result.levelSuggest;
   sub.updatedAt = result.updatedAt || Date.now();
 
+  // Reflejar la actualización en el roster (nivel, nombre, etc.)
+  upsertKnownPlayerFromSubmission(sub);
+
   saveState();
   renderAll();
 
@@ -11123,14 +11831,21 @@ async function requestReevaluation(submissionId) {
 // ========== ADMIN: render de inscripciones ==========
 function renderInscriptions() {
   if (!$('inscriptions-meta')) return;
-  const subs = workspace.submissions || [];
-  const invs = workspace.invitations || [];
+  // ⚠️ Cada torneo es independiente: sólo mostramos las fichas e invitaciones
+  // que pertenecen al torneo activo (sea via invitationId o por
+  // nombre+división declarados al inscribirse).
+  const activeTid = workspace.activeTournamentId;
+  const subs = getTournamentSubmissions(activeTid);
+  const invs = getTournamentInvitations(activeTid);
   $('inscriptions-meta').textContent = `${subs.length} ficha${subs.length === 1 ? '' : 's'} · ${invs.filter(i => !i.completed).length} pendiente${invs.filter(i => !i.completed).length === 1 ? '' : 's'}`;
 
   $('admin-whatsapp').value = workspace.adminWhatsApp || '';
 
   // Render del panel de pagos (resumen + listado por jugador)
   renderPayments();
+
+  // Render del roster global (jugadores conocidos)
+  renderKnownPlayers();
 
   // Selector de torneo para invitar
   const sel = $('invite-tournament-select');
@@ -11201,6 +11916,23 @@ function renderInscriptions() {
       // Torneo destino (el que declaró cualquiera de los dos)
       const destName = p.a.tournamentName || p.b.tournamentName || '';
       const destDiv = p.a.tournamentDivision || p.b.tournamentDivision || '';
+      // Sugerencia: ¿ya habían jugado juntos en algún torneo previo?
+      // Cruzamos el historial de A en knownPlayers contra la identidad de B.
+      const playerA = findKnownPlayerForSubmission(p.a);
+      const playerB = findKnownPlayerForSubmission(p.b);
+      let priorPair = null;
+      if (playerA) {
+        const partnersOfA = getKnownPlayerPreviousPartners(playerA);
+        const bWa = normalizeWhatsapp(p.b.whatsapp);
+        const bName = normalizeName(`${p.b.firstName} ${p.b.lastName}`);
+        priorPair = partnersOfA.find(pp => {
+          if (pp.whatsapp && bWa && pp.whatsapp === bWa) return true;
+          return normalizeName(pp.name) === bName;
+        }) || null;
+      }
+      const priorBadge = priorPair
+        ? `<div class="ready-pair-prior">↻ Ya jugaron juntos${priorPair.tournamentName ? ` en ${escapeHtml(priorPair.tournamentName)}` : ''}</div>`
+        : '';
       return `
         <div class="ready-pair-card">
           <div class="ready-pair-head">
@@ -11211,6 +11943,7 @@ function renderInscriptions() {
             </div>
           </div>
           ${destName ? `<div style="font-size:11px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;margin-bottom:8px;">→ ${escapeHtml(destName)} · DIV. ${escapeHtml(destDiv)}</div>` : ''}
+          ${priorBadge}
           <div class="ready-pair-levels">
             <span>${escapeHtml(l1.label)} · ${p.a.totalPts}pts</span>
             <span>+</span>
@@ -11229,11 +11962,10 @@ function renderInscriptions() {
     }).join('');
   }
 
-  // Jugadores sueltos (buscan compañero)
+  // Jugadores sueltos (buscan compañero) — solo del torneo activo
   const soloEl = $('solo-players-list');
   if (soloEl) {
-    const solos = (workspace.submissions || []).filter(s =>
-      s.status === 'pending' && s.lookingForPartner);
+    const solos = subs.filter(s => s.status === 'pending' && s.lookingForPartner);
     if (solos.length === 0) {
       soloEl.innerHTML = `<div class="empty" style="padding:14px;"><p style="margin:0;font-size:13px;">Nadie quedó solo por ahora.</p></div>`;
     } else {
@@ -11298,8 +12030,173 @@ function renderInscriptions() {
   }
 }
 
+// ============================================================
+//  RENDER ROSTER (jugadores conocidos)
+// ============================================================
+// Estado de búsqueda en memoria (no persistimos)
+let _knownPlayersSearch = '';
+
+function renderKnownPlayers() {
+  const listEl = $('known-players-list');
+  if (!listEl) return; // pestaña aún no montada
+
+  // Aseguramos limpieza por inactividad antes de renderizar (defensa en
+  // profundidad: además del prune que corre en loadState).
+  pruneInactiveKnownPlayers();
+
+  const all = (workspace.knownPlayers || [])
+    .slice()
+    .sort((a, b) => (b.lastActivityAt || 0) - (a.lastActivityAt || 0));
+
+  // Sub-meta
+  const subEl = $('known-players-sub');
+  if (subEl) {
+    subEl.textContent = all.length === 0
+      ? 'EL PADRÓN SE LLENA SOLO CON CADA INSCRIPCIÓN'
+      : `${all.length} JUGADOR${all.length === 1 ? '' : 'ES'} · ACTIVIDAD ÚLTIMOS 6 MESES`;
+  }
+
+  // Selector de torneo destino para los botones "Invitar"
+  const sel = $('known-players-target-tournament');
+  if (sel) {
+    const actives = getActiveTournaments();
+    const prevVal = sel.value;
+    sel.innerHTML = actives.map(t =>
+      `<option value="${t.id}">${escapeHtml(t.name)} · DIV. ${escapeHtml(t.division)}</option>`
+    ).join('');
+    if (actives.find(t => t.id === prevVal)) sel.value = prevVal;
+    else if (actives.find(t => t.id === workspace.activeTournamentId)) sel.value = workspace.activeTournamentId;
+  }
+
+  // Filtro por búsqueda
+  const q = (_knownPlayersSearch || '').trim().toLowerCase();
+  const filtered = q
+    ? all.filter(p => {
+        const haystack = `${p.firstName} ${p.lastName} ${p.nickname || ''}`.toLowerCase();
+        return haystack.includes(q);
+      })
+    : all;
+
+  if (all.length === 0) {
+    listEl.innerHTML = `
+      <div class="known-players-empty">
+        Todavía no hay jugadores en el padrón. Cuando alguien complete una ficha de inscripción, aparecerá acá automáticamente.
+      </div>`;
+    return;
+  }
+  if (filtered.length === 0) {
+    listEl.innerHTML = `<div class="known-players-empty">Sin resultados para "${escapeHtml(q)}".</div>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(p => renderKnownPlayerCard(p)).join('');
+}
+
+function renderKnownPlayerCard(p) {
+  const fullName = `${p.firstName} ${p.lastName}`.trim();
+  const nick = p.nickname ? `<span class="nick">"${escapeHtml(p.nickname)}"</span>` : '';
+  const wa = p.whatsapp ? escapeHtml(p.whatsapp) : '—';
+  const lastTour = getKnownPlayerLastTournamentLabel(p);
+  const lastBlock = lastTour
+    ? `<div class="known-player-last">↳ ${escapeHtml(lastTour)}</div>`
+    : `<div class="known-player-last" style="color:var(--muted);">Sin torneos previos</div>`;
+  const ptsLabel = (typeof p.totalPts === 'number')
+    ? `${p.totalPts} PTS · ${escapeHtml((p.levelLabel || '').toUpperCase())}`
+    : '';
+  return `
+    <div class="known-player-card" data-known-id="${p.id}">
+      ${renderAvatar(fullName, 'lg', p.photoUrl || null)}
+      <div class="known-player-info">
+        <div class="known-player-name">${escapeHtml(fullName)} ${nick}</div>
+        ${ptsLabel ? `<div class="known-player-meta">${ptsLabel}</div>` : ''}
+        <div class="known-player-meta">WA ${wa}</div>
+        ${lastBlock}
+      </div>
+      <div class="known-player-actions">
+        <button class="btn btn-accent btn-sm" onclick="invitePlayerFromRoster('${p.id}')">📨 Invitar a este torneo</button>
+        <button class="btn btn-ghost btn-sm btn-remove" onclick="confirmRemoveKnownPlayer('${p.id}')" title="Quitar del padrón">✕</button>
+      </div>
+    </div>
+  `;
+}
+
+// Click en "📨 Invitar a este torneo": genera una invitación pre-cargada
+// con el nombre del jugador y abre WhatsApp al número del jugador con el
+// link adentro.
+async function invitePlayerFromRoster(playerId) {
+  const p = (workspace.knownPlayers || []).find(x => x.id === playerId);
+  if (!p) { toast('Jugador no encontrado'); return; }
+
+  const sel = $('known-players-target-tournament');
+  const targetId = sel ? sel.value : workspace.activeTournamentId;
+  const targetT = (workspace.tournaments || []).find(t => t.id === targetId);
+  if (!targetT) { toast('Elegí un torneo destino'); return; }
+  if (targetT.phase === 'done') { toast(`"${targetT.name}" ya terminó`); return; }
+
+  const inviterName = `${p.firstName} ${p.lastName}`.trim();
+  const inv = {
+    id: uid(),
+    tournamentId: targetT.id,
+    tournamentName: targetT.name,
+    tournamentDivision: targetT.division,
+    createdAt: Date.now(),
+    inviterName,
+    completed: false,
+    fromKnownPlayerId: p.id,    // trazabilidad
+  };
+  if (!workspace.invitations) workspace.invitations = [];
+  workspace.invitations.push(inv);
+  saveState();
+
+  toast('Generando link…');
+  const link = await buildInviteLink(inv);
+  const msg = `Hola ${p.firstName}! Te invito al torneo "${targetT.name}" (Div. ${targetT.division}). Completá tu ficha acá:\n\n${link}`;
+
+  // Si tenemos su WA, mandamos directo al chat con esa persona
+  const url = p.whatsapp
+    ? `https://wa.me/${normalizeWhatsapp(p.whatsapp)}?text=${encodeURIComponent(msg)}`
+    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  renderAll();
+}
+
+function confirmRemoveKnownPlayer(playerId) {
+  const p = (workspace.knownPlayers || []).find(x => x.id === playerId);
+  if (!p) return;
+  const name = `${p.firstName} ${p.lastName}`.trim();
+  if (!confirm(`¿Quitar a "${name}" del padrón?\n\nLas inscripciones de torneos anteriores no se borran. El jugador volverá a aparecer si se inscribe a un torneo nuevo.`)) return;
+  removeKnownPlayer(playerId);
+  saveState();
+  renderKnownPlayers();
+  toast('Jugador quitado del padrón');
+}
+
+// Inicializa los listeners del roster (search + clear). Se llama una sola
+// vez desde el init principal de la pestaña Inscripciones.
+function initKnownPlayersControls() {
+  const input = $('known-players-search-input');
+  const clearBtn = $('known-players-clear-search');
+  if (input) {
+    input.addEventListener('input', () => {
+      _knownPlayersSearch = input.value;
+      renderKnownPlayers();
+    });
+  }
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      _knownPlayersSearch = '';
+      if (input) input.value = '';
+      renderKnownPlayers();
+    });
+  }
+}
+
 function findReadyPairs() {
-  const pending = (workspace.submissions || []).filter(s => s.status === 'pending');
+  // Sólo armamos parejas dentro del torneo activo: las inscripciones de
+  // otros torneos no se mezclan acá.
+  const activeTid = workspace.activeTournamentId;
+  const pending = (workspace.submissions || []).filter(s =>
+    s.status === 'pending' && resolveTournamentIdForSubmission(s) === activeTid);
   const pairs = [];
   const used = new Set();
   pending.forEach(a => {
@@ -11474,6 +12371,9 @@ function initInscriptionsControls() {
 
   // Wire-up del input de monto de pagos
   setupPaymentAmountInput();
+
+  // Wire-up del roster (búsqueda y botones)
+  initKnownPlayersControls();
 
   $('generate-invite-btn').addEventListener('click', async (ev) => {
     if (!workspace.adminWhatsApp) {

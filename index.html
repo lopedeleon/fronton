@@ -1018,6 +1018,12 @@ table.standings tr.qualified-third td:first-child::before {
 }
 .payments-pending-row:last-child { border-bottom: none; }
 .payments-pending-info { min-width: 0; flex: 1; }
+.payments-pending-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
 .payments-pending-name {
   font-family: 'Archivo', sans-serif;
   font-weight: 600;
@@ -6419,6 +6425,37 @@ function normalizeWhatsapp(wa) {
   return String(wa || '').replace(/[^\d]/g, '');
 }
 
+// Normaliza un teléfono al formato "marcable por WhatsApp" (con código de
+// país). Detecta los formatos locales más comunes de Uruguay y prefijo 598:
+//   "092 817 965"   → "59892817965"
+//   "092817965"     → "59892817965"
+//   "92817965"      → "59892817965"   (8 dígitos sin el 0 inicial)
+//   "+59899123456"  → "59899123456"   (intacto)
+//   "59899123456"   → "59899123456"   (intacto)
+// Si el número ya viene con 598..., lo deja como está. Si no calza con
+// ningún formato UY conocido, devuelve los dígitos tal cual (no rompe
+// números extranjeros que el admin haya ingresado a propósito).
+function normalizeWhatsappUY(wa) {
+  const digits = normalizeWhatsapp(wa);
+  if (!digits) return '';
+  // Ya tiene código país UY → quedó bien
+  if (digits.startsWith('598')) return digits;
+  // Otro código país plausible (10–15 dígitos) → respetar
+  // Heurística: si empieza con un código que NO es 0 y tiene 11+ dígitos,
+  // asumimos que ya trae país. Esto cubre +54 (AR), +55 (BR), +1 (US), etc.
+  if (digits.length >= 11 && !digits.startsWith('0')) return digits;
+  // Formato local UY: "09xxxxxxx" (9 dígitos, el 0 es para discado nacional)
+  if (digits.length === 9 && digits.startsWith('09')) {
+    return '598' + digits.slice(1);
+  }
+  // Formato local UY corto: "9xxxxxxx" (8 dígitos sin el 0)
+  if (digits.length === 8 && digits.startsWith('9')) {
+    return '598' + digits;
+  }
+  // No reconocido → devolver tal cual (mejor que tirar un error al usuario)
+  return digits;
+}
+
 // Normaliza un nombre completo: lowercase, sin tildes, sin espacios extra.
 function normalizeName(s) {
   return String(s || '')
@@ -8009,9 +8046,12 @@ function renderPayments() {
                 <div class="payments-pending-name">${escapeHtml(name)}</div>
                 <div class="payments-pending-meta">${escapeHtml(subLabel)}${s.whatsapp ? ' · WA ' + escapeHtml(s.whatsapp) : ''}</div>
               </div>
-              ${canSend
-                ? `<button class="btn btn-whatsapp btn-sm" onclick="sendPendingReminder('${s.id}')">💬 Recordar</button>`
-                : `<span style="font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;letter-spacing:0.1em;">SIN WHATSAPP</span>`}
+              <div class="payments-pending-actions">
+                <button class="btn btn-ghost btn-sm" onclick="editPlayerWhatsapp('${s.id}')" title="Editar WhatsApp">✏️</button>
+                ${canSend
+                  ? `<button class="btn btn-whatsapp btn-sm" onclick="sendPendingReminder('${s.id}')">💬 Recordar</button>`
+                  : `<button class="btn btn-ghost btn-sm" onclick="editPlayerWhatsapp('${s.id}')" title="Cargar WhatsApp">+ WhatsApp</button>`}
+              </div>
             </div>
           `;
         }).join('')}
@@ -8117,6 +8157,60 @@ function sendPendingReminder(submissionId) {
 
   const url = `https://wa.me/${wa}?text=${encodeURIComponent(body)}`;
   window.open(url, '_blank');
+}
+
+// Permite al admin editar el WhatsApp de un jugador cuando vino mal cargado
+// (típicamente con formato local UY sin código país). Sincroniza el cambio
+// en TODOS los lugares donde aparece ese jugador:
+//   - submission (workspace.submissions)
+//   - knownPlayer del roster (match por id de submission histórica o por nombre)
+//   - team del torneo (p1Data / p2Data) si ya estaba aprobado
+// Devuelve true si guardó, false si canceló o no pudo.
+function editPlayerWhatsapp(submissionId) {
+  const sub = (workspace.submissions || []).find(s => s.id === submissionId);
+  if (!sub) { toast('Ficha no encontrada'); return false; }
+
+  const fullName = `${sub.firstName || ''} ${sub.lastName || ''}`.trim();
+  const current = sub.whatsapp || '';
+  const raw = prompt(
+    `Editar WhatsApp de ${fullName}\n\n` +
+    `Si el jugador cargó "092817965" se va a guardar como "59892817965" para que WhatsApp lo abra.\n\n` +
+    `Número actual: ${current || '(vacío)'}\nNuevo número:`,
+    current
+  );
+  if (raw === null) return false; // canceló
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    if (!confirm('¿Guardar sin WhatsApp? El jugador no podrá recibir recordatorios.')) return false;
+    sub.whatsapp = '';
+  } else {
+    sub.whatsapp = normalizeWhatsappUY(trimmed);
+  }
+
+  // Reflejar en el roster
+  const rosterPlayer = findKnownPlayerForSubmission(sub) ||
+    (workspace.knownPlayers || []).find(p =>
+      (p.tournaments || []).some(e => e.submissionId === sub.id));
+  if (rosterPlayer) {
+    rosterPlayer.whatsapp = normalizeWhatsapp(sub.whatsapp);
+    rosterPlayer.lastActivityAt = Date.now();
+  }
+
+  // Reflejar en el equipo (si ya está armado)
+  if (sub.addedToTournamentId) {
+    const t = (workspace.tournaments || []).find(x => x.id === sub.addedToTournamentId);
+    if (t && Array.isArray(t.teams)) {
+      for (const team of t.teams) {
+        if (team.p1Data && team.p1Data.id === sub.id) team.p1Data.whatsapp = sub.whatsapp;
+        if (team.p2Data && team.p2Data.id === sub.id) team.p2Data.whatsapp = sub.whatsapp;
+      }
+    }
+  }
+
+  saveState();
+  renderAll();
+  toast(sub.whatsapp ? `✓ WhatsApp actualizado: ${sub.whatsapp}` : 'WhatsApp eliminado');
+  return true;
 }
 
 // Wire up del input de monto (se llama una sola vez al iniciar)
@@ -11425,7 +11519,9 @@ async function submitEnrollment() {
   const lastName = $('enr-last-name').value.trim();
   const nickname = $('enr-nickname').value.trim();
   const age = parseInt($('enr-age').value);
-  const whatsapp = $('enr-whatsapp').value.trim();
+  // Normalizamos WhatsApp del jugador al formato con código país UY
+  // para que el admin pueda contactarlo sin tener que editar después.
+  const whatsapp = normalizeWhatsappUY($('enr-whatsapp').value.trim());
 
   if (!firstName || !lastName) { alert('Falta tu nombre o apellido'); return; }
   if (!age || age < 10) { alert('Completá tu edad'); return; }
@@ -11488,7 +11584,7 @@ async function submitEnrollment() {
   const modeEl = document.querySelector('input[name="partner-mode"]:checked');
   const noPartner = modeEl && modeEl.value === 'none';
   const partnerName = noPartner ? '' : $('enr-partner-name').value.trim();
-  const partnerWhatsapp = noPartner ? '' : $('enr-partner-whatsapp').value.trim();
+  const partnerWhatsapp = noPartner ? '' : normalizeWhatsappUY($('enr-partner-whatsapp').value.trim());
 
   if (!noPartner && !partnerName) { alert('Ingresá el nombre de tu compañero/a, o marcá "no tengo compañero aún"'); return; }
 
@@ -11789,7 +11885,7 @@ function handleIncomingReevalResult(payload) {
   sub.lastName = result.lastName;
   sub.nickname = result.nickname || '';
   sub.age = result.age;
-  sub.whatsapp = result.whatsapp;
+  sub.whatsapp = normalizeWhatsappUY(result.whatsapp);
   sub.quizAnswers = result.quizAnswers;
   sub.totalPts = result.totalPts;
   sub.level = result.level;
@@ -11894,6 +11990,7 @@ function renderInscriptions() {
           </div>
           <div class="submission-actions">
             <button class="btn btn-sm btn-ghost" onclick="viewSubmissionDetail('${s.id}')">Ver</button>
+            <button class="btn btn-sm btn-ghost" onclick="editPlayerWhatsapp('${s.id}')" title="Editar WhatsApp">✏️ WA</button>
             <button class="btn btn-sm btn-ghost" onclick="requestReevaluation('${s.id}')" title="Pedirle al jugador que actualice su nivel">↻ Nivel</button>
             <button class="btn btn-danger btn-sm" onclick="deleteSubmission('${s.id}')">✕</button>
           </div>
@@ -12003,6 +12100,7 @@ function renderInscriptions() {
             <div class="submission-actions">
               ${suggestion ? `<button class="btn btn-accent btn-sm" onclick="pairSoloPlayers('${s.id}','${suggestion.id}')">⇄ Emparejar</button>` : ''}
               <button class="btn btn-ghost btn-sm" onclick="viewSubmissionDetail('${s.id}')">Ver</button>
+              <button class="btn btn-ghost btn-sm" onclick="editPlayerWhatsapp('${s.id}')" title="Editar WhatsApp">✏️ WA</button>
               <button class="btn btn-ghost btn-sm" onclick="requestReevaluation('${s.id}')" title="Pedirle al jugador que actualice su nivel">↻ Nivel</button>
               <button class="btn btn-danger btn-sm" onclick="deleteSubmission('${s.id}')">✕</button>
             </div>
@@ -12114,6 +12212,7 @@ function renderKnownPlayerCard(p) {
       </div>
       <div class="known-player-actions">
         <button class="btn btn-accent btn-sm" onclick="invitePlayerFromRoster('${p.id}')">📨 Invitar a este torneo</button>
+        <button class="btn btn-ghost btn-sm btn-remove" onclick="editKnownPlayerWhatsapp('${p.id}')" title="Editar WhatsApp">✏️</button>
         <button class="btn btn-ghost btn-sm btn-remove" onclick="confirmRemoveKnownPlayer('${p.id}')" title="Quitar del padrón">✕</button>
       </div>
     </div>
@@ -12169,6 +12268,52 @@ function confirmRemoveKnownPlayer(playerId) {
   saveState();
   renderKnownPlayers();
   toast('Jugador quitado del padrón');
+}
+
+// Editar el WhatsApp de un jugador del padrón. Propaga el cambio a todas
+// sus submissions históricas y a los equipos donde aparezca, así el
+// número correcto se ve en todos lados.
+function editKnownPlayerWhatsapp(playerId) {
+  const p = (workspace.knownPlayers || []).find(x => x.id === playerId);
+  if (!p) { toast('Jugador no encontrado'); return; }
+
+  const fullName = `${p.firstName} ${p.lastName}`.trim();
+  const current = p.whatsapp || '';
+  const raw = prompt(
+    `Editar WhatsApp de ${fullName}\n\n` +
+    `Si está cargado como "092817965" se va a guardar como "59892817965".\n\n` +
+    `Número actual: ${current || '(vacío)'}\nNuevo número:`,
+    current
+  );
+  if (raw === null) return;
+  const trimmed = raw.trim();
+  const newWa = trimmed ? normalizeWhatsappUY(trimmed) : '';
+  p.whatsapp = newWa;
+  p.lastActivityAt = Date.now();
+
+  // Propagar a todas las submissions de este jugador (las que aparecen en
+  // p.tournaments[] y cualquier otra que matchee por nombre).
+  const submissionIds = new Set((p.tournaments || []).map(e => e.submissionId).filter(Boolean));
+  for (const sub of (workspace.submissions || [])) {
+    if (submissionIds.has(sub.id) ||
+        normalizeName(`${sub.firstName} ${sub.lastName}`) === normalizeName(fullName)) {
+      sub.whatsapp = newWa;
+      // Reflejar también en el team si está armado
+      if (sub.addedToTournamentId) {
+        const t = (workspace.tournaments || []).find(x => x.id === sub.addedToTournamentId);
+        if (t && Array.isArray(t.teams)) {
+          for (const team of t.teams) {
+            if (team.p1Data && team.p1Data.id === sub.id) team.p1Data.whatsapp = newWa;
+            if (team.p2Data && team.p2Data.id === sub.id) team.p2Data.whatsapp = newWa;
+          }
+        }
+      }
+    }
+  }
+
+  saveState();
+  renderAll();
+  toast(newWa ? `✓ WhatsApp actualizado: ${newWa}` : 'WhatsApp eliminado');
 }
 
 // Inicializa los listeners del roster (search + clear). Se llama una sola
@@ -12364,7 +12509,9 @@ async function reshareInvitation(invId) {
 // Init de los controles de inscripciones
 function initInscriptionsControls() {
   $('admin-whatsapp').addEventListener('change', e => {
-    workspace.adminWhatsApp = e.target.value.trim().replace(/[^\d]/g, '');
+    const normalized = normalizeWhatsappUY(e.target.value);
+    workspace.adminWhatsApp = normalized;
+    e.target.value = normalized; // reflejar la normalización en el input
     saveState();
     toast('Número guardado');
   });

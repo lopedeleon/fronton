@@ -6,7 +6,7 @@
 <title>Frontón Cup · Gestor de Torneos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Archivo:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&family=Oswald:wght@400;500;600;700&family=Barlow:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #f4efe6;
@@ -5400,6 +5400,795 @@ tr.qualified .pstand-pos { background: var(--green); }
 }
 
 </style>
+<style id="liga-formal-public">
+/* ============================================================
+   REDISEÑO "LIGA FORMAL" · SOLO MODO PÚBLICO
+   ------------------------------------------------------------
+   Azul marino institucional + dorado. Oswald (display) + Barlow (texto).
+   Todo el bloque está scopeado con #public-mode / body.pub-active, así que
+   NO afecta el modo admin ni el formulario de inscripción del jugador.
+   Si algún día querés volver a la estética anterior, borrá este <style>.
+============================================================ */
+
+/* Fondo de la página cuando estamos en vista pública */
+body.pub-active {
+  background: #060c22;
+  background-image:
+    radial-gradient(circle at 15% -5%, rgba(255,215,0,0.10), transparent 45%),
+    linear-gradient(180deg, #0f1738 0%, #060c22 60%, #04081a 100%);
+  background-attachment: fixed;
+  color: #fff;
+}
+/* El ruido de papel de la estética anterior no va sobre el azul */
+body.pub-active::before { display: none; }
+
+#public-mode {
+  /* Paleta local: redefinimos las variables SOLO acá adentro */
+  --lf-navy: #0f1738;
+  --lf-navy-deep: #060c22;
+  --lf-panel: #0a1230;
+  --lf-panel-2: #111c47;
+  --lf-gold: #ffd700;
+  --lf-gold-2: #ffa500;
+  --lf-gold-deep: #b8860b;
+  --lf-hair: rgba(255,215,0,0.18);
+  --lf-hair-soft: rgba(255,255,255,0.07);
+  --lf-live: #ff4444;
+
+  --accent: #ffd700;
+  --accent-deep: #b8860b;
+  --gold: #ffd700;
+  --green: #3ddc97;
+  --purple: #a78bfa;
+  --ink: #ffffff;
+  --ink-soft: rgba(255,255,255,0.72);
+  --muted: rgba(255,255,255,0.45);
+  --bg: #060c22;
+  --bg-paper: #0a1230;
+  --line: rgba(255,215,0,0.18);
+
+  font-family: 'Barlow', sans-serif;
+  color: #fff;
+  /* Fondo propio: así el azul se ve aunque la clase del body no se aplique */
+  min-height: 100vh;
+  background-color: #060c22;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(255,215,0,0.10), transparent 45%),
+    linear-gradient(180deg, #0f1738 0%, #060c22 60%, #04081a 100%);
+}
+
+/* ---------- NAV ---------- */
+#public-mode .pub-nav {
+  background: rgba(10,18,48,0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--lf-hair);
+  box-shadow: 0 2px 24px rgba(0,0,0,0.5);
+}
+#public-mode .pub-nav::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--lf-gold), transparent);
+  opacity: 0.7;
+}
+#public-mode .pub-nav { color: #fff; }
+#public-mode .pub-nav-inner { padding: 12px 22px; }
+
+/* La pelota pasa a ser el escudo dorado de la liga */
+#public-mode .pub-brand-ball {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-2));
+  box-shadow: 0 4px 18px rgba(255,215,0,0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255,255,255,0.25);
+}
+#public-mode .pub-brand-ball::after {
+  content: "FC";
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  color: #0f1738;
+}
+#public-mode .pub-brand-name {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+}
+#public-mode .pub-brand-name .acc { color: var(--lf-gold); font-style: normal; }
+
+#public-mode .pub-tab {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  padding: 10px 16px;
+  border-radius: 4px;
+}
+#public-mode .pub-tab:hover { color: #fff; background: rgba(255,215,0,0.06); }
+#public-mode .pub-tab.active { color: var(--lf-gold); }
+#public-mode .pub-tab.active::after {
+  bottom: -13px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--lf-gold), var(--lf-gold-2));
+}
+
+#public-mode .pub-nav-side {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: rgba(255,255,255,0.4);
+}
+#public-mode .pub-nav-side .admin-link {
+  color: var(--lf-gold);
+  border: 1px solid rgba(255,215,0,0.35);
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+}
+#public-mode .pub-nav-side .admin-link:hover {
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-2));
+  color: #0f1738;
+}
+
+/* ---------- AVATARES ---------- */
+#public-mode .pavatar {
+  border-radius: 6px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-deep));
+  color: #0f1738;
+  border: 2px solid rgba(255,255,255,0.12);
+}
+#public-mode .pavatar.c-0,
+#public-mode .pavatar.c-1,
+#public-mode .pavatar.c-2,
+#public-mode .pavatar.c-3,
+#public-mode .pavatar.c-4,
+#public-mode .pavatar.c-5 {
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-deep));
+  color: #0f1738;
+}
+#public-mode .pavatar.c-1 { background: linear-gradient(135deg, #ffe066, #c99700); }
+#public-mode .pavatar.c-2 { background: linear-gradient(135deg, #ffd700, #a67c00); }
+#public-mode .pavatar.c-4 { background: linear-gradient(135deg, #fff0a8, #b8860b); }
+#public-mode .pavatar.has-photo { border-color: rgba(255,215,0,0.45); }
+
+/* ---------- HERO ---------- */
+#public-mode .ph-hero {
+  margin-top: 26px;
+  background-color: var(--lf-navy);
+  background-image:
+    radial-gradient(circle at 100% 0%, rgba(255,215,0,0.16), transparent 55%),
+    linear-gradient(180deg, #101a44 0%, #0a1230 100%);
+  border: 1px solid var(--lf-hair);
+  border-radius: 8px;
+  padding: 40px 34px 0;
+  color: #fff;
+}
+#public-mode .ph-hero::before {
+  background-image: none;
+  border-bottom: 2px solid transparent;
+}
+/* Escudo institucional arriba del título */
+#public-mode .ph-hero-kicker {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 0.35em;
+  color: var(--lf-gold);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+#public-mode .ph-hero-kicker::before {
+  content: "FC";
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-2));
+  color: #0f1738;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(255,215,0,0.30);
+}
+#public-mode .ph-hero-title {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: clamp(38px, 6vw, 64px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+#public-mode .ph-hero-title .acc { color: var(--lf-gold); font-style: normal; }
+#public-mode .ph-hero-sub {
+  font-family: 'Barlow', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.7);
+  max-width: 520px;
+  margin-bottom: 26px;
+}
+#public-mode .ph-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--lf-hair);
+  border-top: 1px solid var(--lf-hair);
+  margin: 0 -34px;
+  padding-top: 0;
+}
+#public-mode .ph-hero-stat {
+  background: rgba(10,18,48,0.92);
+  padding: 16px 10px;
+  text-align: center;
+}
+#public-mode .ph-hero-stat .num {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 34px;
+  color: var(--lf-gold);
+}
+#public-mode .ph-hero-stat .lbl {
+  font-family: 'Oswald', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.5);
+}
+@media (max-width: 620px) {
+  #public-mode .ph-hero { padding: 28px 20px 0; }
+  #public-mode .ph-hero-stats { grid-template-columns: repeat(2, 1fr); margin: 0 -20px; }
+}
+
+/* ---------- EN VIVO ---------- */
+#public-mode .plive {
+  margin-top: 22px;
+  background: var(--lf-panel);
+  border: 1px solid rgba(255,215,0,0.22);
+  border-radius: 6px;
+  padding: 22px 26px;
+  color: #fff;
+}
+#public-mode .plive::before {
+  top: 0; right: auto; left: 0;
+  width: 4px; height: 100%;
+  border-radius: 6px 0 0 6px;
+  background: linear-gradient(180deg, var(--lf-gold), var(--lf-gold-2));
+}
+#public-mode .plive-pulse .dot { background: var(--lf-live); width: 10px; height: 10px; }
+@keyframes plivePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+#public-mode .plive-pulse .label {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  color: var(--lf-live);
+}
+#public-mode .plive-stage {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.45);
+}
+#public-mode .plive-team-players {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+#public-mode .plive-team-meta {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.45);
+}
+#public-mode .plive-score {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: clamp(42px, 7vw, 62px);
+  color: var(--lf-gold);
+}
+#public-mode .plive-score .sep { color: rgba(255,255,255,0.2); font-weight: 300; }
+#public-mode .plive-score-sub {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ---------- SPONSORS ---------- */
+#public-mode .pmarquee {
+  background: rgba(10,18,48,0.6);
+  border-top: 1px solid var(--lf-hair);
+  border-bottom: 1px solid var(--lf-hair);
+  border-radius: 6px;
+  margin-top: 26px;
+}
+#public-mode .pmarquee-lbl {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--lf-gold);
+}
+#public-mode .psponsor {
+  background: linear-gradient(160deg, #111c47, #0a1230);
+  border: 1px solid var(--lf-hair);
+  border-radius: 6px;
+  color: #fff;
+}
+#public-mode .psponsor:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,215,0,0.35);
+}
+#public-mode .psponsor.c-1,
+#public-mode .psponsor.c-2,
+#public-mode .psponsor.c-3,
+#public-mode .psponsor.c-4 {
+  background: linear-gradient(160deg, #111c47, #0a1230);
+  border-color: var(--lf-hair);
+  color: #fff;
+}
+#public-mode .psponsor-tag {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.22em;
+  color: var(--lf-gold);
+}
+#public-mode .psponsor-title {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #fff;
+}
+#public-mode .psponsor-body { color: rgba(255,255,255,0.65); }
+#public-mode .psponsor-click { color: var(--lf-gold); font-family: 'Oswald', sans-serif; letter-spacing: 0.15em; }
+#public-mode .psponsor.has-image {
+  background: #0a1230;
+  border-color: rgba(255,215,0,0.3);
+}
+
+/* ---------- TICKER ---------- */
+#public-mode .pticker {
+  background: linear-gradient(90deg, rgba(255,215,0,0.10), rgba(255,215,0,0.02));
+  border: 1px solid var(--lf-hair);
+  border-radius: 6px;
+  color: #fff;
+}
+#public-mode .pticker-track {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: rgba(255,255,255,0.75);
+}
+#public-mode .pticker-item .dot { background: var(--lf-gold); }
+
+/* ---------- CARDS DE HOME ---------- */
+#public-mode .phome-card {
+  background: var(--lf-panel);
+  border: 1px solid var(--lf-hair-soft);
+  border-radius: 6px;
+  overflow: hidden;
+  padding: 0;
+  color: #fff;
+}
+#public-mode .phome-card::before {
+  top: 0; left: 0; right: 0;
+  width: auto; height: 2px;
+  background: linear-gradient(90deg, var(--lf-gold), transparent);
+}
+#public-mode .phome-card.gold::before,
+#public-mode .phome-card.green::before {
+  background: linear-gradient(90deg, var(--lf-gold), transparent);
+}
+#public-mode .phome-card-head {
+  background: linear-gradient(90deg, rgba(255,215,0,0.14), rgba(255,215,0,0.03));
+  border-bottom: 1px solid var(--lf-hair);
+  padding: 12px 16px;
+  margin: 0;
+}
+#public-mode .phome-card-title {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--lf-gold);
+}
+#public-mode .phome-card-count {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  background: rgba(255,215,0,0.15);
+  color: var(--lf-gold);
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
+/* Próximos partidos */
+#public-mode .pup-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+#public-mode .pup-item:hover { background: rgba(255,215,0,0.03); }
+#public-mode .pup-time {
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-deep));
+  color: #0f1738;
+  border-radius: 4px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+}
+#public-mode .pup-time.past { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.6); }
+#public-mode .pup-det {
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  color: #fff;
+}
+#public-mode .pup-det .vs { color: var(--lf-gold); }
+#public-mode .pup-stage {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.45);
+}
+#public-mode .pdiv-chip {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  background: rgba(255,215,0,0.14);
+  color: var(--lf-gold);
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+#public-mode .pdiv-chip.b { background: rgba(61,220,151,0.12); color: #3ddc97; border-color: rgba(61,220,151,0.3); }
+#public-mode .pdiv-chip.c { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); }
+#public-mode .pdiv-chip.open { background: rgba(167,139,250,0.15); color: #c4b5fd; border-color: rgba(167,139,250,0.35); }
+
+/* Líderes */
+#public-mode .plead-row {
+  padding: 11px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+#public-mode .plead-group {
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-deep)) !important;
+  color: #0f1738 !important;
+  border-radius: 4px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+}
+#public-mode .plead-names { font-family: 'Barlow', sans-serif; font-weight: 600; color: #fff; }
+#public-mode .plead-stats {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.45);
+}
+#public-mode .plead-pts {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  color: var(--lf-gold);
+}
+
+/* ---------- ENCABEZADOS DE SECCIÓN ---------- */
+#public-mode .psec {
+  margin-top: 44px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+#public-mode .psec h2 {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+}
+#public-mode .psec .kicker {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: var(--lf-gold);
+}
+#public-mode .psec::after {
+  bottom: -1px;
+  width: 120px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--lf-gold), transparent);
+}
+
+/* ---------- TARJETAS DE TORNEO ---------- */
+#public-mode .ptour {
+  background: linear-gradient(165deg, #111c47, #0a1230);
+  border: 1px solid var(--lf-hair-soft);
+  border-radius: 8px;
+  color: #fff;
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+}
+#public-mode .ptour:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,215,0,0.35);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.45);
+}
+#public-mode .ptour::before,
+#public-mode .ptour.div-b::before,
+#public-mode .ptour.div-c::before,
+#public-mode .ptour.div-open::before {
+  background: radial-gradient(circle at 85% 10%, rgba(255,215,0,0.18), transparent 60%);
+}
+#public-mode .ptour-div,
+#public-mode .ptour.div-b .ptour-div,
+#public-mode .ptour.div-c .ptour-div,
+#public-mode .ptour.div-open .ptour-div {
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-2));
+  color: #0f1738;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  border-radius: 4px;
+  padding: 3px 10px;
+}
+#public-mode .ptour-phase {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.5);
+}
+#public-mode .ptour-name {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+}
+#public-mode .ptour-dates {
+  font-family: 'Oswald', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.4);
+}
+#public-mode .ptour-stats {
+  border-top: 1px solid var(--lf-hair);
+  padding-top: 14px;
+}
+#public-mode .ptour-stat .n {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  color: var(--lf-gold);
+}
+#public-mode .ptour-stat .l {
+  font-family: 'Oswald', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.45);
+}
+
+/* ---------- TARJETAS DE PAREJA ---------- */
+#public-mode .pteam {
+  background: linear-gradient(165deg, #111c47, #0a1230);
+  border: 1px solid var(--lf-hair-soft);
+  border-radius: 8px;
+  color: #fff;
+  transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+}
+#public-mode .pteam:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255,215,0,0.35);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.45);
+}
+#public-mode .pteam::before,
+#public-mode .pteam.div-b::before,
+#public-mode .pteam.div-c::before,
+#public-mode .pteam.div-open::before {
+  height: 3px;
+  background: linear-gradient(90deg, var(--lf-gold), transparent);
+}
+#public-mode .pteam-avatars { margin-top: 26px; }
+#public-mode .pteam-badge {
+  font-family: 'Oswald', sans-serif;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  background: rgba(255,215,0,0.12);
+  color: var(--lf-gold);
+  border: 1px solid rgba(255,215,0,0.25);
+  border-radius: 20px;
+  padding: 3px 9px;
+}
+#public-mode .pteam-avatars .pavatar { border: 2px solid rgba(255,255,255,0.12); }
+/* Con avatares cuadrados la superposición se ve mal: los separamos */
+#public-mode .pteam-avatars .pavatar + .pavatar { margin-left: 10px; }
+#public-mode .pavatar-stack .pavatar + .pavatar { margin-left: 8px; }
+#public-mode .pavatar-stack.big .pavatar + .pavatar { margin-left: 10px; }
+#public-mode .pavatar-stack.rev .pavatar + .pavatar { margin-left: 0; margin-right: 8px; }
+/* Las tarjetas de torneo no se estiran para igualar la columna de sponsors */
+#public-mode .ptour-grid { align-content: start; }
+#public-mode .pwith-sidebar { align-items: start; }
+#public-mode .pteam-p {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+}
+#public-mode .pteam-p .nick { color: var(--lf-gold); font-family: 'Barlow', sans-serif; font-style: italic; }
+#public-mode .pteam-sep { background: var(--lf-hair); }
+#public-mode .pteam-stats {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.55);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+#public-mode .pteam-stats strong { color: var(--lf-gold); }
+#public-mode .pteam-leader { color: var(--lf-gold); }
+
+/* ---------- TABLA DE POSICIONES ---------- */
+#public-mode .pstand {
+  background: var(--lf-panel);
+  border: 1px solid var(--lf-hair-soft);
+  border-radius: 6px;
+  padding: 0 0 6px;
+  overflow: hidden;
+}
+#public-mode .pstand-title {
+  background: linear-gradient(90deg, rgba(255,215,0,0.15), rgba(255,215,0,0.04));
+  border-bottom: 1px solid var(--lf-hair);
+  padding: 12px 16px;
+  margin: 0 0 4px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--lf-gold);
+}
+#public-mode .pstand-title .tag {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.15em;
+  background: rgba(255,215,0,0.15);
+  color: var(--lf-gold);
+  border-radius: 3px;
+}
+#public-mode table.pstand-tbl th {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.15em;
+  color: rgba(255,255,255,0.45);
+  border-bottom: 1px solid var(--lf-hair);
+  padding: 8px 4px;
+}
+#public-mode table.pstand-tbl th:first-child,
+#public-mode table.pstand-tbl td:first-child { padding-left: 16px; }
+#public-mode table.pstand-tbl th:last-child,
+#public-mode table.pstand-tbl td:last-child { padding-right: 16px; }
+#public-mode table.pstand-tbl td {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+#public-mode table.pstand-tbl td:first-child {
+  font-family: 'Barlow', sans-serif;
+  font-weight: 600;
+  color: #fff;
+}
+#public-mode table.pstand-tbl tbody tr:hover td { background: rgba(255,215,0,0.03); }
+#public-mode .pstand-pos {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  border-radius: 3px;
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+}
+#public-mode tr.qualified td { background: rgba(255,215,0,0.06); }
+#public-mode tr.qualified .pstand-pos {
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-deep));
+  color: #0f1738;
+}
+#public-mode tr.qualified td strong { color: var(--lf-gold); }
+
+/* ---------- RESULTADOS ---------- */
+#public-mode .presult {
+  background: var(--lf-panel);
+  border: 1px solid var(--lf-hair-soft);
+  border-radius: 6px;
+  color: #fff;
+  transition: border-color 0.18s;
+}
+#public-mode .presult:hover { border-color: rgba(255,215,0,0.28); }
+#public-mode .presult-date {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.18em;
+  color: rgba(255,255,255,0.4);
+}
+#public-mode .presult-team { font-family: 'Barlow', sans-serif; font-weight: 600; color: rgba(255,255,255,0.85); }
+#public-mode .presult-team.winner { color: var(--lf-gold); font-weight: 700; }
+#public-mode .presult-team.loser { color: rgba(255,255,255,0.4); }
+#public-mode .presult-score {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--lf-gold);
+  background: rgba(255,215,0,0.08);
+  border: 1px solid rgba(255,215,0,0.25);
+  border-radius: 4px;
+}
+
+/* ---------- ESTADOS VACÍOS Y FILTROS ---------- */
+#public-mode .pempty {
+  background: rgba(10,18,48,0.6);
+  border: 1px dashed rgba(255,215,0,0.25);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.6);
+}
+#public-mode .pempty-title {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+#public-mode .pfilter-pill {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.15em;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  color: rgba(255,255,255,0.65);
+}
+#public-mode .pfilter-pill:hover {
+  background: rgba(255,215,0,0.08);
+  border-color: rgba(255,215,0,0.35);
+  color: #fff;
+}
+#public-mode .pfilter-pill.active {
+  background: linear-gradient(135deg, var(--lf-gold), var(--lf-gold-2));
+  border-color: transparent;
+  color: #0f1738;
+  font-weight: 600;
+}
+
+/* ---------- PIE ---------- */
+#public-mode .pub-footer {
+  border-top: 1px solid var(--lf-hair);
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ---------- ACCESIBILIDAD ---------- */
+#public-mode a:focus-visible,
+#public-mode button:focus-visible {
+  outline: 2px solid var(--lf-gold);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  #public-mode .pticker-track,
+  #public-mode .pmarquee-track { animation: none !important; }
+  #public-mode .ptour:hover,
+  #public-mode .pteam:hover { transform: none; }
+}
+
+</style>
 </head>
 <body>
 
@@ -5642,7 +6431,7 @@ tr.qualified .pstand-pos { background: var(--green); }
     </section>
 
     <footer class="pub-footer">
-      FRONTÓN CUP · TEMPORADA 2026 · SISTEMA PÚBLICO DE TORNEOS
+      FRONTÓN CUP · TEMPORADA 2026 · SISTEMA PÚBLICO DE TORNEOS<br><span style="color:#ffd700;">VERSIÓN 2.0 · LIGA FORMAL</span>
     </footer>
   </div>
 </div>
@@ -12628,6 +13417,8 @@ function showPublicMode() {
   setCurrentMode('public');
   $('main-app').style.display = 'none';
   $('public-mode').style.display = 'block';
+  // Estética "Liga Formal" (azul marino + dorado) sólo en vista pública
+  document.body.classList.add('pub-active');
   renderPublicAll();
   window.scrollTo({ top: 0 });
 }
@@ -12636,6 +13427,7 @@ function showAdminMode() {
   setCurrentMode('admin');
   $('public-mode').style.display = 'none';
   $('main-app').style.display = 'block';
+  document.body.classList.remove('pub-active');
   renderAll();
   window.scrollTo({ top: 0 });
 }
@@ -12828,12 +13620,14 @@ function computeGroupStanding(tournament, group) {
         const oppScore = m.homeId === team.id ? totals.away : totals.home;
         pf += teamScore;
         pc += oppScore;
+        // getMatchWinner devuelve 'home' | 'away' | null (NO el id del equipo)
         const winner = getMatchWinner(m);
-        if (winner === team.id) g++;
-        else p++;
+        const isHome = m.homeId === team.id;
+        if ((winner === 'home' && isHome) || (winner === 'away' && !isHome)) g++;
+        else if (winner) p++;
       }
     });
-    const pts = g * 3; // simple: 3 por ganar, 0 por perder
+    const pts = g * 3; // 3 por ganar, 0 por perder
     return { team, pj, g, p, pf, pc, dif: pf - pc, pts };
   });
   rows.sort((a, b) => b.pts - a.pts || b.dif - a.dif || b.pf - a.pf);
@@ -13325,7 +14119,8 @@ function renderPubTeams() {
       if (m.homeId === team.id || m.awayId === team.id) {
         pj++;
         const winner = getMatchWinner(m);
-        if (winner === team.id) { g++; pts += 3; }
+        const isHome = m.homeId === team.id;
+        if ((winner === 'home' && isHome) || (winner === 'away' && !isHome)) { g++; pts += 3; }
       }
     });
 
@@ -13397,8 +14192,8 @@ function renderPubResults() {
     const t = match.scheduledAt ? formatMatchTime(match.scheduledAt) : null;
     const dateStr = t ? `${t.d} · ${t.h}` : 'SIN FECHA';
 
-    const homeCls = winner === home.id ? 'winner' : 'loser';
-    const awayCls = winner === away.id ? 'winner' : 'loser';
+    const homeCls = winner === 'home' ? 'winner' : (winner === 'away' ? 'loser' : '');
+    const awayCls = winner === 'away' ? 'winner' : (winner === 'home' ? 'loser' : '');
 
     return `
       <div class="presult">
